@@ -12,12 +12,7 @@ end
 # Print items in the stack
 10 20 30 !print-stack; pop;
 
-# Count down from 10
-10 !count-down;
+10 !count-down
 
 # Hello
 hello
-
-1 2 < if
-    hello
-end

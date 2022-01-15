@@ -11,7 +11,11 @@ class Interpreter:
 
 
     def error_msg(self, msg):
-        raise Exception(f'[Interpreter] {msg} on op <{self.cur_op}:{op_as_str(ByteCode(self.env.byte_code[self.cur_op]))}>')
+        try:
+            op_str = op_as_str(ByteCode(self.env.byte_code[self.cur_op]))
+        except:
+            op_str = f'Unknown \'{self.env.byte_code[self.cur_op]}\''
+        raise Exception(f'[Interpreter] {msg} on op <{self.cur_op}:{op_str}>')
 
 
     def get_op(self) -> ByteCode:
@@ -104,7 +108,11 @@ class Interpreter:
                 self.cur_op += 1
 
                 if not condition:
-                    self.cur_op = int(self.get_op())
+                    self.cur_op = int(self.get_op()) + 1
+
+            elif operation == ByteCode.OP_BREAK:
+                self.cur_op += 1
+                self.cur_op = int(self.get_op())
 
             elif operation == ByteCode.OP_PRINT:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:

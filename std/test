@@ -10,8 +10,8 @@ macro div;      / end
 
 # Count down from current number on the stack and fill the stack with descending numbers
 macro count-down; 
-    [ dup !swap . 1 !sub ] 
-    pop 
+    [ dup !swap . 1 !sub ]
+    pop
 end
 
 # Print out every item on the stack

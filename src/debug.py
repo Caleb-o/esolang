@@ -30,7 +30,7 @@ def print_env(env: Environment):
 
     idx = 0
 
-    def get_code(index: int) -> ByteCode:
+    def get_code(index: int) -> int:
         return env.byte_code[index]
 
     print('OP_POS   OPERATION')
@@ -44,15 +44,28 @@ def print_env(env: Environment):
             value = env.contants[get_code(idx + 1)]
             idx += 1
             print(f'{op_as_str(op)}<value: {value}>')
+
+        elif op == ByteCode.OP_BREAK:
+            value = get_code(idx + 1)
+            idx += 1
+            print(f'{op_as_str(op)}<jump_to: {value}>')
+
         elif op == ByteCode.OP_PROC_CALL:
             arg_c = get_code(idx + 1)
             ret_c = get_code(idx + 2)
             idx +=  2
             print(f'{op_as_str(op)}<args: {arg_c}, returning: {ret_c}>')
+        
         elif op == ByteCode.OP_LOOP_END:
             jump_to = get_code(idx + 1)
             idx += 1
             print(f'{op_as_str(op)}<jump_to: {jump_to}>')
+        
+        elif op == ByteCode.OP_IF:
+            jump_to = get_code(idx + 1)
+            idx += 1
+            print(f'{op_as_str(op)}<jump_to: {jump_to}>')
+
         else:
             # One byte operations
             print(op_as_str(op))

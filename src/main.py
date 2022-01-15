@@ -1,4 +1,4 @@
-import sys
+import sys, debug
 from parser import Parser
 from interpreter import Interpreter
 
@@ -21,6 +21,10 @@ def main():
             except Exception as e:
                 print(e)
     elif argv_len == 2:
+        debug.DEBUG = True
+        debug.IGNORE_OUTPUT = False
+        debug.op_max = 256
+
         try:
             parser = Parser(sys.argv[1], open(sys.argv[1]).read())
             interpreter = Interpreter(parser.parse())

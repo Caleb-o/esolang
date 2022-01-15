@@ -1,7 +1,7 @@
 import os
 from re import S
 from Token import *
-from bytecode import ByteCode
+from bytecode import ByteCode, op_as_str
 from lexer import Lexer
 from dataclasses import dataclass
 
@@ -209,17 +209,41 @@ class Parser:
         loop_start_ip = [ ]
 
         while ip < len(self.env.byte_code):
-            if self.env.byte_code[ip] == ByteCode.OP_LOOP_START:
+            if self.env.byte_code[ip] in [ ByteCode.OP_PUSH, ByteCode.OP_IF ]:
+                ip += 1
+            elif self.env.byte_code[ip] == ByteCode.OP_LOOP_START:
                 loop_start_ip.append(ip)
             elif self.env.byte_code[ip] == ByteCode.OP_LOOP_END:
                 self.env.byte_code[ip + 1] = loop_start_ip.pop()
-                break
+                
+            ip += 1
+
+
+    def reevaluate_break(self, start_idx: int):
+        ip = start_idx
+        loop_end_ip = [ ]
+
+        while ip < len(self.env.byte_code) - 2:
+            if self.env.byte_code[ip] == ByteCode.OP_PUSH :
+                ip += 1
+
+            elif self.env.byte_code[ip] == ByteCode.OP_BREAK:
+                ip += 1
+                loop_end_ip.append(ip)
+            elif self.env.byte_code[ip] in [ ByteCode.OP_LOOP_END, ByteCode.OP_IF ]:
+                ip += 1
+                
+                while len(loop_end_ip) > 0:
+                    self.env.byte_code[loop_end_ip.pop()] = ip
             
             ip += 1
 
 
     def statment(self):
-        if self.cur_token.ttype == TokenType.IF:
+        if self.cur_token.ttype == TokenType.BREAK:
+            self.consume(TokenType.BREAK)
+            self.push_block([ ByteCode.OP_BREAK, self.get_current_code_loc() + 2 ])
+        elif self.cur_token.ttype == TokenType.IF:
             # Macro call
             self.consume(TokenType.IF)
             self.push_code(ByteCode.OP_IF)
@@ -246,7 +270,6 @@ class Parser:
             try:
                 start_loc = self.get_current_code_loc()
                 self.push_block(self.macros[macro_name])
-                self.reevaluate_loop(start_loc)
             except:
                 self.error_msg(f'Macro is not defined \'{macro_name}\'')
 
@@ -262,7 +285,6 @@ class Parser:
                 start_loc = self.get_current_code_loc() + 3
                 self.push_code(ByteCode.OP_PROC_CALL)
                 self.push_block(self.procedures[proc_name])
-                self.reevaluate_loop(start_loc)
             except:
                 self.error_msg(f'Proc is not defined \'{proc_name}\'')
 
@@ -349,6 +371,9 @@ class Parser:
 
         while self.cur_token.ttype != TokenType.EOF:
             self.statment()
+        
+        self.reevaluate_loop(0)
+        self.reevaluate_break(0)
 
     
     def parse(self) -> Environment:

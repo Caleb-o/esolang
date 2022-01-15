@@ -27,8 +27,7 @@ class TokenType(Enum):
     MACRO = iota()
     UNDEF = iota()
     IF = iota()
-    WHILE = iota()
-    THEN = iota()
+    BREAK = iota()
     END = iota()
     EOF = iota()
 
