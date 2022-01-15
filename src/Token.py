@@ -20,6 +20,7 @@ class TokenType(Enum):
     LSQUARE = iota()
     RSQUARE = iota()
     MACRO = iota()
+    UNDEF = iota()
     END = iota()
     EOF = iota()
 

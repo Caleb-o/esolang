@@ -1,3 +1,9 @@
 impl 'std.test'
 
 16 count-down
+
+# Remove macro
+undef count-down
+
+# Try calling it again
+10 count-down

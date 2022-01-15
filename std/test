@@ -1,1 +1,4 @@
 macro count-down; [ dup swap . 1 - ] pop end
+
+
+macro count-up; [ dup swap . 1 + ] pop end

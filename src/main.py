@@ -14,15 +14,15 @@ def main():
                 break
 
             try:
-                parser = Parser(user_input)
+                parser = Parser('repl', user_input)
                 interpreter = Interpreter(parser.parse())
                 
                 interpreter.interpret()
             except Exception as e:
-                print(f'error: {e}')
+                print(e.message)
     elif argv_len == 2:
         try:
-            parser = Parser(sys.argv[1])
+            parser = Parser(sys.argv[1], open(sys.argv[1]).read())
             interpreter = Interpreter(parser.parse())
             
             interpreter.interpret()

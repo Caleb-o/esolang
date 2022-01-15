@@ -24,18 +24,21 @@ KEYWORDS = {
     'mul'   : TokenType.STAR,
     'div'   : TokenType.SLASH,
     'macro' : TokenType.MACRO,
+    'undef' : TokenType.UNDEF,
     'end'   : TokenType.END,
 }
 
 
 class Lexer:
-    def __init__(self, source: str) -> None:
+    def __init__(self, file_name: str, source: str) -> None:
+        self.file_name = file_name
         self.source = source
         self.ip: int = 0
         self.cur_tok = None
         self.col = 1
         self.line = 1
         self.cur_char =  source[0]
+
 
     def reset(self):
         self.ip: int = 0
@@ -51,7 +54,7 @@ class Lexer:
 
 
     def error_msg(self, msg: str):
-        raise Exception(f'[Lexer] {msg} on line {self.line} at pos {self.col} \'{self.cur_char}\'')
+        raise Exception(f'[\'{self.file_name}\'][Lexer] {msg} on line {self.line} at pos {self.col} \'{self.cur_char}\'')
 
 
     def advance(self):
@@ -66,6 +69,7 @@ class Lexer:
         while self.cur_char in (' ', '\t', '\b', '\r', '\n', '#'):
             if self.cur_char == '#':
                 while self.cur_char != '\0' and self.source[self.ip] != '\n':
+                    self.col += 1
                     self.advance()
             
             elif self.cur_char == '\n':
@@ -138,7 +142,10 @@ class Lexer:
             
             if self.cur_char in SINGLE_CHARS:
                 self.cur_tok = Token(self.line, self.col, SINGLE_CHARS[self.cur_char], self.cur_char)
+                self.col += 1
                 self.advance()
                 return
+            
+            self.error_msg(f'Unknown token found')
         else: 
             self.cur_tok = Token(self.line, self.col, TokenType.EOF, 'EOF')
