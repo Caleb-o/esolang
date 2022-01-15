@@ -21,7 +21,7 @@ def main():
             except Exception as e:
                 print(e)
     elif argv_len == 2:
-        debug.DEBUG = True
+        debug.DEBUG = False
         debug.IGNORE_OUTPUT = False
         debug.op_max = 256
 
@@ -31,7 +31,7 @@ def main():
             
             interpreter.interpret()
         except Exception as e:
-            print(e.message)
+            print(e)
     else:
         print('usage: lang [file]')
 
