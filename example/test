@@ -1,9 +1,15 @@
 impl 'std.test'
 
-16 count-down
+# Define a proc
+proc plus_five 1 1;
+    5 +
+end
 
-# Remove macro
-undef count-down
+proc count-down 1 0; 
+    [ . 1 - ]
+end
 
-# Try calling it again
-10 count-down
+6 count-down;
+
+# Call procedure
+1 plus_five;

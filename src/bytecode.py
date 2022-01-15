@@ -1,8 +1,8 @@
 from utils import iota
-from enum import Enum
+from enum import IntEnum
 
 
-class ByteCode(Enum):
+class ByteCode(IntEnum):
     OP_PUSH = iota(True)
     OP_POP = iota()
     OP_ADD = iota()
@@ -11,7 +11,12 @@ class ByteCode(Enum):
     OP_DIV = iota()
     OP_PRINT = iota()
     OP_SWAP = iota()
+    OP_PROC_CALL = iota()
     OP_DUPLICATE = iota()
     OP_LOOP_START = iota()
     OP_LOOP_END = iota()
     OP_RETURN = iota()
+
+
+def op_as_str(op: ByteCode) -> str:
+    return str(op).replace('ByteCode.OP_', '').lower()

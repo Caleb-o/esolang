@@ -6,8 +6,12 @@ SINGLE_CHARS = {
     '-' : TokenType.MINUS,
     '*' : TokenType.STAR,
     '/' : TokenType.SLASH,
+    '>' : TokenType.GREATER_THAN,
+    '<' : TokenType.LESS_THAN,
+    '=' : TokenType.EQUAL_TO,
     ';' : TokenType.SEMICOLON,
     '.' : TokenType.DOT,
+    '!' : TokenType.BANG,
     '&' : TokenType.AMPERSAND,
     '[' : TokenType.LSQUARE,
     ']' : TokenType.RSQUARE,
@@ -26,6 +30,7 @@ KEYWORDS = {
     'macro' : TokenType.MACRO,
     'undef' : TokenType.UNDEF,
     'end'   : TokenType.END,
+    'proc'  : TokenType.PROC
 }
 
 
@@ -146,6 +151,6 @@ class Lexer:
                 self.advance()
                 return
             
-            self.error_msg(f'Unknown token found')
+            self.cur_tok = Token(self.line, self.col, TokenType.EOF, 'EOF')
         else: 
             self.cur_tok = Token(self.line, self.col, TokenType.EOF, 'EOF')
