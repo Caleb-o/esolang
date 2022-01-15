@@ -10,6 +10,7 @@ class ByteCode(IntEnum):
     OP_MUL = iota()
     OP_DIV = iota()
     OP_PRINT = iota()
+    OP_PRINT_CHAR = iota()
     OP_SWAP = iota()
     OP_PROC_CALL = iota()
     OP_DUPLICATE = iota()

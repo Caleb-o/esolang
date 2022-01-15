@@ -1,2 +1,24 @@
+# Misc
+macro print;    . end
+macro swap;     & end
+
+# Mathmatical
+macro add;      + end
+macro sub;      - end
+macro mul;      * end
+macro div;      / end
+
 # Count down from current number on the stack and fill the stack with descending numbers
-macro count-down; [ dup swap . 1 - ] pop end
+macro count-down; 
+    [ dup !swap . 1 !sub ] 
+    pop 
+end
+
+# Print out every item on the stack
+# Can be used to print items provided in a proc
+# Note: This macro pops items from the stack, so it should only be used
+#       when debugging
+macro print-stack;
+    0 !swap
+    [ !print pop !swap ]
+end

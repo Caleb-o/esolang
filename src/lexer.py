@@ -11,8 +11,9 @@ SINGLE_CHARS = {
     '=' : TokenType.EQUAL_TO,
     ';' : TokenType.SEMICOLON,
     '.' : TokenType.DOT,
+    ',' : TokenType.COMMA,
     '!' : TokenType.BANG,
-    '&' : TokenType.AMPERSAND,
+    '&' : TokenType.SWAP,
     '[' : TokenType.LSQUARE,
     ']' : TokenType.RSQUARE,
 }
@@ -20,13 +21,8 @@ SINGLE_CHARS = {
 
 KEYWORDS = {
     'impl'  : TokenType.IMPL,
-    'swap'  : TokenType.SWAP,
     'dup'   : TokenType.DUPLICATE,
     'pop'   : TokenType.POP,
-    'add'   : TokenType.PLUS,
-    'sub'   : TokenType.MINUS,
-    'mul'   : TokenType.STAR,
-    'div'   : TokenType.SLASH,
     'macro' : TokenType.MACRO,
     'undef' : TokenType.UNDEF,
     'end'   : TokenType.END,

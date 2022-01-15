@@ -1,7 +1,6 @@
 import sys
 from parser import Parser
 from interpreter import Interpreter
-import debug
 
 
 def main():
@@ -22,17 +21,13 @@ def main():
             except Exception as e:
                 print(e)
     elif argv_len == 2:
-        debug.DEBUG = True
-        debug.IGNORE_OUTPUT = False
-        debug.op_max = 128
-
         try:
             parser = Parser(sys.argv[1], open(sys.argv[1]).read())
             interpreter = Interpreter(parser.parse())
             
             interpreter.interpret()
         except Exception as e:
-            print(e.mesage)
+            print(e)
     else:
         print('usage: lang [file]')
 

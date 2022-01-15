@@ -62,7 +62,8 @@ class Interpreter:
                 self.cur_op += 1
                 self.push_constant(self.get_op())
             elif operation == ByteCode.OP_POP:
-                self.try_pop()
+                if len(self.env.scopes[-1].stack) > 0:
+                    self.try_pop()
             elif operation == ByteCode.OP_ADD:
                 val_b = self.try_pop()
                 val_a = self.try_pop()
@@ -86,13 +87,20 @@ class Interpreter:
             elif operation == ByteCode.OP_PRINT:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
                     print(self.try_peek())
+
+            elif operation == ByteCode.OP_PRINT_CHAR:
+                if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
+                    print(chr(self.try_peek()), end='')
+
             elif operation == ByteCode.OP_SWAP:
-                val_b = self.try_pop()
-                val_a = self.try_pop()
-                self.push_value(val_b)
-                self.push_value(val_a)
+                if len(self.env.scopes[-1].stack) > 1:
+                    val_b = self.try_pop()
+                    val_a = self.try_pop()
+                    self.push_value(val_b)
+                    self.push_value(val_a)
             elif operation == ByteCode.OP_DUPLICATE:
-                self.push_value(self.try_peek())
+                if len(self.env.scopes[-1].stack) > 0:
+                    self.push_value(self.try_peek())
             elif operation == ByteCode.OP_LOOP_START:
                 # Don't really care for anything here
                 pass
@@ -100,7 +108,7 @@ class Interpreter:
                 self.cur_op += 1
 
                 # Go back to the start
-                if self.try_peek() > 0:
+                if len(self.env.scopes[-1].stack) > 0 and self.try_peek() > 0:
                     self.cur_op = int(self.get_op())
             elif operation == ByteCode.OP_PROC_CALL:
                 self.cur_op += 1
@@ -142,9 +150,9 @@ class Interpreter:
             self.cur_op += 1
 
 
-        print(f'stack :: {self.env.scopes[0].stack}')
-
         if debug.DEBUG:
+            print(f'stack :: {self.env.scopes[0].stack}')
+            
             print()
             debug.print_debug_symbols()
         

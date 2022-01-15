@@ -1,5 +1,4 @@
 import os
-from pickletools import optimize
 from Token import *
 from bytecode import ByteCode
 from lexer import Lexer
@@ -180,13 +179,13 @@ class Parser:
     # This needs to occur when we expand procs and macros into the main code
     def reevaluate_loop(self, start_idx: int):
         ip = start_idx
-        loop_start_ip = start_idx
+        loop_start_ip = [ ]
 
         while ip < len(self.env.byte_code):
             if self.env.byte_code[ip] == ByteCode.OP_LOOP_START:
-                loop_start_ip = ip
+                loop_start_ip.append(ip)
             elif self.env.byte_code[ip] == ByteCode.OP_LOOP_END:
-                self.env.byte_code[ip + 1] = loop_start_ip
+                self.env.byte_code[ip + 1] = loop_start_ip.pop()
                 break
             
             ip += 1
@@ -268,6 +267,12 @@ class Parser:
             # Print the last item on the stack
             self.consume(self.cur_token.ttype)
             self.push_code(ByteCode.OP_PRINT)
+
+        elif self.cur_token.ttype == TokenType.COMMA:
+            # Print the last item on the stack
+            self.consume(self.cur_token.ttype)
+            self.push_code(ByteCode.OP_PRINT_CHAR)
+
         else:
             # Evaluate an expression if no statement matches
             self.expr()
@@ -290,8 +295,6 @@ class Parser:
                     impl_parser = Parser(import_name, open(import_name).read())
                     env = impl_parser.parse()
 
-                    print(f'file loaded :: {import_name}')
-                    
                     # Add environment to local
                     self.env.byte_code.extend(env.byte_code)
                     self.env.contants.extend(env.contants)

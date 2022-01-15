@@ -18,7 +18,7 @@ class TokenType(Enum):
     ID = iota()
     SEMICOLON = iota()
     DOT = iota()
-    AMPERSAND = iota()
+    COMMA = iota()
     SWAP = iota()
     POP = iota()
     DUPLICATE = iota()

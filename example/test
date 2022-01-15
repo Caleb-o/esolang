@@ -1,12 +1,19 @@
 impl 'std.test'
 
-# Define a proc
-proc plus_five 1 1;
-    5 +
+proc hello 0 0;
+    104 , pop
+    101 , pop
+    108 , , pop
+    111 , pop
+    33 , pop
+    10 , pop
 end
 
-proc count-down 1 0;
-    [ dup swap . 1 - ] pop
-end
+# Print items in the stack
+10 20 30 !print-stack; pop;
 
-6 count-down
+# Count down from 10
+10 !count-down;
+
+# Hello
+hello
