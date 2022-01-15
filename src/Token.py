@@ -26,6 +26,9 @@ class TokenType(Enum):
     RSQUARE = iota()
     MACRO = iota()
     UNDEF = iota()
+    IF = iota()
+    WHILE = iota()
+    THEN = iota()
     END = iota()
     EOF = iota()
 

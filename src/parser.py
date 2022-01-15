@@ -1,4 +1,5 @@
 import os
+from re import S
 from Token import *
 from bytecode import ByteCode
 from lexer import Lexer
@@ -81,6 +82,15 @@ class Parser:
         else:
             return len(self.env.byte_code) - 1
 
+
+    def insert_code_at(self, idx: int, code: ByteCode):
+        if self.current_proc != None:
+            self.procedures[self.current_proc].insert(idx, code)
+        elif self.current_macro != None:
+            self.macros[self.current_macro].insert(idx, code)
+        else:
+            self.env.byte_code.insert(idx, code)
+
     
     # Consume token of type, otherwise, error
     def consume(self, ttype: TokenType):
@@ -113,6 +123,20 @@ class Parser:
             self.consume(self.cur_token.ttype)
     
 
+    def comparison(self):
+        while self.cur_token.ttype in ( TokenType.LESS_THAN, TokenType.GREATER_THAN, TokenType.EQUAL_TO ):
+            if self.cur_token.ttype == TokenType.LESS_THAN:
+                self.push_code(ByteCode.OP_LESS)
+            
+            elif self.cur_token.ttype == TokenType.GREATER_THAN:
+                self.push_code(ByteCode.OP_GREATER)
+
+            elif self.cur_token.ttype == TokenType.EQUAL_TO:
+                self.push_code(ByteCode.OP_EQUAL_TO)
+
+            self.consume(self.cur_token.ttype)
+    
+
     def expr(self):
         if self.cur_token.ttype == TokenType.INT:
             self.env.contants.append(int(self.cur_token.lexeme))
@@ -122,6 +146,9 @@ class Parser:
 
         elif self.cur_token.ttype in ( TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH ):
             self.arithmetic()
+        
+        elif self.cur_token.ttype in ( TokenType.LESS_THAN, TokenType.GREATER_THAN, TokenType.EQUAL_TO ):
+            self.comparison()
 
         elif self.cur_token.ttype == TokenType.DUPLICATE:
             self.consume(self.cur_token.ttype)
@@ -192,7 +219,22 @@ class Parser:
 
 
     def statment(self):
-        if self.cur_token.ttype == TokenType.BANG:
+        if self.cur_token.ttype == TokenType.IF:
+            # Macro call
+            self.consume(TokenType.IF)
+            self.push_code(ByteCode.OP_IF)
+            if_next = self.get_current_code_loc() + 1
+
+            while self.cur_token.ttype != TokenType.END:
+                self.statment()
+
+            self.consume(TokenType.END)
+
+            # Insert end of block if condition is false
+            block_loc = self.get_current_code_loc()
+            self.insert_code_at(if_next, block_loc)
+        
+        elif self.cur_token.ttype == TokenType.BANG:
             # Macro call
             self.consume(TokenType.BANG)
             macro_name = self.cur_token.lexeme

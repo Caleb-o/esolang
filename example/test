@@ -17,3 +17,7 @@ end
 
 # Hello
 hello
+
+1 2 < if
+    hello
+end

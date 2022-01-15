@@ -84,6 +84,28 @@ class Interpreter:
                     self.error_msg("Cannot divide by 0")
 
                 self.push_value(val_a / val_b)
+            elif operation == ByteCode.OP_GREATER:
+                val_b = self.try_pop()
+                val_a = self.try_peek()
+                self.push_value(int(val_b > val_a))
+            
+            elif operation == ByteCode.OP_LESS:
+                val_b = self.try_pop()
+                val_a = self.try_peek()
+                self.push_value(int(val_b < val_a))
+            
+            elif operation == ByteCode.OP_EQUAL_TO:
+                val_b = self.try_pop()
+                val_a = self.try_peek()
+                self.push_value(int(val_a == val_b))
+            
+            elif operation == ByteCode.OP_IF:
+                condition = self.try_pop()
+                self.cur_op += 1
+
+                if not condition:
+                    self.cur_op = int(self.get_op())
+
             elif operation == ByteCode.OP_PRINT:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
                     print(self.try_peek())

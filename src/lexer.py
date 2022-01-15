@@ -20,6 +20,7 @@ SINGLE_CHARS = {
 
 
 KEYWORDS = {
+    'if'    : TokenType.IF,
     'impl'  : TokenType.IMPL,
     'dup'   : TokenType.DUPLICATE,
     'pop'   : TokenType.POP,
