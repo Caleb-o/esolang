@@ -5,11 +5,8 @@ proc plus_five 1 1;
     5 +
 end
 
-proc count-down 1 0; 
-    [ . 1 - ]
+proc count-down 1 0;
+    [ dup swap . 1 - ] pop
 end
 
-6 count-down;
-
-# Call procedure
-1 plus_five;
+6 count-down

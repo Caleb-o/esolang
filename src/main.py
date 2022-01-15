@@ -23,6 +23,7 @@ def main():
                 print(e)
     elif argv_len == 2:
         debug.DEBUG = True
+        debug.IGNORE_OUTPUT = False
         debug.op_max = 128
 
         try:

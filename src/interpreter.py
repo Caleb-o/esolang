@@ -48,7 +48,8 @@ class Interpreter:
             operation = self.get_op()
 
             if debug.DEBUG:
-                if debug.op_count >= debug.op_max:
+                if debug.op_max > 0 and debug.op_count >= debug.op_max:
+                    print('debug exit')
                     break
 
                 if op_as_str(operation) not in debug.ops:
@@ -83,7 +84,8 @@ class Interpreter:
 
                 self.push_value(val_a / val_b)
             elif operation == ByteCode.OP_PRINT:
-                print(self.try_peek())
+                if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
+                    print(self.try_peek())
             elif operation == ByteCode.OP_SWAP:
                 val_b = self.try_pop()
                 val_a = self.try_pop()

@@ -1,2 +1,2 @@
 # Count down from current number on the stack and fill the stack with descending numbers
-macro count-down; [ . 1 - ] pop end
+macro count-down; [ dup swap . 1 - ] pop end

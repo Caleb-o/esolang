@@ -3,6 +3,7 @@ from bytecode import op_as_str
 import operator
 
 DEBUG = False
+IGNORE_OUTPUT = False # Only evaluated when debug is true
 
 # Debug symbols
 op_count = 0

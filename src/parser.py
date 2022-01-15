@@ -65,6 +65,24 @@ class Parser:
             self.env.byte_code.extend(bytes)
 
     
+    def get_current_code_op(self):
+        if self.current_proc != None:
+            return self.procedures[self.current_proc][-1]
+        elif self.current_macro != None:
+            return self.macros[self.current_macro][-1]
+        else:
+            return self.env.byte_code[-1]
+    
+
+    def get_current_code_loc(self):
+        if self.current_proc != None:
+            return len(self.procedures[self.current_proc]) - 1
+        elif self.current_macro != None:
+            return len(self.macros[self.current_macro]) - 1
+        else:
+            return len(self.env.byte_code) - 1
+
+    
     # Consume token of type, otherwise, error
     def consume(self, ttype: TokenType):
         if self.cur_token.ttype == ttype:
@@ -157,6 +175,22 @@ class Parser:
         self.consume(TokenType.END)
         self.current_macro = None
 
+    
+    # Re-evaluate start position on the loop_end bytecode
+    # This needs to occur when we expand procs and macros into the main code
+    def reevaluate_loop(self, start_idx: int):
+        ip = start_idx
+        loop_start_ip = start_idx
+
+        while ip < len(self.env.byte_code):
+            if self.env.byte_code[ip] == ByteCode.OP_LOOP_START:
+                loop_start_ip = ip
+            elif self.env.byte_code[ip] == ByteCode.OP_LOOP_END:
+                self.env.byte_code[ip + 1] = loop_start_ip
+                break
+            
+            ip += 1
+
 
     def statment(self):
         if self.cur_token.ttype == TokenType.BANG:
@@ -169,7 +203,9 @@ class Parser:
                 self.error_msg(f'Cannot recursively call macro \'{macro_name}\'')
 
             try:
+                start_loc = self.get_current_code_loc()
                 self.push_block(self.macros[macro_name])
+                self.reevaluate_loop(start_loc)
             except:
                 self.error_msg(f'Macro is not defined \'{macro_name}\'')
 
@@ -182,8 +218,10 @@ class Parser:
                 self.error_msg(f'Cannot recursively call procedure \'{proc_name}\'')
 
             try:
+                start_loc = self.get_current_code_loc() + 3
                 self.push_code(ByteCode.OP_PROC_CALL)
                 self.push_block(self.procedures[proc_name])
+                self.reevaluate_loop(start_loc)
             except:
                 self.error_msg(f'Proc is not defined \'{proc_name}\'')
 
