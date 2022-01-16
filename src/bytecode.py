@@ -9,6 +9,7 @@ class ByteCode(IntEnum):
     OP_SUB = iota()
     OP_MUL = iota()
     OP_DIV = iota()
+    OP_STR = iota()
     OP_LESS = iota()
     OP_GREATER = iota()
     OP_EQUAL_TO = iota()

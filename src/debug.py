@@ -41,9 +41,16 @@ def print_env(env: Environment):
         print('{:>4}     '.format(idx), end='')
 
         if op == ByteCode.OP_PUSH:
-            value = env.contants[get_code(idx + 1)]
+            val_idx = get_code(idx + 1)
+            value = env.contants[val_idx]
             idx += 1
-            print(f'{op_as_str(op)}<value: {value}>')
+            print(f'{op_as_str(op)}<value: {value}, at: {val_idx}>')
+
+        elif op == ByteCode.OP_STR:
+            val_idx = get_code(idx + 1)
+            value = env.strings[val_idx]
+            idx += 1
+            print(f'{op_as_str(op)}<value: "{value}", at: {val_idx}>')
 
         elif op == ByteCode.OP_BREAK:
             value = get_code(idx + 1)

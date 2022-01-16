@@ -16,6 +16,7 @@ class Scope:
 class Environment:
     scopes: list[Scope]
     contants: list[int]
+    strings: list[str]
     byte_code: list[ByteCode]
 
 
@@ -30,7 +31,7 @@ class Parser:
         self.file_name = file_name
         self.lexer = Lexer(file_name, source)
         self.cur_token = self.lexer.get_next()
-        self.env: Environment = Environment([], [], [])
+        self.env: Environment = Environment([], [], [], [])
 
         # Better handling of spaces (eg. Global, Macro or Proc)
         self.current_space: list[tuple[str, SpaceType]] = []
@@ -146,6 +147,12 @@ class Parser:
 
             self.push_bytes([ ByteCode.OP_PUSH, len(self.env.contants) - 1 ])
 
+        elif self.cur_token.ttype == TokenType.STR:
+            self.env.strings.append(self.cur_token.lexeme)
+            self.consume(self.cur_token.ttype)
+
+            self.push_bytes([ ByteCode.OP_STR, len(self.env.strings) - 1 ])
+
         elif self.cur_token.ttype in ( TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH ):
             self.arithmetic()
         
@@ -211,19 +218,24 @@ class Parser:
     
     # Re-evaluate start position on the loop_end bytecode
     # This needs to occur when we expand procs and macros into the main code
-    def reevaluate_loop(self, start_idx: int):
-        ip = start_idx
+    def reevaluate_loop(self):
+        ip = 0
         loop_start_ip = [ ]
+
+        print(f'evaluating {len(self.env.byte_code)-1} operations')
 
         while ip < len(self.env.byte_code):
             operation = self.get_code_op_from(ip)
 
             if operation in [ ByteCode.OP_PUSH, ByteCode.OP_IF ]:
                 ip += 1
+            elif operation in [ ByteCode.OP_PROC_CALL ]:
+                ip += 2
             elif operation == ByteCode.OP_LOOP_START:
                 loop_start_ip.append(ip)
             elif operation == ByteCode.OP_LOOP_END:
-                self.env.byte_code[ip + 1] = loop_start_ip.pop()
+                if len(loop_start_ip) > 0:
+                    self.env.byte_code[ip + 1] = loop_start_ip.pop()
                 
             ip += 1
 
@@ -263,10 +275,6 @@ class Parser:
             try:
                 start_indx = self.get_current_code_loc()
                 self.push_bytes(self.current_space_code[(macro_name, SpaceType.MACRO)])
-
-                # Only evaluate loop in global space
-                if len(self.current_space) == 0:
-                    self.reevaluate_loop(start_indx)
             except:
                 self.error_msg(f'Macro is not defined \'{macro_name}\'')
 
@@ -322,10 +330,6 @@ class Parser:
             # Push the start index of the loop for if we need to go back
             self.consume(TokenType.RSQUARE)
             self.push_bytes([ByteCode.OP_LOOP_END, loop_start])
-            
-            # Only evaluate loop in global space
-            if len(self.current_space) == 0:
-                self.reevaluate_loop(loop_start)
         
         elif self.cur_token.ttype == TokenType.SWAP:
             # Swap top 2 items on the stack
@@ -386,4 +390,7 @@ class Parser:
     
     def parse(self) -> Environment:
         self.program()
+        
+        # Re-evaluate all loops
+        self.reevaluate_loop()
         return self.env

@@ -18,8 +18,8 @@ class Interpreter:
         raise Exception(f'[Interpreter] {msg} on op <{self.cur_op}:{op_str}>')
 
 
-    def get_op(self) -> ByteCode:
-        return self.env.byte_code[self.cur_op]
+    def get_op(self, idx: int = 0) -> ByteCode:
+        return self.env.byte_code[self.cur_op] if idx == 0 else self.env.byte_code[self.cur_op + idx]
 
 
     def push_value(self, value: int):
@@ -35,6 +35,14 @@ class Interpreter:
             return self.env.scopes[self.cur_scope].stack.pop()
         else:
             self.error_msg('Cannot pop stack. Stack is empty!')
+
+    
+    # Returns if bytecode at offset (from current)
+    def peek_op_is_type(self, idx: int, type: ByteCode) -> bool:
+        try:
+            return self.env.byte_code[self.cur_op + idx] == type
+        except:
+            return False
 
 
     def try_peek(self) -> int:
@@ -116,11 +124,22 @@ class Interpreter:
 
             elif operation == ByteCode.OP_PRINT:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
-                    print(self.try_peek())
+                    # Currently strings can only be print from constants/literals,
+                    # Since strings cannot be constructed
+                    if self.peek_op_is_type(-2, ByteCode.OP_STR):
+                        print(self.env.strings[self.get_op(-1)])
+                    else:
+                        print(self.try_peek())
 
             elif operation == ByteCode.OP_PRINT_CHAR:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
-                    print(chr(self.try_peek()), end='')
+                    if self.peek_op_is_type(-2, ByteCode.OP_STR):
+                        # Print each character as ascii code
+                        for c in self.env.strings[self.get_op(-1)]:
+                            print(f'{ord(c)} ', end='')
+                        print()
+                    else:
+                        print(chr(self.try_peek()), end='')
 
             elif operation == ByteCode.OP_SWAP:
                 if len(self.env.scopes[-1].stack) > 1:
@@ -131,9 +150,6 @@ class Interpreter:
             elif operation == ByteCode.OP_DUPLICATE:
                 if len(self.env.scopes[-1].stack) > 0:
                     self.push_value(self.try_peek())
-            elif operation == ByteCode.OP_LOOP_START:
-                # Don't really care for anything here
-                pass
             elif operation == ByteCode.OP_LOOP_END:
                 self.cur_op += 1
 
@@ -180,6 +196,16 @@ class Interpreter:
                 self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack[:return_count])
                 self.cur_scope -= 1
                 self.env.scopes.pop()
+
+            # Operations with no functionality without context
+            elif operation == ByteCode.OP_STR:
+                # Don't really care for anything here
+                self.cur_op += 1
+
+            elif operation == ByteCode.OP_LOOP_START:
+                # Don't really care for anything here
+                pass
+
             else:
                 self.error_msg(f'Operation not implemented : \'{operation}\'')
             

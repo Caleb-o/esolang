@@ -1,25 +1,24 @@
 impl 'std.experimental'
 
-proc hello 0 0;
-    104 , 	pop
-    101 , 	pop
-    108 , , pop
-    111 , 	pop
-    33 	, 	pop
-    10 	, 	pop
+# Create a procedure
+proc proc_count_down 1 0;
+	'proc_count_down' .
+    [ !print 1 !sub ]
+    pop
 end
 
 # Print items in the stack
 10 20 30 !print-stack;
 
-# Count down from 10
-10 !count-down;
+# Count down from 5 using a macro
+5 !count-down;
+# Count down from 5 using a procedure
+5 proc_count_down;
 
-# Hello proc call
-hello;
+'hello world' .
 
 # Simple condition (1 == 1)
 1 1 = if
-	hello;
+	'In the if condition!' .
 	5 !count-down;
 end

@@ -7,9 +7,9 @@ def main():
     argv_len = len(sys.argv)
 
     # Assign debugging values
-    debug.DEBUG = False
+    debug.DEBUG = True
     debug.IGNORE_OUTPUT = False
-    debug.op_max = 128
+    debug.op_max = 256
 
     # Try to parse argv
     if argv_len <= 1:
