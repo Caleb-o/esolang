@@ -78,6 +78,14 @@ class Parser:
     def insert_byte_at(self, idx: int, byte: ByteCode):
         self.current_space_code[self.current_space[-1]].insert(idx, byte)
 
+
+    def remove_bytes_from(self, idx: int):
+        i = idx
+
+        while i < self.get_current_code_loc():
+            self.current_space_code[self.current_space[-1]].remove(i)
+            i += 1
+
     
     # Consume token of type, otherwise, error
     def consume(self, ttype: TokenType):
@@ -279,7 +287,6 @@ class Parser:
                     self.error_msg(f'Cannot recursively call macro \'{macro_name}\'')
 
             try:
-                start_indx = self.get_current_code_loc()
                 self.push_bytes(self.current_space_code[(macro_name, SpaceType.MACRO)])
             except:
                 self.error_msg(f'Macro is not defined \'{macro_name}\'')
@@ -328,14 +335,23 @@ class Parser:
             self.consume(self.cur_token.ttype)
             self.push_bytes([ByteCode.OP_LOOP_START])
 
-            loop_start = len(self.env.byte_code) - 1
+            loop_start = self.get_current_code_loc()
             
             while self.cur_token.ttype != TokenType.RSQUARE:
                 self.statment()
 
-            # Push the start index of the loop for if we need to go back
+            loop_end = self.get_current_code_loc()
+
+            # Check if empty
+            if loop_start == loop_end:
+                # Remove beginning
+                print('empty loop')
+                self.current_space_code[self.current_space[-1]].pop()
+            else:
+                # Push the start index of the loop for if we need to go back
+                self.push_bytes([ByteCode.OP_LOOP_END, loop_start])
+            
             self.consume(TokenType.RSQUARE)
-            self.push_bytes([ByteCode.OP_LOOP_END, loop_start])
         
         elif self.cur_token.ttype == TokenType.SWAP:
             # Swap top 2 items on the stack
