@@ -117,10 +117,15 @@ class Interpreter:
                 self.cur_op += 1
 
                 if not condition:
-                    self.cur_op = int(self.get_op()) + 1
+                    self.cur_op = int(self.get_op())
 
             elif operation == ByteCode.OP_BREAK:
                 self.cur_op += 1
+
+                # Error from parser
+                if int(self.get_op()) < 0:
+                    self.error_msg('Break jump point was not set')
+
                 self.cur_op = int(self.get_op())
 
             elif operation == ByteCode.OP_PRINT:
@@ -148,9 +153,11 @@ class Interpreter:
                     val_a = self.try_pop()
                     self.push_value(val_b)
                     self.push_value(val_a)
+                    
             elif operation == ByteCode.OP_DUPLICATE:
                 if len(self.env.scopes[-1].stack) > 0:
                     self.push_value(self.try_peek())
+
             elif operation == ByteCode.OP_LOOP_END:
                 self.cur_op += 1
 

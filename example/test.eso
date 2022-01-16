@@ -18,6 +18,19 @@ end
 # String literal and print
 'hello world' .
 
+break break
+
+# If condition within a loop
+'starting loop...' .
+30 [ 
+    . 1 - dup 25
+    > if
+        # Break if condition is true
+        'breaking' .
+	break 
+    end
+] 'end of loop' .
+
 # Simple condition (1 == 1)
 1 1 = if
     'In the if condition!' .

@@ -254,16 +254,64 @@ class Parser:
             ip += 1
 
 
-    def reevaluate_break(self, start_idx: int):
-        assert False, 're-evaluate break not implemented'
+    def reevaluate_break(self):
+        ip = 0
+        loop_break_ip = [ ]
+        depth = 0
+
+        while ip < len(self.env.byte_code):
+            operation = self.get_code_op_from(ip)
+
+            if operation in [ ByteCode.OP_PUSH, ByteCode.OP_IF ]:
+                ip += 1
+
+            elif operation in [ ByteCode.OP_PROC_CALL ]:
+                ip += 2
+
+            elif operation == ByteCode.OP_BREAK:
+                ip += 1
+                loop_break_ip.append(ip)
+
+            elif operation == ByteCode.OP_LOOP_START:
+                depth += 1
+
+            elif operation == ByteCode.OP_LOOP_END:
+                ip += 1
+
+                if depth == 0:
+                    if len(loop_break_ip) > 0:
+                        self.env.byte_code[loop_break_ip.pop()] = ip
+                
+                depth -= 1
+
+            ip += 1
+        
+        if len(loop_break_ip) > 0:
+            print(f'Removing {len(loop_break_ip)} breaks')
+            # Remove break token, it might be in the wrong place
+
+            idx = loop_break_ip[0] - 1
+
+            # TODO: Try to remove these bad boys. Removing causes issues rn.
+
+            while idx < loop_break_ip[-1]:
+                if self.env.byte_code[idx] == ByteCode.OP_BREAK and self.env.byte_code[idx + 1] == -1:
+                    self.env.byte_code[idx + 1] = idx + 1
+
+                idx += 1
+                
 
 
     def statment(self):
-        if self.cur_token.ttype == TokenType.IF:
+        if self.cur_token.ttype == TokenType.BREAK:
+            self.consume(TokenType.BREAK)
+            self.push_bytes([ ByteCode.OP_BREAK, -1 ])
+
+        elif self.cur_token.ttype == TokenType.IF:
             # If condition
             self.consume(TokenType.IF)
-            self.push_byte(ByteCode.OP_IF)
-            if_next = self.get_current_code_loc()
+            self.push_bytes([ ByteCode.OP_IF, -1 ])
+            if_next = self.get_current_code_loc() - 1
 
             while self.cur_token.ttype != TokenType.END:
                 self.statment()
@@ -271,8 +319,8 @@ class Parser:
             self.consume(TokenType.END)
 
             # Insert end of block if condition is false
-            block_loc = self.get_current_code_loc()
-            self.insert_byte_at(if_next, block_loc)
+            block_loc = self.get_current_code_loc() - 1
+            self.set_code_op_at(if_next, block_loc)
         
         elif self.cur_token.ttype == TokenType.BANG:
             # Macro call
@@ -425,4 +473,5 @@ class Parser:
         self.env.byte_code.extend(self.current_space_code[('global', SpaceType.GLOBAL)])
         # Re-evaluate all loops
         self.reevaluate_loop()
+        self.reevaluate_break()
         return self.env
