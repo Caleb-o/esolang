@@ -1,6 +1,6 @@
 import os
 from Token import *
-from bytecode import ByteCode, op_as_str
+from bytecode import ByteCode
 from lexer import Lexer
 from dataclasses import dataclass
 from enum import IntEnum
@@ -20,10 +20,12 @@ class Environment:
     byte_code: list[ByteCode]
 
 
+# Type of space the parser is within
+# eg. We're parsing within a macro
 class SpaceType(IntEnum):
-    # Global is assumed
-    PROC = 0
-    MACRO = 1
+    GLOBAL  = iota(True)
+    PROC    = iota()
+    MACRO   = iota()
 
 
 class Parser:
@@ -34,8 +36,8 @@ class Parser:
         self.env: Environment = Environment([], [], [], [])
 
         # Better handling of spaces (eg. Global, Macro or Proc)
-        self.current_space: list[tuple[str, SpaceType]] = []
-        self.current_space_code: dict[tuple[str, SpaceType], list[ByteCode]] = {}
+        self.current_space: list[tuple[str, SpaceType]] = [ ('global', SpaceType.GLOBAL) ]
+        self.current_space_code: dict[tuple[str, SpaceType], list[ByteCode]] = { ('global', SpaceType.GLOBAL): [] }
 
 
     def set_source(self, source: str):
@@ -51,48 +53,30 @@ class Parser:
 
 
     def push_byte(self, byte: ByteCode):
-        if len(self.current_space) == 0:
-            self.env.byte_code.append(byte)
-        else:
-            self.current_space_code[self.current_space[-1]].append(byte)
+        self.current_space_code[self.current_space[-1]].append(byte)
     
     
     def push_bytes(self, bytes: list[ByteCode]):
-        if len(self.current_space) == 0:
-            self.env.byte_code.extend(bytes)
-        else:
-            self.current_space_code[self.current_space[-1]].extend(bytes)
+        self.current_space_code[self.current_space[-1]].extend(bytes)
 
     
     def get_current_code_op(self):
-        return self.env.byte_code[-1] if len(self.current_space) == 0 else self.current_space_code[self.current_space[-1]][-1]
+        return self.current_space_code[self.current_space[-1]][-1]
     
     def get_code_op_from(self, idx: int):
-        try:
-            return self.env.byte_code[idx] if len(self.current_space) == 0 else self.current_space_code[self.current_space[-1]][idx]
-        except:
-            assert False, 'Attempting to negative index get_code_op_from'
+        return self.current_space_code[self.current_space[-1]][idx]
 
     
     def set_code_op_at(self, idx: int, op: ByteCode):
-        try:
-            if len(self.current_space) == 0:
-                self.env.byte_code[idx] = op
-            else:
-                self.current_space_code[self.current_space[-1]][idx] = op
-        except:
-            assert False, 'Attempting to negative index get_code_op_from'
+        self.current_space_code[self.current_space[-1]][idx] = op
     
 
     def get_current_code_loc(self):
-        return len(self.env.byte_code) if len(self.current_space) == 0 else len(self.current_space_code[self.current_space[-1]])
+        return len(self.current_space_code[self.current_space[-1]])
 
 
     def insert_byte_at(self, idx: int, byte: ByteCode):
-        if len(self.current_space) == 0:
-            self.env.byte_code.insert(idx, byte)
-        else:
-            self.current_space_code[self.current_space[-1]].insert(idx, byte)
+        self.current_space_code[self.current_space[-1]].insert(idx, byte)
 
     
     # Consume token of type, otherwise, error
@@ -399,6 +383,7 @@ class Parser:
     def parse(self) -> Environment:
         self.program()
         
+        self.env.byte_code.extend(self.current_space_code[('global', SpaceType.GLOBAL)])
         # Re-evaluate all loops
         self.reevaluate_loop()
         return self.env

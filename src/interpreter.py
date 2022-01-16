@@ -70,6 +70,7 @@ class Interpreter:
                 debug.op_count += 1
                 debug.ops[op_as_str(operation)] += 1
 
+
             if operation == ByteCode.OP_PUSH:
                 self.cur_op += 1
                 self.push_constant(self.get_op())

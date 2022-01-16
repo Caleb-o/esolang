@@ -2,7 +2,7 @@ impl 'std.experimental'
 
 # Create a procedure
 proc proc_count_down 1 0;
-	'proc_count_down' .
+    'proc_count_down' .
     [ !print 1 !sub ]
     pop
 end
