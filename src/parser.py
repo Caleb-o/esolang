@@ -222,8 +222,6 @@ class Parser:
         ip = 0
         loop_start_ip = [ ]
 
-        print(f'evaluating {len(self.env.byte_code)-1} operations')
-
         while ip < len(self.env.byte_code):
             operation = self.get_code_op_from(ip)
 
@@ -357,6 +355,8 @@ class Parser:
     def program(self):
         self.env.scopes.append(Scope(0, []))
 
+        included: list[str] = []
+
         # Impl can only be at the top of the file
         while self.cur_token.ttype == TokenType.IMPL:
             self.consume(TokenType.IMPL)
@@ -367,6 +367,14 @@ class Parser:
                 import_name += '.eso'
 
             self.consume(TokenType.STR)
+
+            # Don't import a file that has already been included
+            # Todo: Make this global so we don't include them within other files
+            if import_name in included:
+                continue
+
+            # Add to included
+            included.append(import_name)
 
             if os.path.isfile(import_name):
                 try:
