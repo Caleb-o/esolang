@@ -137,6 +137,10 @@ class Interpreter:
             elif operation == ByteCode.OP_LOOP_END:
                 self.cur_op += 1
 
+                # Error from parser
+                if int(self.get_op()) < 0:
+                    self.error_msg('Loop end jump point was not set')
+
                 # Go back to the start
                 if len(self.env.scopes[-1].stack) > 0 and self.try_peek() > 0:
                     self.cur_op = int(self.get_op())
@@ -148,7 +152,7 @@ class Interpreter:
                 return_count = int(self.get_op())
 
                 # Create a new scope
-                self.env.scopes.append(Scope(self.cur_scope + 1, [ return_count ]))
+                self.env.scopes.append(Scope(self.cur_scope + 1, []))
 
                 # Check correct arg count
                 if len(self.env.scopes[self.cur_scope].stack) < arg_count:
@@ -157,21 +161,23 @@ class Interpreter:
                 # Add arguments to scope
                 self.env.scopes[self.cur_scope + 1].stack.extend(self.env.scopes[self.cur_scope].stack[-arg_count:])
 
-                for idx in range(-arg_count, 0):
+                for _ in range(-arg_count, 0):
                     self.env.scopes[self.cur_scope].stack.pop()
 
+                # Push Return count onto stack
+                self.env.scopes[self.cur_scope].stack.append(return_count)
+
                 self.cur_scope += 1
-            elif operation == ByteCode.OP_RETURN:
-                if len(self.env.scopes[self.cur_scope].stack) == 0:
-                    self.error_msg('Trying to exit a procedure with an empty! Return count has been removed.')
-                
-                return_count = self.env.scopes[self.cur_scope].stack[0]
+            elif operation == ByteCode.OP_RETURN:            
+                # Get return value from previous stack and remove it    
+                return_count = self.env.scopes[self.cur_scope-1].stack[-1]
+                self.env.scopes[self.cur_scope-1].stack.pop()
 
                 if len(self.env.scopes[self.cur_scope].stack) < return_count:
                     self.error_msg(f'{"-" * (self.cur_scope + 4)} Return expected {return_count} argument(s) but got {len(self.env.scopes[self.cur_scope].stack)}')
                 
                 # Add items to stack
-                self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack[1:return_count+1])
+                self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack[:return_count])
                 self.cur_scope -= 1
                 self.env.scopes.pop()
             else:

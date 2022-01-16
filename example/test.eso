@@ -1,19 +1,19 @@
 impl 'std.experimental'
 
 proc hello 0 0;
-    104 , pop
-    101 , pop
+    104 , 	pop
+    101 , 	pop
     108 , , pop
-    111 , pop
-    33 , pop
-    10 , pop
+    111 , 	pop
+    33 	, 	pop
+    10 	, 	pop
 end
 
 # Print items in the stack
 10 20 30 !print-stack;
 
 # Count down from 10
-10 !count-down
+10 !count-down;
 
 # Hello proc call
-hello
+hello;

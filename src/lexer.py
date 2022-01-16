@@ -37,7 +37,6 @@ class Lexer:
         self.file_name = file_name
         self.source = source
         self.ip: int = 0
-        self.cur_tok = None
         self.col = 1
         self.line = 1
         self.cur_char =  source[0]
@@ -84,7 +83,7 @@ class Lexer:
                 self.advance()
 
     
-    def make_identifier(self):
+    def make_identifier(self) -> Token:
         start_pos = self.ip
         start_col = self.col
 
@@ -94,13 +93,10 @@ class Lexer:
 
         lexeme = self.source[start_pos:self.ip]
 
-        if lexeme in KEYWORDS:
-            self.cur_tok = Token(self.line, start_col, KEYWORDS[lexeme], lexeme)
-        else:
-            self.cur_tok = Token(self.line, start_col, TokenType.ID, lexeme)
+        return Token(self.line, start_col, KEYWORDS[lexeme], lexeme) if lexeme in KEYWORDS else Token(self.line, start_col, TokenType.ID, lexeme)
     
 
-    def make_string(self):
+    def make_string(self) -> Token:
         start_pos = self.ip
         start_col = self.col
 
@@ -111,10 +107,10 @@ class Lexer:
         self.col += 1
         self.advance()
 
-        self.cur_tok = Token(self.line, start_col, TokenType.STR, self.source[start_pos:self.ip-1])
+        return Token(self.line, start_col, TokenType.STR, self.source[start_pos:self.ip-1])
     
 
-    def make_number(self):
+    def make_number(self) -> Token:
         start_pos = self.ip
         start_col = self.col
 
@@ -122,33 +118,28 @@ class Lexer:
             self.col += 1
             self.advance()
         
-        self.cur_tok = Token(self.line, start_col, TokenType.INT, self.source[start_pos:self.ip])
+        return Token(self.line, start_col, TokenType.INT, self.source[start_pos:self.ip])
     
 
-    def get_next(self):
+    def get_next(self) -> Token:
         if self.ip < len(self.source):
             self.skip_whitespace()
 
             if self.cur_char == '\'':
                 self.col += 1
                 self.advance()
-                self.make_string()
-                return
-
+                return self.make_string()
+                
             if self.cur_char.isalpha():
-                self.make_identifier()
-                return
+                return self.make_identifier()
 
             if self.cur_char.isdigit():
-                self.make_number()
-                return
+                return self.make_number()
             
             if self.cur_char in SINGLE_CHARS:
-                self.cur_tok = Token(self.line, self.col, SINGLE_CHARS[self.cur_char], self.cur_char)
+                token = Token(self.line, self.col, SINGLE_CHARS[self.cur_char], self.cur_char)
                 self.col += 1
                 self.advance()
-                return
+                return token
             
-            self.cur_tok = Token(self.line, self.col, TokenType.EOF, 'EOF')
-        else: 
-            self.cur_tok = Token(self.line, self.col, TokenType.EOF, 'EOF')
+        return Token(self.line, self.col, TokenType.EOF, 'EOF')
