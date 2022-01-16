@@ -27,7 +27,7 @@ class Interpreter:
 
 
     def push_constant(self, idx: int):
-        self.env.scopes[self.cur_scope].stack.append(self.env.contants[idx]) 
+        self.env.scopes[self.cur_scope].stack.append(self.env.constants[idx]) 
 
 
     def try_pop(self):

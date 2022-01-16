@@ -15,7 +15,7 @@ class Scope:
 @dataclass
 class Environment:
     scopes: list[Scope]
-    contants: list[int]
+    constants: list[int]
     strings: list[str]
     byte_code: list[ByteCode]
 
@@ -126,16 +126,40 @@ class Parser:
 
     def expr(self):
         if self.cur_token.ttype == TokenType.INT:
-            self.env.contants.append(int(self.cur_token.lexeme))
+            value = int(self.cur_token.lexeme)
+            value_idx = -1
+
             self.consume(self.cur_token.ttype)
 
-            self.push_bytes([ ByteCode.OP_PUSH, len(self.env.contants) - 1 ])
+            # Check if value exists in table
+            if value in self.env.constants:
+                # Fetch index of value
+                value_idx = self.env.constants.index(value)
+            else:
+                # New value
+                self.env.constants.append(value)
+                value_idx = len(self.env.constants) - 1
+
+
+            self.push_bytes([ ByteCode.OP_PUSH, value_idx ])
 
         elif self.cur_token.ttype == TokenType.STR:
-            self.env.strings.append(self.cur_token.lexeme)
+            value = self.cur_token.lexeme
+            value_idx = -1
+
             self.consume(self.cur_token.ttype)
 
-            self.push_bytes([ ByteCode.OP_STR, len(self.env.strings) - 1 ])
+            # Check if value exists in table
+            if value in self.env.strings:
+                # Fetch index of value
+                value_idx = self.env.strings.index(value)
+            else:
+                # New value
+                self.env.strings.append(value)
+                value_idx = len(self.env.strings) - 1
+
+
+            self.push_bytes([ ByteCode.OP_STR, value_idx ])
 
         elif self.cur_token.ttype in ( TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH ):
             self.arithmetic()
@@ -367,7 +391,7 @@ class Parser:
 
                     # Add environment to local
                     self.env.byte_code.extend(env.byte_code)
-                    self.env.contants.extend(env.contants)
+                    self.env.constants.extend(env.constants)
 
                     # Import macros/procs
                     self.current_space_code |= impl_parser.current_space_code

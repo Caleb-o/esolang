@@ -28,12 +28,20 @@ def print_env(env: Environment):
     if not DEBUG:
         return
 
-    idx = 0
+    ## Print values
+    print('Literals')
+    print(env.constants)
+    print(env.strings)
+    print()
+
+    ## Print operations
 
     def get_code(index: int) -> int:
         return env.byte_code[index]
 
     print('OP_POS   OPERATION')
+    
+    idx = 0
 
     while idx < len(env.byte_code):
         op = get_code(idx)
@@ -42,7 +50,7 @@ def print_env(env: Environment):
 
         if op == ByteCode.OP_PUSH:
             val_idx = get_code(idx + 1)
-            value = env.contants[val_idx]
+            value = env.constants[val_idx]
             idx += 1
             print(f'{op_as_str(op)}<value: {value}, at: {val_idx}>')
 
