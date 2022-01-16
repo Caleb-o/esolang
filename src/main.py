@@ -7,7 +7,7 @@ def main():
     argv_len = len(sys.argv)
 
     # Assign debugging values
-    debug.DEBUG = True
+    debug.DEBUG = False
     debug.IGNORE_OUTPUT = False
     debug.op_max = 256
 
