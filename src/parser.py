@@ -345,7 +345,6 @@ class Parser:
             # Check if empty
             if loop_start == loop_end:
                 # Remove beginning
-                print('empty loop')
                 self.current_space_code[self.current_space[-1]].pop()
             else:
                 # Push the start index of the loop for if we need to go back

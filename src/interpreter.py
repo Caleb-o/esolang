@@ -99,17 +99,17 @@ class Interpreter:
                 self.push_value(val_a / val_b)
             elif operation == ByteCode.OP_GREATER:
                 val_b = self.try_pop()
-                val_a = self.try_peek()
+                val_a = self.try_pop()
                 self.push_value(int(val_b > val_a))
             
             elif operation == ByteCode.OP_LESS:
                 val_b = self.try_pop()
-                val_a = self.try_peek()
+                val_a = self.try_pop()
                 self.push_value(int(val_b < val_a))
             
             elif operation == ByteCode.OP_EQUAL_TO:
                 val_b = self.try_pop()
-                val_a = self.try_peek()
+                val_a = self.try_pop()
                 self.push_value(int(val_a == val_b))
             
             elif operation == ByteCode.OP_IF:
