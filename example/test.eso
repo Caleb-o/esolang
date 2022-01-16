@@ -17,3 +17,9 @@ end
 
 # Hello proc call
 hello;
+
+# Simple condition (1 == 1)
+1 1 = if
+	hello;
+	5 !count-down;
+end

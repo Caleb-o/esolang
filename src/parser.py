@@ -236,7 +236,7 @@ class Parser:
         if self.cur_token.ttype == TokenType.IF:
             # If condition
             self.consume(TokenType.IF)
-            self.push_code(ByteCode.OP_IF)
+            self.push_byte(ByteCode.OP_IF)
             if_next = self.get_current_code_loc()
 
             while self.cur_token.ttype != TokenType.END:
