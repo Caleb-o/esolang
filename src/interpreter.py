@@ -157,14 +157,14 @@ class Interpreter:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
                     # Currently strings can only be print from constants/literals,
                     # Since strings cannot be constructed
-                    if self.peek_op_is_type(-2, ByteCode.OP_STR):
+                    if self.peek_op_is_type(-2, ByteCode.OP_STR) and not self.peek_op_is_type(-3, ByteCode.OP_ASSERT):
                         print(self.env.strings[self.get_op(-1)])
                     else:
                         print(self.try_peek())
 
             elif operation == ByteCode.OP_PRINT_CHAR:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
-                    if self.peek_op_is_type(-2, ByteCode.OP_STR):
+                    if self.peek_op_is_type(-2, ByteCode.OP_STR) and not self.peek_op_is_type(-3, ByteCode.OP_ASSERT):
                         # Print each character as ascii code
                         for c in self.env.strings[self.get_op(-1)]:
                             print(f'{ord(c)} ', end='')
@@ -237,6 +237,15 @@ class Interpreter:
                     
                 self.cur_scope -= 1
                 self.env.scopes.pop()
+            
+            elif operation == ByteCode.OP_ASSERT:
+                condition = self.try_pop()
+                self.cur_op += 1
+
+                if condition == 0:
+                    self.error_msg(f'{self.env.strings[self.get_op(1)]}')
+                else:
+                    self.cur_op += 1
 
             # Operations with no functionality without context
             elif operation == ByteCode.OP_STR:

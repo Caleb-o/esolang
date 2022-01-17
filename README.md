@@ -64,6 +64,7 @@ Only integers can be created from within the code, so there isn't an easy way to
 - `impl` Import statement
 - `break` exit out of a loop
 - 'neg' negate the next value
+- 'assert' cause an assertion if value is 0
 
 ### Example
 ```
@@ -134,6 +135,22 @@ end
     # This will not print
     '1 > 2? True' .
 end
+```
+
+### Assertions
+As any good language should have, Eso supports assertions. An assertion raises an error if the condition is not met. This allows the programmer to test values before the program proceeds and exit before more errors occur.
+
+### Example
+```
+# Push 10
+10
+
+# Check if 10 is bigger than 20
+# We duplicate here, since we consume both values and may want to use 10 later
+dup 20 > assert '10 is bigger than 20'
+
+# Assert passed, print 10
+. pop
 ```
 
 ### Loops

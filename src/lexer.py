@@ -21,16 +21,17 @@ SINGLE_CHARS = {
 
 
 KEYWORDS = {
-    'if'    : TokenType.IF,
-    'break' : TokenType.BREAK,
-    'neg'   : TokenType.NEGATE,
-    'impl'  : TokenType.IMPL,
-    'dup'   : TokenType.DUPLICATE,
-    'pop'   : TokenType.POP,
-    'macro' : TokenType.MACRO,
-    'undef' : TokenType.UNDEF,
-    'end'   : TokenType.END,
-    'proc'  : TokenType.PROC
+    'if'        : TokenType.IF,
+    'break'     : TokenType.BREAK,
+    'neg'       : TokenType.NEGATE,
+    'impl'      : TokenType.IMPL,
+    'dup'       : TokenType.DUPLICATE,
+    'pop'       : TokenType.POP,
+    'macro'     : TokenType.MACRO,
+    'undef'     : TokenType.UNDEF,
+    'end'       : TokenType.END,
+    'proc'      : TokenType.PROC,
+    'assert'    : TokenType.ASSERT,
 }
 
 

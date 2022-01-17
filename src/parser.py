@@ -23,9 +23,9 @@ class Environment:
 # Type of space the parser is within
 # eg. We're parsing within a macro
 class SpaceType(IntEnum):
-    GLOBAL  = iota(True)
-    PROC    = iota()
-    MACRO   = iota()
+    GLOBAL  = auto(True)
+    PROC    = auto()
+    MACRO   = auto()
 
 
 class Parser:
@@ -131,6 +131,25 @@ class Parser:
                 self.push_byte(ByteCode.OP_EQUAL_TO)
 
             self.consume(self.cur_token.ttype)
+
+
+    def str_op(self):
+        value = self.cur_token.lexeme
+        value_idx = -1
+
+        self.consume(self.cur_token.ttype)
+
+        # Check if value exists in table
+        if value in self.env.strings:
+            # Fetch index of value
+            value_idx = self.env.strings.index(value)
+        else:
+            # New value
+            self.env.strings.append(value)
+            value_idx = len(self.env.strings) - 1
+
+
+        self.push_bytes([ ByteCode.OP_STR, value_idx ])
     
 
     def expr(self):
@@ -153,22 +172,7 @@ class Parser:
             self.push_bytes([ ByteCode.OP_PUSH, value_idx ])
 
         elif self.cur_token.ttype == TokenType.STR:
-            value = self.cur_token.lexeme
-            value_idx = -1
-
-            self.consume(self.cur_token.ttype)
-
-            # Check if value exists in table
-            if value in self.env.strings:
-                # Fetch index of value
-                value_idx = self.env.strings.index(value)
-            else:
-                # New value
-                self.env.strings.append(value)
-                value_idx = len(self.env.strings) - 1
-
-
-            self.push_bytes([ ByteCode.OP_STR, value_idx ])
+            self.str_op()
 
         elif self.cur_token.ttype in ( TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH ):
             self.arithmetic()
@@ -310,6 +314,11 @@ class Parser:
 
             self.consume(self.cur_token.ttype)
             self.push_bytes([ ByteCode.OP_BREAK, -1 ])
+
+        elif self.cur_token.ttype == TokenType.ASSERT:
+            self.consume(self.cur_token.ttype)
+            self.push_byte(ByteCode.OP_ASSERT)
+            self.str_op()
 
         elif self.cur_token.ttype == TokenType.IF:
             # If condition

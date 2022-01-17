@@ -1,5 +1,9 @@
-impl 'std.experimental'
+# Push 10
+10
 
-# Prompt for input
-'Enter values:' . ?
-!print-stack
+# Check if 10 is bigger than 20
+# We duplicate here, since we consume both values and may want to use 10 later
+dup 20 > assert '10 is bigger than 20'
+
+# Assert passed, print 10
+. pop
