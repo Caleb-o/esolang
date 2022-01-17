@@ -27,7 +27,6 @@ class SpaceType(IntEnum):
     GLOBAL  = auto(True)
     PROC    = auto()
     MACRO   = auto()
-    TEST    = auto()
 
 
 class Parser:
