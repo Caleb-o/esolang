@@ -33,6 +33,7 @@ class TokenType(Enum):
     NEGATE = auto()
     END = auto()
     REVERSE = auto()
+    TEST = auto()
     EOF = auto()
 
 

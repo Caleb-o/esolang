@@ -70,6 +70,10 @@ def print_env(env: Environment):
             ret_c = get_code(idx + 2)
             idx +=  2
             print(f'{op_as_str(op)}<args: {arg_c}, returning: {ret_c}>')
+
+        elif op == ByteCode.OP_TEST_CALL:
+            idx +=  1
+            print(f'{op_as_str(op)}')
         
         elif op == ByteCode.OP_LOOP_END:
             jump_to = get_code(idx + 1)

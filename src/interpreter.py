@@ -3,11 +3,16 @@ from bytecode import op_as_str
 import debug
 
 
+RUN_TESTS = False
+
+
 class Interpreter:
     def __init__(self, env: Environment) -> None:
         self.env = env
         self.cur_op = 0
         self.cur_scope = 0
+        self.in_test = False
+        self.test_counter = -1
 
 
     def error_msg(self, msg):
@@ -23,6 +28,7 @@ class Interpreter:
     
 
     def assertion(self, msg):
+        print(self.env.scopes[-1].stack)
         raise Exception(f'Assertion Failed: {msg}')
 
 
@@ -170,22 +176,24 @@ class Interpreter:
 
             elif operation == ByteCode.OP_PRINT:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
-                    # Currently strings can only be print from constants/literals,
-                    # Since strings cannot be constructed
-                    if self.peek_op_is_type(-2, ByteCode.OP_STR) and not self.peek_op_is_type(-3, ByteCode.OP_ASSERT):
-                        print(self.env.strings[self.get_op(-1)], end='')
-                    else:
-                        print(f'{self.try_peek()} ', end='')
+                    if not self.in_test:
+                        # Currently strings can only be print from constants/literals,
+                        # Since strings cannot be constructed
+                        if self.peek_op_is_type(-2, ByteCode.OP_STR) and not self.peek_op_is_type(-3, ByteCode.OP_ASSERT):
+                            print(self.env.strings[self.get_op(-1)], end='')
+                        else:
+                            print(f'{self.try_peek()} ', end='')
 
             elif operation == ByteCode.OP_PRINT_CHAR:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
-                    if self.peek_op_is_type(-2, ByteCode.OP_STR) and not self.peek_op_is_type(-3, ByteCode.OP_ASSERT):
-                        # Print each character as ascii code
-                        for c in self.env.strings[self.get_op(-1)]:
-                            print(f'{ord(c)} ', end='')
-                        print()
-                    else:
-                        print(chr(self.try_peek()), end='')
+                    if not self.in_test:
+                        if self.peek_op_is_type(-2, ByteCode.OP_STR) and not self.peek_op_is_type(-3, ByteCode.OP_ASSERT):
+                            # Print each character as ascii code
+                            for c in self.env.strings[self.get_op(-1)]:
+                                print(f'{ord(c)} ', end='')
+                            print()
+                        else:
+                            print(chr(self.try_peek()), end='')
 
             elif operation == ByteCode.OP_SWAP:
                 if len(self.env.scopes[-1].stack) > 1:
@@ -250,7 +258,7 @@ class Interpreter:
                 self.env.scopes[self.cur_scope-1].stack.pop()
 
                 # -1 will define any amount
-                if return_count > -1:
+                if return_count > 0:
                     if len(self.env.scopes[self.cur_scope].stack) < return_count:
                         self.error_msg(f'Return expected {return_count} argument(s) but got {len(self.env.scopes[self.cur_scope].stack)}')
                     elif len(self.env.scopes[self.cur_scope].stack) > return_count:
@@ -258,12 +266,16 @@ class Interpreter:
                 
                     # Add items to stack
                     self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack[-return_count:])
-                else:
+                elif return_count < 0:
                     # Copy the entire stack
                     self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack)
                     
                 self.cur_scope -= 1
                 self.env.scopes.pop()
+
+                if self.in_test:
+                    self.in_test = False
+                    print(f'{self.env.test_names[self.test_counter]} passed!')
             
             elif operation == ByteCode.OP_ASSERT:
                 condition = self.try_pop()
@@ -273,6 +285,21 @@ class Interpreter:
                     self.assertion(f'{self.env.strings[self.get_op(1)]}')
                 else:
                     self.cur_op += 1
+            
+            elif operation == ByteCode.OP_TEST_CALL:
+                self.cur_op += 1
+
+                if not RUN_TESTS:
+                    self.cur_op = int(self.get_op())
+                else:
+                    self.in_test = True
+                    self.test_counter += 1
+
+                    # Append return value
+                    self.env.scopes[self.cur_scope].stack.append(0)
+
+                    self.cur_scope += 1
+                    self.env.scopes.append(Scope(self.cur_scope, []))
 
             # Operations with no functionality without context
             elif operation == ByteCode.OP_STR:

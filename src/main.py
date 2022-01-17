@@ -1,11 +1,13 @@
-from math import sin
 import sys, debug
+import interpreter as i
 from parser import Parser
-from interpreter import Interpreter
 
 
 def main():
     argv_len = len(sys.argv)
+
+    # Run tests?
+    i.RUN_TESTS = True
 
     # Assign debugging values
     debug.DEBUG = False
@@ -22,7 +24,7 @@ def main():
 
             try:
                 parser = Parser('repl', user_input)
-                interpreter = Interpreter(parser.parse())
+                interpreter = i.Interpreter(parser.parse())
                 
                 interpreter.interpret()
             except Exception as e:
@@ -30,7 +32,7 @@ def main():
     elif argv_len == 2:
         try:
             parser = Parser(sys.argv[1], open(sys.argv[1]).read())
-            interpreter = Interpreter(parser.parse())
+            interpreter = i.Interpreter(parser.parse())
             
             interpreter.interpret()
         except Exception as e:

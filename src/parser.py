@@ -17,6 +17,7 @@ class Environment:
     scopes: list[Scope]
     constants: list[int]
     strings: list[str]
+    test_names: list[str]
     byte_code: list[ByteCode]
 
 
@@ -26,6 +27,7 @@ class SpaceType(IntEnum):
     GLOBAL  = auto(True)
     PROC    = auto()
     MACRO   = auto()
+    TEST    = auto()
 
 
 class Parser:
@@ -33,7 +35,7 @@ class Parser:
         self.file_name = file_name
         self.lexer = Lexer(file_name, source)
         self.cur_token = self.lexer.get_next()
-        self.env: Environment = Environment([], [], [], [])
+        self.env: Environment = Environment([], [], [], [], [])
 
         self.is_loop = False
         # Better handling of spaces (eg. Global, Macro or Proc)
@@ -188,6 +190,23 @@ class Parser:
             self.push_byte(ByteCode.OP_POP)
 
     
+    def test_decl(self):
+        test_name = self.cur_token.lexeme
+        self.consume(TokenType.STR)
+        self.consume(TokenType.SEMICOLON)
+
+        self.env.test_names.append(test_name)
+
+        # Append argc and return count
+        self.push_bytes([ ByteCode.OP_TEST_CALL, -1 ])
+
+        while self.cur_token.ttype != TokenType.END:
+            self.statment()
+        
+        self.consume(TokenType.END)
+        self.push_byte(ByteCode.OP_RETURN)
+
+
     def proc_decl(self):
         proc_name = self.cur_token.lexeme
         self.consume(TokenType.ID)
@@ -252,13 +271,34 @@ class Parser:
 
             if operation in [ ByteCode.OP_PUSH, ByteCode.OP_IF ]:
                 ip += 1
-            elif operation in [ ByteCode.OP_PROC_CALL ]:
+            elif operation in [ ByteCode.OP_PROC_CALL, ByteCode.OP_TEST_CALL ]:
                 ip += 2
             elif operation == ByteCode.OP_LOOP_START:
                 loop_start_ip.append(ip)
             elif operation == ByteCode.OP_LOOP_END:
                 if len(loop_start_ip) > 0:
                     self.env.byte_code[ip + 1] = loop_start_ip.pop()
+                
+            ip += 1
+
+
+    def reevaluate_test_calls(self):
+        ip = 0
+        test_start_ip = [ ]
+
+        while ip < len(self.env.byte_code):
+            operation = self.get_code_op_from(ip)
+
+            if operation in [ ByteCode.OP_PUSH, ByteCode.OP_IF, ByteCode.OP_LOOP_START ]:
+                ip += 1
+            elif operation in [ ByteCode.OP_PROC_CALL ]:
+                ip += 2
+            elif operation == ByteCode.OP_TEST_CALL:
+                ip += 1
+                test_start_ip.append(ip)
+            elif operation == ByteCode.OP_RETURN:
+                if len(test_start_ip) > 0:
+                    self.env.byte_code[test_start_ip.pop()] = ip
                 
             ip += 1
 
@@ -274,7 +314,7 @@ class Parser:
             if operation in [ ByteCode.OP_PUSH, ByteCode.OP_IF ]:
                 ip += 1
 
-            elif operation in [ ByteCode.OP_PROC_CALL ]:
+            elif operation in [ ByteCode.OP_PROC_CALL, ByteCode.OP_TEST_CALL ]:
                 ip += 2
 
             elif operation == ByteCode.OP_ASSERT:
@@ -352,6 +392,10 @@ class Parser:
                 self.push_bytes(self.current_space_code[(macro_name, SpaceType.MACRO)])
             except:
                 self.error_msg(f'Macro is not defined \'{macro_name}\'')
+        
+        elif self.cur_token.ttype == TokenType.TEST:
+            self.consume(self.cur_token.ttype)
+            self.test_decl()
 
         elif self.cur_token.ttype == TokenType.ID:
             # Proc call
@@ -499,4 +543,5 @@ class Parser:
         # Re-evaluate all loops
         self.reevaluate_loop()
         self.reevaluate_break()
+        self.reevaluate_test_calls()
         return self.env

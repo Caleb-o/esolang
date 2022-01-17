@@ -21,6 +21,7 @@ class ByteCode(IntEnum):
     OP_PRINT_CHAR = auto()
     OP_SWAP = auto()
     OP_PROC_CALL = auto()
+    OP_TEST_CALL = auto()
     OP_DUPLICATE = auto()
     OP_LOOP_START = auto()
     OP_LOOP_END = auto()

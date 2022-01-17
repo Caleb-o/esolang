@@ -31,6 +31,7 @@ KEYWORDS = {
     'undef'     : TokenType.UNDEF,
     'end'       : TokenType.END,
     'proc'      : TokenType.PROC,
+    'test'      : TokenType.TEST,
     'assert'    : TokenType.ASSERT,
     'rev'       : TokenType.REVERSE,
 }
