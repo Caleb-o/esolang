@@ -13,6 +13,7 @@ SINGLE_CHARS = {
     '.' : TokenType.DOT,
     ',' : TokenType.COMMA,
     '!' : TokenType.BANG,
+    '?' : TokenType.QMARK,
     '&' : TokenType.SWAP,
     '[' : TokenType.LSQUARE,
     ']' : TokenType.RSQUARE,

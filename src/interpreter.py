@@ -134,6 +134,20 @@ class Interpreter:
                     self.error_msg('Break jump point was not set')
 
                 self.cur_op = int(self.get_op())
+            
+            elif operation == ByteCode.OP_INPUT:
+                user_input = input()
+
+                if len(user_input) > 0:
+                    values = user_input.split(' ')
+
+                    for value in values:
+                        # Push value
+                        if value.isdigit():
+                            self.push_value(int(value))
+                        # Push length if string
+                        elif value.isalnum():
+                            self.push_value(len(value))
 
             elif operation == ByteCode.OP_PRINT:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:

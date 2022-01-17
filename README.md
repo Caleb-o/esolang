@@ -42,6 +42,7 @@ Only integers can be created from within the code, so there isn't an easy way to
 - ']' End of a loop
 - `;` (Optional) end of statement
 - `!` invoke macro
+- `?` Prompt user for input
 
 ### Example
 ```
@@ -179,12 +180,33 @@ Eso is a stack based language, that gives you direct access to stack manipulatio
 # stack after [ 1 2 3 4 5 6 ]
 ```
 
+
+### I/O
+IO in Eso is limited, it can only print or prompt via the console. Three operators control io:
+- `.` Print value or string
+- `,` Print character representation of value or ascii value of string chars
+- `?` Promp the user for input, pushing each value to the stack. Strings will be pushed as their length.
+
+### Example
+```
+impl 'std.experimental'
+
+# Prompt user for input
+'Enter values' .
+
+# input 'hello world 10 20'
+? !print-stack
+
+# output 20 10 5 5
+```
+
+
 ### Scopes and Stacks
 Currently there is only one method of creating scopes (which have their own stack) and that's by using procedures. When a procedure is called, a new scope is created and that comes with its own stack. This is so you can start with a fresh stack and not interfere with other values you may not want to modify. Procedures allow for "arguments" which copy values from the previous stack into the procedures' stack.
 
 ### Example
 ```
-# Create a procedure that takes on argument and returns non
+# Create a procedure that takes on argument and returns none
 proc my_proc 1 0;
     # Print and pop the value
     . pop
@@ -224,3 +246,11 @@ end
 # print-stack is a macro from the std experimental
 any_return_proc; !print-stack
 ```
+
+
+## Limitations / Restrictions / Caveats
+- No CLI args passed through
+- No string manipulation/construction
+- No file I/O
+- Procs, like macros, are copied in-place of their call. Meaning the program's final code will be bloated.
+- Only type is an integer (sometimes interpreted as a boolean when using comparison)

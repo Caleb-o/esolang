@@ -21,6 +21,7 @@ class TokenType(Enum):
     COMMA = iota()
     SWAP = iota()
     POP = iota()
+    QMARK = iota()
     DUPLICATE = iota()
     LSQUARE = iota()
     RSQUARE = iota()

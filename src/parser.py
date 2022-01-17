@@ -296,10 +296,10 @@ class Parser:
 
     def statment(self):
         if self.cur_token.ttype == TokenType.NEGATE:
-            self.consume(TokenType.NEGATE)
+            self.consume(self.cur_token.ttype)
 
             if self.cur_token.ttype == TokenType.INT:
-                self.push_byte(ByteCode.OP_NEGATE)
+                self.consume(self.cur_token.ttype)
                 self.expr()
             else:
                 self.error_msg('Cannot negate non int')
@@ -308,12 +308,12 @@ class Parser:
             if not self.is_loop:
                 self.error_msg('Cannot use break outside of a loop')
 
-            self.consume(TokenType.BREAK)
+            self.consume(self.cur_token.ttype)
             self.push_bytes([ ByteCode.OP_BREAK, -1 ])
 
         elif self.cur_token.ttype == TokenType.IF:
             # If condition
-            self.consume(TokenType.IF)
+            self.consume(self.cur_token.ttype)
             self.push_bytes([ ByteCode.OP_IF, -1 ])
             if_next = self.get_current_code_loc() - 1
 
@@ -328,7 +328,7 @@ class Parser:
         
         elif self.cur_token.ttype == TokenType.BANG:
             # Macro call
-            self.consume(TokenType.BANG)
+            self.consume(self.cur_token.ttype)
             macro_name = self.cur_token.lexeme
             self.consume(TokenType.ID)
 
@@ -346,9 +346,9 @@ class Parser:
         elif self.cur_token.ttype == TokenType.ID:
             # Proc call
             proc_name = self.cur_token.lexeme
-            self.consume(TokenType.ID)
+            self.consume(self.cur_token.ttype)
 
-            self.push_bytes([ByteCode.OP_PROC_CALL])
+            self.push_byte(ByteCode.OP_PROC_CALL)
 
             if len(self.current_space) > 0:
                 procedure_name, proc_space = self.current_space[-1]
@@ -364,7 +364,7 @@ class Parser:
 
 
         elif self.cur_token.ttype == TokenType.UNDEF:
-            self.consume(TokenType.UNDEF)
+            self.consume(self.cur_token.ttype)
             macro_name = self.cur_token.lexeme
             self.consume(TokenType.ID)
 
@@ -374,12 +374,12 @@ class Parser:
                 self.error_msg(f'Macro \'{macro_name}\' is not defined or might have been undefined previously {self.cur_token.line}')
         
         elif self.cur_token.ttype == TokenType.PROC:
-            self.consume(TokenType.PROC)
+            self.consume(self.cur_token.ttype)
             self.proc_decl()
 
         elif self.cur_token.ttype == TokenType.MACRO:
             # Macro definition
-            self.consume(TokenType.MACRO)
+            self.consume(self.cur_token.ttype)
             self.macro_decl()
 
         elif self.cur_token.ttype == TokenType.LSQUARE:
@@ -409,17 +409,22 @@ class Parser:
         elif self.cur_token.ttype == TokenType.SWAP:
             # Swap top 2 items on the stack
             self.consume(self.cur_token.ttype)
-            self.push_bytes([ByteCode.OP_SWAP])
+            self.push_byte(ByteCode.OP_SWAP)
         
         elif self.cur_token.ttype == TokenType.DOT:
             # Print the last item on the stack
             self.consume(self.cur_token.ttype)
-            self.push_bytes([ByteCode.OP_PRINT])
+            self.push_byte(ByteCode.OP_PRINT)
+
+        elif self.cur_token.ttype == TokenType.QMARK:
+            # Ask the user for something and put it on the stack
+            self.consume(self.cur_token.ttype)
+            self.push_byte(ByteCode.OP_INPUT)
 
         elif self.cur_token.ttype == TokenType.COMMA:
             # Print the last item on the stack
             self.consume(self.cur_token.ttype)
-            self.push_bytes([ByteCode.OP_PRINT_CHAR])
+            self.push_byte(ByteCode.OP_PRINT_CHAR)
 
         else:
             # Evaluate an expression if no statement matches

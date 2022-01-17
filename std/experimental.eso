@@ -1,8 +1,9 @@
-# Misc
-macro print;    . end
-macro swap;     & end
+# Misc wrappers
+macro print;        . end
+macro print-char;   , end
+macro swap;         & end
  
-# Mathmatical
+# Mathmatical wrappers
 macro add;      + end
 macro sub;      - end
 macro mul;      * end
@@ -31,4 +32,3 @@ macro drop-stack;
     [ pop !swap ]
 	pop
 end
-
