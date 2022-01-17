@@ -13,6 +13,7 @@ class ByteCode(IntEnum):
     OP_LESS = iota()
     OP_GREATER = iota()
     OP_EQUAL_TO = iota()
+    OP_NEGATE = iota()
     OP_IF = iota()
     OP_BREAK = iota()
     OP_PRINT = iota()

@@ -282,7 +282,6 @@ class Parser:
 
                 if depth == 0:
                     while len(loop_break_ip) > 0:
-                        # self.set_code_op_at(loop_break_ip.pop(), ip + 1)
                         self.env.byte_code[loop_break_ip.pop()] = ip
                 
 
@@ -292,7 +291,16 @@ class Parser:
 
 
     def statment(self):
-        if self.cur_token.ttype == TokenType.BREAK:
+        if self.cur_token.ttype == TokenType.NEGATE:
+            self.consume(TokenType.NEGATE)
+
+            if self.cur_token.ttype == TokenType.INT:
+                self.push_byte(ByteCode.OP_NEGATE)
+                self.expr()
+            else:
+                self.error_msg('Cannot negate non int')
+            
+        elif self.cur_token.ttype == TokenType.BREAK:
             if not self.is_loop:
                 self.error_msg('Cannot use break outside of a loop')
 

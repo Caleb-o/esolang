@@ -14,7 +14,7 @@ class Interpreter:
         try:
             op_str = op_as_str(ByteCode(self.env.byte_code[self.cur_op]))
         except:
-            op_str = f'Unknown \'{self.env.byte_code[self.cur_op]}\''
+            op_str = f'Unknown \'{self.cur_op}\''
         raise Exception(f'[Interpreter] {msg} on op <{self.cur_op}:{op_str}>')
 
 
@@ -27,7 +27,10 @@ class Interpreter:
 
 
     def push_constant(self, idx: int):
-        self.env.scopes[self.cur_scope].stack.append(self.env.constants[idx]) 
+        self.env.scopes[self.cur_scope].stack.append(self.env.constants[idx])
+
+    def push_neg_constant(self, idx: int):
+        self.env.scopes[self.cur_scope].stack.append(-self.env.constants[idx])
 
 
     def try_pop(self):
@@ -73,7 +76,11 @@ class Interpreter:
 
             if operation == ByteCode.OP_PUSH:
                 self.cur_op += 1
-                self.push_constant(self.get_op())
+
+                if self.get_op(-2) == ByteCode.OP_NEGATE:
+                    self.push_neg_constant(-int(self.get_op()))
+                else:
+                    self.push_constant(self.get_op())
             elif operation == ByteCode.OP_POP:
                 if len(self.env.scopes[-1].stack) > 0:
                     self.try_pop()
@@ -155,8 +162,7 @@ class Interpreter:
                     self.push_value(val_a)
                     
             elif operation == ByteCode.OP_DUPLICATE:
-                if len(self.env.scopes[-1].stack) > 0:
-                    self.push_value(self.try_peek())
+                self.push_value(self.try_peek())
 
             elif operation == ByteCode.OP_LOOP_END:
                 self.cur_op += 1
@@ -197,11 +203,19 @@ class Interpreter:
                 return_count = self.env.scopes[self.cur_scope-1].stack[-1]
                 self.env.scopes[self.cur_scope-1].stack.pop()
 
-                if len(self.env.scopes[self.cur_scope].stack) < return_count:
-                    self.error_msg(f'{"-" * (self.cur_scope + 4)} Return expected {return_count} argument(s) but got {len(self.env.scopes[self.cur_scope].stack)}')
+                # -1 will define any amount
+                if return_count > -1:
+                    if len(self.env.scopes[self.cur_scope].stack) < return_count:
+                        self.error_msg(f'Return expected {return_count} argument(s) but got {len(self.env.scopes[self.cur_scope].stack)}')
+                    elif len(self.env.scopes[self.cur_scope].stack) > return_count:
+                        self.error_msg(f'Return expected {return_count} argument(s) but got {len(self.env.scopes[self.cur_scope].stack)}')
                 
-                # Add items to stack
-                self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack[:return_count])
+                    # Add items to stack
+                    self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack[-return_count:])
+                else:
+                    # Copy the entire stack
+                    self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack)
+                    
                 self.cur_scope -= 1
                 self.env.scopes.pop()
 
@@ -210,7 +224,7 @@ class Interpreter:
                 # Don't really care for anything here
                 self.cur_op += 1
 
-            elif operation == ByteCode.OP_LOOP_START:
+            elif operation in [ ByteCode.OP_LOOP_START, ByteCode.OP_NEGATE ]:
                 # Don't really care for anything here
                 pass
 
@@ -218,6 +232,11 @@ class Interpreter:
                 self.error_msg(f'Operation not implemented : \'{operation}\'')
             
             self.cur_op += 1
+
+        
+        # Exit contains values on stack
+        if len(self.env.scopes[0].stack) > 0:
+            self.error_msg('Stack is not empty on exit')
 
 
         if debug.DEBUG:

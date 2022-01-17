@@ -28,6 +28,7 @@ class TokenType(Enum):
     UNDEF = iota()
     IF = iota()
     BREAK = iota()
+    NEGATE = iota()
     END = iota()
     EOF = iota()
 

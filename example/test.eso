@@ -3,8 +3,9 @@ impl 'std.experimental'
 # Create a procedure
 proc count_down 1 0;
     'proc_count_down' .
-    [ dup !swap !print 1 !sub ]
-    pop
+    0 !swap
+    [ !print 1 !sub ]
+    pop pop
 end
 
 # Print items in the stack
@@ -44,3 +45,5 @@ end
     'In the if condition!' .
     5 !count-down;
 end
+
+!drop-stack;

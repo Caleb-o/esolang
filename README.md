@@ -61,6 +61,7 @@ Only integers can be created from within the code, so there isn't an easy way to
 - `undef` Undefines a proc
 - `end` End of a if/proc/macro block
 - `impl` Import statement
+- `break` exit out of a loop
 
 ### Example
 ```
@@ -164,3 +165,44 @@ end
 *Note: The std and examples are written in a mixture of both styles, depending on context.*
 
 **The repl currently only works using a single line, entering code will evaluate that single line and will forget previous entries.*
+
+
+## How it Works
+Eso is a stack based language, that gives you direct access to stack manipulation. Every operation directly pushes to or pops from the stack. A series of numbers will add that value directly to the stack. This also includes operations like `+ - * /` and comparison with `> < =`.
+
+*Note: The only value that never touches the stack is a string literal, it is stored in global space.*
+### Example
+```
+# stack before []
+1 2 3 4 5 6
+# stack after [ 1 2 3 4 5 6 ]
+```
+
+### Scopes and Stacks
+Currently there is only one method of creating scopes (which have their own stack) and that's by using procedures. When a procedure is called, a new scope is created and that comes with its own stack. This is so you can start with a fresh stack and not interfere with other values you may not want to modify. Procedures allow for "arguments" which copy values from the previous stack into the procedures' stack.
+
+### Example
+```
+# Create a procedure that takes on argument and returns non
+proc my_proc 1 0;
+    # Print and pop the value
+    . pop
+end
+
+# Push 10 onto the stack and call my_proc
+# 10 will be copied into the procedure
+10 my_proc
+```
+
+A procedure can also return values from its stack, which works the same way as arguments. As soon as the procedure ends, it will copy N number of values back into the previous stack.
+
+### Example
+```
+# Create a procedure that takes one argument and returns one
+proc plus_one 1 1;
+    1 +
+end
+
+# Pass 20 to plus_one and print return value
+20 plus_one .
+```

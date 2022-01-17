@@ -1,6 +1,7 @@
 # Misc
 macro print;    . end
 macro swap;     & end
+macro any;  neg 1 end
 
 # Mathmatical
 macro add;      + end
@@ -24,3 +25,11 @@ macro print-stack;
     [ !print pop !swap ]
 	pop
 end
+
+# Drops all values on the stack
+macro drop-stack;
+    0 !swap
+    [ pop !swap ]
+	pop
+end
+
