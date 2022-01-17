@@ -35,6 +35,7 @@ class Parser:
         self.cur_token = self.lexer.get_next()
         self.env: Environment = Environment([], [], [], [])
 
+        self.is_loop = False
         # Better handling of spaces (eg. Global, Macro or Proc)
         self.current_space: list[tuple[str, SpaceType]] = [ ('global', SpaceType.GLOBAL) ]
         self.current_space_code: dict[tuple[str, SpaceType], list[ByteCode]] = { ('global', SpaceType.GLOBAL): [] }
@@ -277,33 +278,24 @@ class Parser:
 
             elif operation == ByteCode.OP_LOOP_END:
                 ip += 1
+                depth -= 1
 
                 if depth == 0:
-                    if len(loop_break_ip) > 0:
+                    while len(loop_break_ip) > 0:
+                        # self.set_code_op_at(loop_break_ip.pop(), ip + 1)
                         self.env.byte_code[loop_break_ip.pop()] = ip
                 
-                depth -= 1
 
             ip += 1
         
-        if len(loop_break_ip) > 0:
-            print(f'Removing {len(loop_break_ip)} breaks')
-            # Remove break token, it might be in the wrong place
-
-            idx = loop_break_ip[0] - 1
-
-            # TODO: Try to remove these bad boys. Removing causes issues rn.
-
-            while idx < loop_break_ip[-1]:
-                if self.env.byte_code[idx] == ByteCode.OP_BREAK and self.env.byte_code[idx + 1] == -1:
-                    self.env.byte_code[idx + 1] = idx + 1
-
-                idx += 1
-                
+        assert len(loop_break_ip) == 0, 'Undetermined loop break'
 
 
     def statment(self):
         if self.cur_token.ttype == TokenType.BREAK:
+            if not self.is_loop:
+                self.error_msg('Cannot use break outside of a loop')
+
             self.consume(TokenType.BREAK)
             self.push_bytes([ ByteCode.OP_BREAK, -1 ])
 
@@ -384,11 +376,13 @@ class Parser:
             self.push_bytes([ByteCode.OP_LOOP_START])
 
             loop_start = self.get_current_code_loc()
+            self.is_loop = True
             
             while self.cur_token.ttype != TokenType.RSQUARE:
                 self.statment()
 
             loop_end = self.get_current_code_loc()
+            self.is_loop = False
 
             # Check if empty
             if loop_start == loop_end:

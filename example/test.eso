@@ -3,7 +3,7 @@ impl 'std.experimental'
 # Create a procedure
 proc count_down 1 0;
     'proc_count_down' .
-    [ !print 1 !sub ]
+    [ dup !swap !print 1 !sub ]
     pop
 end
 
@@ -18,13 +18,13 @@ end
 # String literal and print
 'hello world' .
 
-break break
-
 # If condition within a loop
 'starting loop...' .
 30 [ 
-    . 1 - dup 25
-    > if
+    . 1 - 
+    # 25 > value on stack?
+    dup 25 > if
+        pop
         # Break if condition is true
         'breaking' .
 	break 

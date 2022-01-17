@@ -7,8 +7,8 @@ def main():
     argv_len = len(sys.argv)
 
     # Assign debugging values
-    debug.DEBUG = True
-    debug.IGNORE_OUTPUT = True
+    debug.DEBUG = False
+    debug.IGNORE_OUTPUT = False
     debug.op_max = 0
 
     # Try to parse argv
@@ -33,7 +33,7 @@ def main():
             
             interpreter.interpret()
         except Exception as e:
-            print(e.message)
+            print(e)
     else:
         print('usage: lang [file]')
 
