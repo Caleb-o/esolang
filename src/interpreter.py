@@ -15,7 +15,11 @@ class Interpreter:
             op_str = op_as_str(ByteCode(self.env.byte_code[self.cur_op]))
         except:
             op_str = f'Unknown \'{self.cur_op}\''
-        raise Exception(f'[Interpreter] {msg} on op <{self.cur_op}:{op_str}>')
+
+        if self.cur_op < len(self.env.byte_code):
+            raise Exception(f'[Interpreter] {msg} on op <{self.cur_op}:{op_str}>')
+        else:
+            raise Exception(f'[Interpreter] {msg}')
 
 
     def get_op(self, idx: int = 0) -> ByteCode:
@@ -251,6 +255,7 @@ class Interpreter:
         
         # Exit contains values on stack
         if len(self.env.scopes[0].stack) > 0:
+            print(f'stack :: {self.env.scopes[0].stack}')
             self.error_msg('Stack is not empty on exit')
 
 

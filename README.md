@@ -169,6 +169,18 @@ end
 **The repl currently only works using a single line, entering code will evaluate that single line and will forget previous entries.*
 
 
+### Naming conventions
+This is totally up to you! Since the only things you can name are procedures and macros, I just recommend using a different scheme so you don't mix them up. This is how the std is written:
+
+```
+# A macro convention
+macro my-macro; end
+
+# A proc convention
+proc my_proc 0 0; end
+```
+
+
 ## How it Works
 Eso is a stack based language, that gives you direct access to stack manipulation. Every operation directly pushes to or pops from the stack. A series of numbers will add that value directly to the stack. This also includes operations like `+ - * /` and comparison with `> < =`.
 
@@ -255,3 +267,4 @@ any_return_proc; !print-stack
 - Procs, like macros, are copied in-place of their call. Meaning the program's final code will be bloated.
 - Only type is an integer (sometimes interpreted as a boolean when using comparison)
 - Imports are relative to the interpreter, so a local import might cause an error because it may not exist relative to the interpreter.
+- No namespacing. Importing a file may cause conflicts with other files. I hope you're good at unique names and/or undefining macros when not in use :^)

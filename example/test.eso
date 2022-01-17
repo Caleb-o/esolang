@@ -1,4 +1,5 @@
 impl 'std.experimental'
 
+# Prompt for input
 'Enter values:' . ?
-!print-stack
+!ramp-input

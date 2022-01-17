@@ -32,3 +32,10 @@ macro drop-stack;
     [ pop !swap ]
 	pop
 end
+
+# Take input and print 0 -> N -> 0
+# eg. 1 2 3 = 1 2 3 2 1
+macro ramp-input;
+    !count-down
+    !print-stack
+end
