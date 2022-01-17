@@ -37,9 +37,9 @@ Only integers can be created from within the code, so there isn't an easy way to
 - `= < >` Comparison
 - `.` Print current value on stack / Print string
 - `,` Print current value on stack as a char / Print string as ascii codes
-- '&' Swaps the top two numbers on the stack
-- '[' Start of a loop
-- ']' End of a loop
+- `&` Swaps the top two numbers on the stack
+- `[` Start of a loop
+- `]` End of a loop
 - `;` (Optional) end of statement
 - `!` invoke macro
 - `?` Prompt user for input
@@ -63,8 +63,8 @@ Only integers can be created from within the code, so there isn't an easy way to
 - `end` End of a if/proc/macro block
 - `impl` Import statement
 - `break` exit out of a loop
-- 'neg' negate the next value
-- 'assert' cause an assertion if value is 0
+- `neg` negate the next value
+- `assert` cause an assertion if value is 0
 
 ### Example
 ```
@@ -145,9 +145,9 @@ As any good language should have, Eso supports assertions. An assertion raises a
 # Push 10
 10
 
-# Check if 10 is bigger than 20
+# Check if 10 is smaller than 20
 # We duplicate here, since we consume both values and may want to use 10 later
-dup 20 > assert '10 is bigger than 20'
+dup 20 < assert '10 is bigger than 20'
 
 # Assert passed, print 10
 . pop
@@ -224,7 +224,7 @@ impl 'std.experimental'
 'Enter values' .
 
 # input 'hello world 10 20'
-? !print-stack
+? !print-stack-drop
 
 # output 20 10 5 5
 ```
@@ -273,7 +273,7 @@ end
 
 # Call our return proc and print values returned
 # print-stack is a macro from the std experimental
-any_return_proc; !print-stack
+any_return_proc; !print-stack-drop
 ```
 
 

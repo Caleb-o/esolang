@@ -175,7 +175,7 @@ class Interpreter:
                     if self.peek_op_is_type(-2, ByteCode.OP_STR) and not self.peek_op_is_type(-3, ByteCode.OP_ASSERT):
                         print(self.env.strings[self.get_op(-1)], end='')
                     else:
-                        print(self.try_peek(), end='')
+                        print(f'{self.try_peek()} ', end='')
 
             elif operation == ByteCode.OP_PRINT_CHAR:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:

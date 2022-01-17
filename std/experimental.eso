@@ -26,7 +26,7 @@ macro square;   dup * end
 #		used when debugging
 macro print-stack-drop;
     0 !swap
-    [ !print ' ' . pop !swap ]
+    [ !print pop !swap ]
     pop
 end
 
