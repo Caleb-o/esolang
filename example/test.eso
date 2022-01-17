@@ -1,49 +1,7 @@
 impl 'std.experimental'
 
-# Create a procedure
-proc count_down 1 0;
-    'proc_count_down' .
-    0 !swap
-    [ !print 1 !sub ]
-    pop pop
+proc my_proc 1;
+    
 end
 
-# Print items in the stack
-10 20 30 !print-stack;
-
-# Count down from 5 using a macro
-5 !count-down;
-# Count down from 5 using a procedure
-5 count_down;
-
-# String literal and print
-'hello world' .
-
-# If condition within a loop
-'starting loop...' .
-30 [ 
-    . 1 - 
-    # 25 > value on stack?
-    dup 25 > if
-        pop
-        # Break if condition is true
-        'breaking 1' .
-	    break
-    end
-
-    # 28 > value on stack?
-    dup 28 > if
-        pop
-        # Break if condition is true
-        'breaking 2' .
-	    break
-    end
-] 'end of loop' .
-
-# Simple condition (1 == 1)
-1 1 = if
-    'In the if condition!' .
-    5 !count-down;
-end
-
-!drop-stack;
+10 my_proc; !print-stack

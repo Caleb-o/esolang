@@ -1,8 +1,7 @@
 # Misc
 macro print;    . end
 macro swap;     & end
-macro any;  neg 1 end
-
+ 
 # Mathmatical
 macro add;      + end
 macro sub;      - end
@@ -12,7 +11,7 @@ macro div;      / end
 # Count down from current number on the stack and fill the stack
 # with descending numbers
 macro count-down; 
-    [ dup !swap !print 1 !sub ]
+    [ dup !swap 1 !sub ]
     pop
 end
 

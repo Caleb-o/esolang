@@ -33,7 +33,7 @@ def main():
             
             interpreter.interpret()
         except Exception as e:
-            print(e)
+            print(e.message)
     else:
         print('usage: lang [file]')
 

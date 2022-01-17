@@ -189,8 +189,12 @@ class Parser:
         self.consume(TokenType.ID)
         arg_count = int(self.cur_token.lexeme)
         self.consume(TokenType.INT)
-        return_count = int(self.cur_token.lexeme)
-        self.consume(TokenType.INT)
+        return_count = -1
+
+        if self.cur_token.ttype == TokenType.INT:
+            return_count = int(self.cur_token.lexeme)
+            self.consume(TokenType.INT)
+        
         self.consume(TokenType.SEMICOLON)
 
         if (proc_name, SpaceType.PROC) in self.current_space:
