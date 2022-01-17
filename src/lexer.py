@@ -103,14 +103,35 @@ class Lexer:
         start_pos = self.ip
         start_col = self.col
 
+        # Ol reliable
+        result = ''
+
         while self.cur_char != '\0' and self.cur_char != '\'':
-            self.col += 1
-            self.advance()
+            # Check for escapes
+            if self.cur_char == '\\':
+                self.advance()
+
+                if self.cur_char == 'n':
+                    result += '\n'
+                    self.advance()
+                elif self.cur_char == 't':
+                    result += '\t'
+                    self.advance()
+                elif self.cur_char == 'b':
+                    result += '\b'
+                    self.advance()
+                elif self.cur_char == 'r':
+                    result += '\r'
+                    self.advance()
+            else:
+                result += self.cur_char
+                self.col += 1
+                self.advance()
         
         self.col += 1
         self.advance()
 
-        return Token(self.line, start_col, TokenType.STR, self.source[start_pos:self.ip-1])
+        return Token(self.line, start_col, TokenType.STR, result)
     
 
     def make_number(self) -> Token:

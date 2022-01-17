@@ -303,7 +303,7 @@ class Parser:
             self.consume(self.cur_token.ttype)
 
             if self.cur_token.ttype == TokenType.INT:
-                self.consume(self.cur_token.ttype)
+                self.push_byte(ByteCode.OP_NEGATE)
                 self.expr()
             else:
                 self.error_msg('Cannot negate non int')

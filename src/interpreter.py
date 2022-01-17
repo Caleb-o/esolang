@@ -20,6 +20,10 @@ class Interpreter:
             raise Exception(f'[Interpreter] {msg} on op <{self.cur_op}:{op_str}>')
         else:
             raise Exception(f'[Interpreter] {msg}')
+    
+
+    def assertion(self, msg):
+        raise Exception(f'Assertion Failed: {msg}')
 
 
     def get_op(self, idx: int = 0) -> ByteCode:
@@ -85,7 +89,7 @@ class Interpreter:
                 self.cur_op += 1
 
                 if self.get_op(-2) == ByteCode.OP_NEGATE:
-                    self.push_neg_constant(-int(self.get_op()))
+                    self.push_neg_constant(self.get_op())
                 else:
                     self.push_constant(self.get_op())
             elif operation == ByteCode.OP_POP:
@@ -161,9 +165,9 @@ class Interpreter:
                     # Currently strings can only be print from constants/literals,
                     # Since strings cannot be constructed
                     if self.peek_op_is_type(-2, ByteCode.OP_STR) and not self.peek_op_is_type(-3, ByteCode.OP_ASSERT):
-                        print(self.env.strings[self.get_op(-1)])
+                        print(self.env.strings[self.get_op(-1)], end='')
                     else:
-                        print(self.try_peek())
+                        print(self.try_peek(), end='')
 
             elif operation == ByteCode.OP_PRINT_CHAR:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
@@ -245,7 +249,7 @@ class Interpreter:
                 self.cur_op += 1
 
                 if condition == 0:
-                    self.error_msg(f'{self.env.strings[self.get_op(1)]}')
+                    self.assertion(f'{self.env.strings[self.get_op(1)]}')
                 else:
                     self.cur_op += 1
 

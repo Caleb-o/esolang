@@ -1,3 +1,4 @@
+from math import sin
 import sys, debug
 from parser import Parser
 from interpreter import Interpreter
@@ -8,7 +9,7 @@ def main():
 
     # Assign debugging values
     debug.DEBUG = False
-    debug.IGNORE_OUTPUT = True
+    debug.IGNORE_OUTPUT = False
     debug.op_max = 0
 
     # Try to parse argv

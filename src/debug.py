@@ -56,7 +56,7 @@ def print_env(env: Environment):
 
         elif op == ByteCode.OP_STR:
             val_idx = get_code(idx + 1)
-            value = env.strings[val_idx]
+            value = env.strings[val_idx].replace('\n', ' ').replace('\t', ' ')
             idx += 1
             print(f'{op_as_str(op)}<value: "{value}", at: {val_idx}>')
 
