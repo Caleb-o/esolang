@@ -1,7 +1,8 @@
 impl 'std.experimental'
 
-proc my_proc 1;
-    
+proc my_proc 1 0;
+    # Print and pop the value
+    . pop
 end
 
-10 my_proc; !print-stack
+10 my_proc; pop

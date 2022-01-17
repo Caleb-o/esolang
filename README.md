@@ -62,6 +62,7 @@ Only integers can be created from within the code, so there isn't an easy way to
 - `end` End of a if/proc/macro block
 - `impl` Import statement
 - `break` exit out of a loop
+- 'neg' negate the next value
 
 ### Example
 ```
@@ -191,7 +192,7 @@ end
 
 # Push 10 onto the stack and call my_proc
 # 10 will be copied into the procedure
-10 my_proc
+10 my_proc pop
 ```
 
 A procedure can also return values from its stack, which works the same way as arguments. As soon as the procedure ends, it will copy N number of values back into the previous stack.
@@ -204,5 +205,22 @@ proc plus_one 1 1;
 end
 
 # Pass 20 to plus_one and print return value
-20 plus_one .
+20 plus_one . pop
+```
+
+A stack is required to be empty, or the size of the return count (if a procedure). This means the interpreter will throw an error if the stack size is incorrect. If a proc requires an argument or set of arguments, the stack must contain that many values. This is the same for return count of procedures. However, Eso supports returning any number of arguments if a return count is not provided. Since procedure declarations don't support expressions or statements within the argument/return count, this gives the programmer a little more control.
+
+*Note: An empty argument count is also being considered, but is not currently implemented*
+
+### Example
+```
+impl 'std.experimental'
+
+proc any_return_proc 0;
+    1 2 3 4 5 6 7 8 9 10
+end
+
+# Call our return proc and print values returned
+# print-stack is a macro from the std experimental
+any_return_proc; !print-stack
 ```
