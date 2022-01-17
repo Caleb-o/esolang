@@ -8,7 +8,7 @@ def main():
 
     # Assign debugging values
     debug.DEBUG = False
-    debug.IGNORE_OUTPUT = False
+    debug.IGNORE_OUTPUT = True
     debug.op_max = 0
 
     # Try to parse argv

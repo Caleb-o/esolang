@@ -26,8 +26,16 @@ end
     dup 25 > if
         pop
         # Break if condition is true
-        'breaking' .
-	break 
+        'breaking 1' .
+	    break
+    end
+
+    # 28 > value on stack?
+    dup 28 > if
+        pop
+        # Break if condition is true
+        'breaking 2' .
+	    break
     end
 ] 'end of loop' .
 
