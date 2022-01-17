@@ -1,0 +1,26 @@
+# Nesting procedures
+proc my_proc 0 0;
+    proc my_second_proc 0 0;
+        '2nd proc' .
+    end
+
+    '1st proc' .
+
+    my_second_proc;
+end
+
+# Nesting macros
+macro my-macro;
+    macro my-second-macro;
+        '2nd macro' .
+    end
+
+    '1st macro' .
+    !my-second-macro
+end
+
+# Because of how Eso works, all procedures/macros are globally namespaced
+# So that allows us to call nested procs/macros
+my_second_proc; my_proc;
+
+!my-second-macro; !my-macro;

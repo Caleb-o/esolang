@@ -1,9 +1,14 @@
-# Push 10
-10
+impl 'std.experimental'
 
-# Check if 10 is bigger than 20
-# We duplicate here, since we consume both values and may want to use 10 later
-dup 20 > assert '10 is bigger than 20'
+proc my_proc 0 0;
+    proc kek_proc 0 0;
+        'kek' .
+    end
 
-# Assert passed, print 10
-. pop
+    'my proc' .
+
+    kek_proc;
+end
+
+kek_proc;
+my_proc;

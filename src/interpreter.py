@@ -63,6 +63,9 @@ class Interpreter:
         debug.print_env(self.env)
         debug.reset_debug()
 
+        if debug.DEBUG and not debug.IGNORE_OUTPUT:
+            print('\n=== Output ===')
+
         while self.cur_op < len(self.env.byte_code):
             operation = self.get_op()
 
@@ -264,12 +267,12 @@ class Interpreter:
         
         # Exit contains values on stack
         if len(self.env.scopes[0].stack) > 0:
-            print(f'stack :: {self.env.scopes[0].stack}')
+            print(f'\nstack :: {self.env.scopes[0].stack}')
             self.error_msg('Stack is not empty on exit')
 
 
         if debug.DEBUG:
-            print(f'stack :: {self.env.scopes[0].stack}')
+            print(f'\nstack :: {self.env.scopes[0].stack}')
             
             print()
             debug.print_debug_symbols()
