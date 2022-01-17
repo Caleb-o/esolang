@@ -16,6 +16,15 @@ macro count-down;
     pop
 end
 
+# Count up from current number on the stack and fill the stack
+# with ascending numbers
+macro count-up;
+    !count-down
+    1
+    [ 1 - ]
+	pop
+end
+
 # Print out every item on the stack
 # Can be used to print items provided in a proc
 # Note: This macro pops items from the stack, so it should only be 
@@ -35,7 +44,7 @@ end
 
 # Take input and print 0 -> N -> 0
 # eg. 1 2 3 = 1 2 3 2 1
-macro ramp-input;
+macro ramp-input-print;
     !count-down
     !print-stack
 end
