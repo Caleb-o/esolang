@@ -35,7 +35,5 @@ test 'Negation';
     10 neg 10 * neg 100 = assert '10*-10 didnt equal -100'
 end
 
-1 +
-
 '\n=== Summary ===\n' .
-1 - . 'tests passed ' . pop
+. 'tests passed ' . pop

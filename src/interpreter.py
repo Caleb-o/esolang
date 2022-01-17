@@ -29,7 +29,7 @@ class Interpreter:
 
     def assertion(self, msg):
         print(self.env.scopes[-1].stack)
-        raise Exception(f'Assertion Failed: {msg}')
+        raise Exception(f'Assertion Failed: {msg}' if not self.in_test else f'[Test "{self.env.test_names[self.test_counter]}"] Assertion Failed{msg}')
 
 
     def get_op(self, idx: int = 0) -> ByteCode:
@@ -275,7 +275,7 @@ class Interpreter:
 
                 if self.in_test:
                     self.in_test = False
-                    print(f'{self.env.test_names[self.test_counter]} passed!')
+                    print(f'"{self.env.test_names[self.test_counter]}" passed!')
             
             elif operation == ByteCode.OP_ASSERT:
                 condition = self.try_pop()
