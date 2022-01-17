@@ -254,3 +254,4 @@ any_return_proc; !print-stack
 - No file I/O
 - Procs, like macros, are copied in-place of their call. Meaning the program's final code will be bloated.
 - Only type is an integer (sometimes interpreted as a boolean when using comparison)
+- Imports are relative to the interpreter, so a local import might cause an error because it may not exist relative to the interpreter.
