@@ -278,6 +278,7 @@ any_return_proc; !print-stack
 
 
 ## Limitations / Restrictions / Caveats
+- This is a toy language and wasn't meant to get as big as it is now. A lot has been hacked on or rewritten to support new features.
 - No CLI args passed through
 - No string manipulation/construction
 - No file I/O
@@ -285,3 +286,5 @@ any_return_proc; !print-stack
 - Only type is an integer (sometimes interpreted as a boolean when using comparison)
 - Imports are relative to the interpreter, so a local import might cause an error because it may not exist relative to the interpreter.
 - No namespacing. Importing a file may cause conflicts with other files. I hope you're good at unique names and/or undefining macros when not in use :^)
+- The conditional if only has a true body, you must evaluate again in another if with the opposite value to get the false body
+- Bad structure doesn't allow for too much expansion on the language, without rewrites.
