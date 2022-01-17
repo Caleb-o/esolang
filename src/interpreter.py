@@ -235,7 +235,6 @@ class Interpreter:
                     self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack[-return_count:])
                 else:
                     # Copy the entire stack
-                    self.env.scopes[self.cur_scope].stack.reverse()
                     self.env.scopes[self.cur_scope - 1].stack.extend(self.env.scopes[self.cur_scope].stack)
                     
                 self.cur_scope -= 1

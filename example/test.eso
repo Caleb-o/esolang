@@ -1,14 +1,4 @@
 impl 'std.experimental'
 
-proc my_proc 0 0;
-    proc kek_proc 0 0;
-        'kek' .
-    end
-
-    'my proc' .
-
-    kek_proc;
-end
-
-kek_proc;
-my_proc;
+4 !square; .
+3 !square; .
