@@ -95,18 +95,22 @@ class Interpreter:
             elif operation == ByteCode.OP_POP:
                 if len(self.env.scopes[-1].stack) > 0:
                     self.try_pop()
+
             elif operation == ByteCode.OP_ADD:
                 val_b = self.try_pop()
                 val_a = self.try_pop()
                 self.push_value(val_a + val_b)
+
             elif operation == ByteCode.OP_SUB:
                 val_b = self.try_pop()
                 val_a = self.try_pop()
                 self.push_value(val_a - val_b)
+
             elif operation == ByteCode.OP_MUL:
                 val_b = self.try_pop()
                 val_a = self.try_pop()
                 self.push_value(val_a * val_b)
+
             elif operation == ByteCode.OP_DIV:
                 val_b = self.try_pop()
                 val_a = self.try_pop()
@@ -118,12 +122,12 @@ class Interpreter:
             elif operation == ByteCode.OP_GREATER:
                 val_b = self.try_pop()
                 val_a = self.try_pop()
-                self.push_value(int(val_b > val_a))
+                self.push_value(int(val_a > val_b))
             
             elif operation == ByteCode.OP_LESS:
                 val_b = self.try_pop()
                 val_a = self.try_pop()
-                self.push_value(int(val_b < val_a))
+                self.push_value(int(val_a < val_b))
             
             elif operation == ByteCode.OP_EQUAL_TO:
                 val_b = self.try_pop()
@@ -148,6 +152,7 @@ class Interpreter:
             
             elif operation == ByteCode.OP_INPUT:
                 user_input = input()
+                value_count = len(user_input)
 
                 if len(user_input) > 0:
                     values = user_input.split(' ')
@@ -158,7 +163,10 @@ class Interpreter:
                             self.push_value(int(value))
                         # Push length if string
                         elif value.isalnum():
-                            self.push_value(len(value))
+                            [self.push_value(ord(c)) for c in value]
+
+                # Push amount of values on the stack
+                self.push_value(value_count)
 
             elif operation == ByteCode.OP_PRINT:
                 if not debug.DEBUG or debug.DEBUG and not debug.IGNORE_OUTPUT:
@@ -189,6 +197,17 @@ class Interpreter:
             elif operation == ByteCode.OP_DUPLICATE:
                 self.push_value(self.try_peek())
 
+            elif operation == ByteCode.OP_REVERSE:
+                value_count = self.try_pop()
+
+                values = []
+
+                for _ in range(value_count):
+                    values.append(self.try_pop())
+                
+                for value in values:
+                    self.push_value(value)
+
             elif operation == ByteCode.OP_LOOP_END:
                 self.cur_op += 1
 
@@ -199,6 +218,7 @@ class Interpreter:
                 # Go back to the start
                 if len(self.env.scopes[-1].stack) > 0 and self.try_peek() > 0:
                     self.cur_op = int(self.get_op())
+
             elif operation == ByteCode.OP_PROC_CALL:
                 self.cur_op += 1
                 arg_count = int(self.get_op())
@@ -223,6 +243,7 @@ class Interpreter:
                 self.env.scopes[self.cur_scope].stack.append(return_count)
 
                 self.cur_scope += 1
+
             elif operation == ByteCode.OP_RETURN:            
                 # Get return value from previous stack and remove it    
                 return_count = self.env.scopes[self.cur_scope-1].stack[-1]

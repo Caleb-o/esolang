@@ -32,6 +32,7 @@ class TokenType(Enum):
     BREAK = auto()
     NEGATE = auto()
     END = auto()
+    REVERSE = auto()
     EOF = auto()
 
 

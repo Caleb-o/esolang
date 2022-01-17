@@ -277,6 +277,9 @@ class Parser:
             elif operation in [ ByteCode.OP_PROC_CALL ]:
                 ip += 2
 
+            elif operation == ByteCode.OP_ASSERT:
+                ip += 3
+
             elif operation == ByteCode.OP_BREAK:
                 ip += 1
                 loop_break_ip.append(ip)
@@ -294,8 +297,6 @@ class Parser:
                 
 
             ip += 1
-        
-        assert len(loop_break_ip) == 0, 'Undetermined loop break'
 
 
     def statment(self):
@@ -419,6 +420,10 @@ class Parser:
             # Swap top 2 items on the stack
             self.consume(self.cur_token.ttype)
             self.push_byte(ByteCode.OP_SWAP)
+        
+        elif self.cur_token.ttype == TokenType.REVERSE:
+            self.consume(self.cur_token.ttype)
+            self.push_byte(ByteCode.OP_REVERSE)
         
         elif self.cur_token.ttype == TokenType.DOT:
             # Print the last item on the stack

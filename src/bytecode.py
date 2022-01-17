@@ -26,6 +26,7 @@ class ByteCode(IntEnum):
     OP_LOOP_END = auto()
     OP_RETURN = auto()
     OP_ASSERT = auto()
+    OP_REVERSE = auto()
 
 
 def op_as_str(op: ByteCode) -> str:

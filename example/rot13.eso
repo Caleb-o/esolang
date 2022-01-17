@@ -1,0 +1,17 @@
+# Rot13
+'input string: ' . ?
+
+# Nothing entered
+dup 0 = if
+    pop
+    'Please enter a string' .
+end
+
+# Values were entered
+dup 0 > if
+    # Reverse the string using input count
+    rev
+
+    # Print values +13
+    'rot13: "' . [ dup 64 > if dup 123 < if 13 + , end end pop ] '"' .
+end

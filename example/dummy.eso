@@ -1,3 +1,0 @@
-'10*-10 test...\t' . 10 neg 10 * neg 100 = if
-    'true' .
-end

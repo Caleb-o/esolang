@@ -32,6 +32,7 @@ KEYWORDS = {
     'end'       : TokenType.END,
     'proc'      : TokenType.PROC,
     'assert'    : TokenType.ASSERT,
+    'rev'       : TokenType.REVERSE,
 }
 
 

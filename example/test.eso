@@ -1,20 +1,26 @@
 impl 'std.experimental'
 
 # Amount of passing tests
-0
+1
 
 '=== Eso Testing ===\n' .
 
+# Comparisons
+. ' => '. '1 2 > test...\t\t' . 1 2 > 0 = assert '1>2 didnt equal 1' 1 + 'passed\n' .
+
 # Testing square
-'4^2 test...\t' . 4 !square 16  = assert '4^2 didnt equal 16' 1 + 'passed\n' .
-'3^2 test...\t' . 3 !square 9   = assert '3^2 didnt equal 9'  1 + 'passed\n' .
+. ' => '. '4^2 test...\t\t' . 4 !square 16  = assert '4^2 didnt equal 16' 1 + 'passed\n' .
+. ' => '. '3^2 test...\t\t' . 3 !square 9   = assert '3^2 didnt equal 9'  1 + 'passed\n' .
+
+# Reverse
+. ' => '. '1 2 2 rev test...\t\t' . 1 2 2 rev 1 = assert '1 2 2 rev didnt equal 1' pop  1 + 'passed\n' .
 
 # Double
-'10*2 test...\t' . 10 double 20     = assert '10*2 didnt equal 20'  1 + 'passed\n' .
+. ' => '. '10 2 * test...\t\t' . 10 double 20 = assert '10*2 didnt equal 20' 1 + 'passed\n' .
 
 # Negation
-'10*-10 test...\t' . 10 neg 10 * neg 100 = assert '10*-10 didnt equal -100'  1 + 'passed\n' .
+. ' => '. '10 neg 10 * test...\t' . 10 neg 10 * neg 100 = assert '10*-10 didnt equal -100'  1 + 'passed\n' .
 
 
 '\n=== Summary ===\n' .
-. ' tests passed ' . pop
+1 - . ' tests passed ' . pop

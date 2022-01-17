@@ -214,7 +214,7 @@ Eso is a stack based language, that gives you direct access to stack manipulatio
 IO in Eso is limited, it can only print or prompt via the console. Three operators control io:
 - `.` Print value or string
 - `,` Print character representation of value or ascii value of string chars
-- `?` Promp the user for input, pushing each value to the stack. Strings will be pushed as their length.
+- `?` Promp the user for input, pushing each value to the stack. Strings will be pushed in ascii form per character.
 
 ### Example
 ```

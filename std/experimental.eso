@@ -26,7 +26,7 @@ macro square;   dup * end
 #		used when debugging
 macro print-stack-drop;
     0 !swap
-    [ !print pop !swap ]
+    [ !print ' ' . pop !swap ]
     pop
 end
 
@@ -63,6 +63,13 @@ end
 # Take input and print N-1 -> 0 -> N
 # eg. 4 = 3 2 1 0 1 2 3 4
 proc slope_input_print 1 0;
-    [ dup 1 - . ] 1 -  pop
+    [ dup 1 - . ' ' . ] 1 -  pop
+    !print-stack-drop
+end
+
+# Take input and print N-1 -> 0 -> N
+# eg. 4 = 3 2 1 0 1 2 3 4
+proc slope_input 1 0;
+    [ dup 1 - ] 1 -  pop
     !print-stack-drop
 end
