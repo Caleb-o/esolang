@@ -1,4 +1,4 @@
-user defined structs:
+User defined structs:
 - They will have to be registered as a TYPEID, so they can be used
 
 
@@ -21,8 +21,8 @@ Converting:
 	- Can also use to swap the current type on the stack. eg. 
 	  int -> string
 	- Optional ID to bind it to a name after converting
-	
-	
+
+
 Procedure:
 - All parameters will be bound, which will be moved off the stack
   and put into the proecdures scope

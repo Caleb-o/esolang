@@ -1,5 +1,5 @@
 # Import std experimental library
-import 'std.experimental'
+using 'std.experimental'
 
 
 # This is a struct definition
@@ -44,11 +44,10 @@ proc return_multiple(a, b, c : int) -> int, int, int {
 	ret
 }
 
-
 proc main() {
 	1 2 3
 	'Hello'
-	test
+	!test
 
 	# Print result
 	print pop

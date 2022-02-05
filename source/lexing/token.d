@@ -3,10 +3,18 @@ module lexing.token;
 import std.stdio : writefln;
 
 final enum Kind : uint {
+	// Operators
 	PLUS, MINUS, SLASH, STAR, SEMICOLON, COLON,
-	FUNCTION_DECL, PRINT, PRINTLN, EQUAL,
+	ARROW,  EQUAL, BANG, GREATER, LESS_THAN,
 	COMMA, DOT, LCURLY, RCURLY, LBRACKET, RBRACKET,
+	
+	// Keywords
+	PROC, IF, ELIF, ELSE, POP, BIND, BIND_MOVE, PRINT, PRINTLN,
+	DUP, SWAP, INPUT, ASSERT, USING, STRUCT,
 
+	FUNCTION_DECL,
+
+	// Types
 	BOOL, INT, FLOAT, STRING, ID, TYPEID,
 
 	EOF,
@@ -29,14 +37,17 @@ class Token {
 
 	void print() {
 		switch(kind) {
-			case Kind.PLUS: .. case Kind.RBRACKET:
+			// Singles
+			case Kind.PLUS: .. case Kind.STRUCT:
 				writefln("%s", kind);
 				break;
 
-			case Kind.INT: .. case Kind.FLOAT:
+			// Types + value
+			case Kind.BOOL: .. case Kind.FLOAT:
 				writefln("%s(%s)", kind, lexeme);
 				break;
 
+			// Named / Strings
 			default:
 				// String/Named types
 				writefln("%s('%s')", kind, lexeme);

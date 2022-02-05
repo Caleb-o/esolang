@@ -6,6 +6,20 @@ Simple esolang written in Python
 This is a bytecode interpreted, stack-based language that I've written in Python. I have been reading about and exploring new languages, so I decided that I would like to develop one of my own. Initially, it was going to be something similar to BrainF*ck but using numbers and words to have a better visualisation. I came across Tsoding's Porth language, which is also a stack-based language written in Python and I've taken a lot of inspiration from it. I don't know much about compilation/assembly, so my version is interpreted.
 
 
+## Influenced By
+- Porth
+- C Family (including C#)
+- Rust
+- Pascal
+- BrainFuck
+
+
+## Backends
+- Interpreter
+- Transpiler (Desirable)
+    - Pascal?
+
+
 ## Language Spec
 
 ### Comments
