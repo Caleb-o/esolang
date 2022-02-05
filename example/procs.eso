@@ -1,1 +1,2 @@
 proc main(a, b, c : int) -> void {}
+proc main(a, b, c : int) -> void {}

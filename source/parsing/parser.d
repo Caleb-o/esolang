@@ -1,6 +1,7 @@
 module parsing.parser;
 
 import std.stdio;
+import std.format;
 import std.conv;
 import core.stdc.stdlib : abort;
 import std.algorithm : countUntil;
@@ -49,6 +50,12 @@ final class Parser {
 			writefln("Expected type '%s' ('%s') but got '%s' on line %d at pos %d", kind, current.lexeme, current.kind, current.line, current.col);
 			abort();
 		}
+	}
+
+	void error(string message) {
+		writefln("%s on line %d at pos %d", message, current.line, current.col);
+		// FIXME: Use exceptions instead, since this will exit the program
+		abort();
 	}
 	
 	void expr() {
@@ -118,10 +125,14 @@ final class Parser {
 	void procedureDefinition() {
 		consume(current.kind);
 		immutable string procName = current.lexeme;
+		consume(Kind.ID);
+
+		if (procName in env.defs.procedures) {
+			error(format("Procedure '%s' has been redefined", procName));
+		}
 
 		env.defs.procedures[procName] = ProcedureDef();
 		
-		consume(Kind.ID);
 		parameterList(procName);
 		consume(Kind.ARROW);
 

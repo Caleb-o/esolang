@@ -18,6 +18,7 @@ final class Lexer {
 	this(string source) {
 		this.source = source;
 		line = 1;
+		col = 1;
 	}
 
 	private:
@@ -35,7 +36,7 @@ final class Lexer {
 
 				// Whitespace
 				case '\n': {
-					col = 0;
+					col = 1;
 					line++;
 					ip++;
 					break;
