@@ -10,10 +10,12 @@ import parsing.value;
 
 struct CallFrame {
 	string procID;
+	int returnIdx;
 	Value[] stack;
 
-	this(string procID) {
+	this(string procID, ulong returnIdx) {
 		this.procID = procID;
+		this.returnIdx = cast(int)returnIdx;
 	}
 }
 
@@ -32,7 +34,7 @@ final class VM {
 
 	void unwindStack() {
 		writeln("== Callstack ==");
-		size_t i = callStack.length-1u;
+		int i = cast(int)callStack.length-1u;
 		do {
 			writefln("depth %d \"%s\" stack", i, callStack[i].procID);
 
@@ -42,7 +44,9 @@ final class VM {
 				writeln();
 			}
 			writeln();
-		} while(i > 0);
+
+			i--;
+		} while(i >= 0);
 	}
 
 	void error(string message) {
@@ -51,7 +55,21 @@ final class VM {
 		abort();
 	}
 
+	string getProcName(size_t idx) {
+		size_t i;
+		foreach(key; env.defs.procedures.byKey) {
+			if (idx == i) {
+				return key;
+			}
+			
+			i++;
+		}
+
+		return "None";
+	}
+
 	public:
+
 	void interpret() {
 		writeln("Running...");
 
@@ -67,7 +85,7 @@ final class VM {
 		}
 
 		// Create a new stack item
-		callStack[callStack.length++] = CallFrame("main");
+		callStack[callStack.length++] = CallFrame("main", -1);
 
 		// Fetch entry point and start there
 		ip = env.defs.procedures["main"].startIdx;
@@ -77,6 +95,7 @@ final class VM {
 			switch(env.code[ip]) {
 				case ByteCode.PUSH: {
 					callStack[callStack.length-1u].stack[callStack[callStack.length-1u].stack.length++] = env.literals[env.code[++ip]];
+					ip++;
 					break;
 				}
 
@@ -85,6 +104,16 @@ final class VM {
 						error("Trying to drop an empty stack");
 					}
 					callStack[callStack.length-1u].stack.length--;
+					ip++;
+					break;
+				}
+
+				case ByteCode.PROCCALL: {
+					immutable int index = env.code[++ip];
+					string procName = getProcName(index);
+
+					callStack[callStack.length++] = CallFrame(procName, ip+1);
+					ip = env.defs.procedures[procName].startIdx;
 					break;
 				}
 
@@ -93,6 +122,7 @@ final class VM {
 						error("Values must be dropped from the stack on exit");
 					}
 
+					ip = callStack[$-1].returnIdx;
 					callStack.length--;
 					break;
 				}
@@ -101,6 +131,7 @@ final class VM {
 					if (callStack[callStack.length-1u].stack.length > 0) {
 						writeValue(callStack[callStack.length-1u].stack[callStack[callStack.length-1u].stack.length-1u]);
 					}
+					ip++;
 					break;
 				}
 
@@ -109,14 +140,15 @@ final class VM {
 						writeValue(callStack[callStack.length-1u].stack[callStack[callStack.length-1u].stack.length-1u]);
 					}
 					writeln();
+					ip++;
 					break;
 				}
 
 				default: {
+					ip++;
 					break;
 				}
 			}
-			ip++;
 		}
 	}
 }

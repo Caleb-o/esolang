@@ -115,8 +115,23 @@ final class Parser {
 		}
 	}
 
+	void procedureCall() {
+		consume(current.kind);
+
+		immutable string procName = current.lexeme;
+		consume(Kind.ID);
+
+		if (procName !in env.defs.procedures) {
+			error(format("Trying to call procedure that has not been defined yet '%s'", procName));
+		}
+
+		// Push proc call + idx of procedure
+		pushBytes(ByteCode.PROCCALL, countUntil(env.defs.procedures.byKey, procName));
+	}
+
 	void statement() {
 		switch(current.kind) {
+			case Kind.BANG:		procedureCall(); break;
 			case Kind.POP:		consume(current.kind); pushByte(ByteCode.POP); break;
 			case Kind.PRINT: 	consume(current.kind); pushByte(ByteCode.PRINT); break;
 			case Kind.PRINTLN: 	consume(current.kind); pushByte(ByteCode.PRINTLN); break;

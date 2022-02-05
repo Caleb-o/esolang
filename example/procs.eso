@@ -1,11 +1,14 @@
 proc test(x, y, z : float) -> void {
-	1 2 3
+	'Test Func' println drop
 }
 
 # Entry point
 proc main() -> void {
 	1 		println drop
 	false 	println drop
+
+	!test
+
 	'hello' println drop
 	3.2 	println drop
 }
