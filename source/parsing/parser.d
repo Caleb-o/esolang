@@ -166,8 +166,9 @@ final class Parser {
 					// end. We can duplicate them all however.
 					error("Cannot use dup modifier after move parameters");
 				}
-				
+
 				consume(current.kind);
+				isMoved = false;
 			} else {
 				hasMove = true;
 			}

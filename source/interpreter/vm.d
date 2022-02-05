@@ -39,6 +39,10 @@ final class VM {
 		do {
 			writefln("depth %d \"%s\" stack", i, callStack[i].procID);
 
+			if (callStack[i].stack.length == 0) {
+				writeln("-- EMPTY --");
+			}
+
 			foreach_reverse(idx, val; callStack[i].stack) {
 				writef("[%d] ", idx);
 				writeValue(val);
@@ -125,18 +129,29 @@ final class VM {
 
 					// Check parameter types
 					int stackIdx = cast(int)(stackSize-arity);
+					int stackMoveFrom = -1;
+
 					foreach(key, param; env.defs.procedures[procName].parameters) {
-						if (callStack[$-2].stack[stackIdx++].kind != param.kind) {
+						if (callStack[$-2].stack[stackIdx].kind != param.kind) {
 							error(format("'%s' at param '%s' expected type %s but got %s", 
 								procName, key,
-								param.kind, callStack[$-2].stack[stackIdx++].kind
+								param.kind, callStack[$-2].stack[stackIdx].kind
 							));
 						}
 
-						// Copy or move to new frame
 						if (param.isMoved) {
-							
+							if (stackMoveFrom == -1) stackMoveFrom = stackIdx;
 						}
+
+						// Copy values to frame
+						callStack[$-1].stack[callStack[$-1].stack.length++] = callStack[$-2].stack[stackIdx];
+
+						stackIdx++;
+					}
+
+					if (stackMoveFrom >= 0) {
+						writefln("Removing %d elements", (stackIdx - stackMoveFrom));
+						callStack[$-2].stack.length -= (stackIdx - stackMoveFrom);
 					}
 
 					ip = env.defs.procedures[procName].startIdx;
