@@ -1,0 +1,33 @@
+user defined structs:
+- They will have to be registered as a TYPEID, so they can be used
+
+
+Bindings:
+- Parameters are automatically bound to their names, consuming the
+  original value
+- Would have to be a pointer, either independent or refering to an
+  item on the stack
+- Should be cleared on scope exit
+- They can refer to stack items or lift them off into scope memory
+	- bind: Refers to item on stack
+	- bind-move: Lifts to scope memory, which will be cleaned up on
+	  scope exit
+	- unbind: Removes a binding, so we can possibly reuse the name
+
+
+Converting:
+- Converts items on the stack to a type. eg. Struct
+	- This will consume these values and move it into the new type
+	- Can also use to swap the current type on the stack. eg. 
+	  int -> string
+	- Optional ID to bind it to a name after converting
+	
+	
+Procedure:
+- All parameters will be bound, which will be moved off the stack
+  and put into the proecdures scope
+
+
+Structs:
+- Currently are read-only, so you cannot rewrite their values
+  without reconstructing the struct
