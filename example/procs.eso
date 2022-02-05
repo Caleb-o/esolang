@@ -1,2 +1,14 @@
-proc main(a, b, c : int) -> void {}
-proc main(a, b, c : int) -> void {}
+proc test(x, y, z : float) -> void {
+	1 2 3
+}
+
+# Entry point
+proc main(a, b, c : int) -> void {
+	1 println
+	false println
+	'hello' println
+	3.2 println
+}
+
+# Error: We redefine a proc here
+# proc main(a, b, c : int) -> void {}

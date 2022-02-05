@@ -57,13 +57,70 @@ final class Parser {
 		// FIXME: Use exceptions instead, since this will exit the program
 		abort();
 	}
+
+	size_t addToList(Value value) {
+		size_t idx;
+		if ((idx = countUntil(env.literals, value)) > -1) {
+			return idx;
+		}
+
+		idx = env.literals.length;
+		env.literals[env.literals.length++] = value;
+		return idx;
+	}
+
+	size_t addLiteral() {
+		switch(current.kind) {
+			case Kind.INT: {
+				ValueData data = { idata:to!int(current.lexeme) };
+				Value value = Value(ValueKind.INT, data);
+				return addToList(value);
+			}
+
+			case Kind.FLOAT: {
+				ValueData data = { fdata:to!float(current.lexeme) };
+				Value value = Value(ValueKind.FLOAT, data);
+				return addToList(value);
+			}
+
+			case Kind.BOOL: {
+				ValueData data = { bdata:to!bool(current.lexeme) };
+				Value value = Value(ValueKind.BOOl, data);
+				return addToList(value);
+			}
+
+			case Kind.STRING: {
+				ValueData data = { sdata:current.lexeme };
+				Value value = Value(ValueKind.STRING, data);
+				return addToList(value);
+			}
+
+			default: {
+				assert(0, format("Unreachable literal type: '%s'", current.kind));
+			}
+		}
+	}
 	
 	void expr() {
+		switch(current.kind) {
+			case Kind.BOOL: .. case Kind.STRING: {
+				pushBytes(ByteCode.PUSH, addLiteral());
+				consume(current.kind);
+				break;
+			}
 
+			default: {
+				error(format("Expected a value, but got '%s'", current.lexeme));
+			}
+		}
 	}
 
 	void statement() {
-		
+		switch(current.kind) {
+			case Kind.PRINT: 	consume(current.kind); pushByte(ByteCode.PRINT); break;
+			case Kind.PRINTLN: 	consume(current.kind); pushByte(ByteCode.PRINTLN); break;
+			default: 			expr(); break;
+		}
 	}
 
 	void typeList(string id, bool isProc) {
@@ -115,11 +172,11 @@ final class Parser {
 	}
 
 	void usingStatement() {
-
+		assert(0, "TOOD: Unimplemented");
 	}
 
 	void structDefinition() {
-
+		assert(0, "TOOD: Unimplemented");
 	}
 
 	void procedureDefinition() {
@@ -132,7 +189,9 @@ final class Parser {
 		}
 
 		env.defs.procedures[procName] = ProcedureDef();
-		
+		env.defs.procedures[procName].startIdx = env.code.length;
+
+
 		parameterList(procName);
 		consume(Kind.ARROW);
 
@@ -172,9 +231,8 @@ final class Parser {
 				}
 
 				default: {
-					writeln("Unexpected token found '%s' on line %d at pos %d", current.kind, current.line, current.col);
 					// FIXME: Use exceptions instead, since this will exit the program
-					abort();
+					error(format("Unexpected token found '%s'", current.kind));
 				}
 			}
 		}

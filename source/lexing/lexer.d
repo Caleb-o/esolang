@@ -30,7 +30,7 @@ final class Lexer {
 				case '#': {
 					ip++;
 					col++;
-					while(source[ip++] != '\n') {}
+					while(ip < source.length && source[ip++] != '\n') {}
 					break;
 				}
 
@@ -57,7 +57,7 @@ final class Lexer {
 		immutable size_t start = ip++;
 		col++;
 
-		while(ip < source.length && (source[ip].isAlpha || source[ip] == '_')) { ip++; col++; }
+		while(ip < source.length && (source[ip].isAlphaNum || source[ip] == '_')) { ip++; col++; }
 
 		// Hack: Must be here, since it does not evaluate as a constant and cannot be static
 		immutable Kind[string] KEYWORDS = [

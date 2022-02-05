@@ -1,7 +1,8 @@
 import std.stdio;
 import std.getopt;
 import std.file;
-import parsing.environment : Environment;
+import parsing.bytecode;
+import parsing.environment;
 import parser = parsing.parser;
 import interpreter.vm;
 
@@ -31,7 +32,7 @@ void main(string[] args) {
 	// Incorrect arguments provided
 	if (args.length > 1) {
 		writeln("Incorrect arguments provided.");
-		writeln("Usage: lang [--file|--quiet] [filename]");
+		writeln("Usage: esolang [--file|--quiet] [filename]");
 	} else {
 		if (fileName !is null) {
 			string data = cast(string)read(fileName);
@@ -39,9 +40,11 @@ void main(string[] args) {
 				writeln("Parsing ", fileName);
 				
 				parser.Parser p = new parser.Parser(data);
-				p.parse();
-				// VM vm = new VM(p.parse());
-				// vm.interpret();
+				auto env = p.parse();
+				printCode(env);
+
+				VM vm = new VM(env);
+				vm.interpret();
 			}
 		} else {
 			repl();

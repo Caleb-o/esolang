@@ -2,6 +2,7 @@ module parsing.bytecode;
 
 import std.stdio;
 import parsing.environment;
+import parsing.value;
 
 
 final enum ByteCode : ubyte {
@@ -19,7 +20,11 @@ void printCode(Environment env) {
 		switch(env.code[i]) {
 			case ByteCode.PUSH: {
 				immutable int idx = env.code[i+1];
-				writefln("%s<%s>", env.code[i], env.literals[idx]);
+				
+				writef("%s<", env.code[i]);
+				writeValue(env.literals[idx]);
+				writeln(">");
+
 				i++;
 				break;
 			}

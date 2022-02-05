@@ -36,7 +36,7 @@ void writeValue(Value value) {
 		case ValueKind.VOID: 	write("VOID"); break;
 		case ValueKind.INT:		write(value.data.idata); break;
 		case ValueKind.FLOAT:	write(value.data.fdata); break;
-		case ValueKind.STRING: 	write(value.data.sdata); break;
+		case ValueKind.STRING: 	writef("'%s'", value.data.sdata); break;
 		case ValueKind.BOOl: 	write(value.data.bdata); break;
 		case ValueKind.STRUCT: 	break; // FIXME: Print struct fields
 	}
