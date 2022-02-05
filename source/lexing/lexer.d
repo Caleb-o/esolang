@@ -59,8 +59,21 @@ final class Lexer {
 		while(ip < source.length && (source[ip].isAlpha || source[ip] == '_')) { ip++; col++; }
 
 		// Hack: Must be here, since it does not evaluate as a constant and cannot be static
-		immutable Kind[string] KEYWORDS = [
-			"fn": 		Kind.FUNCTION_DECL,
+		final immutable Kind[string] KEYWORDS = [
+			"proc":		Kind.PROC_DECL,
+			"dup":		Kind.DUP,
+			"swap":		Kind.SWAP,
+			"input":	Kind.INPUT,
+			"pop":		Kind.POP,
+			"conv":		Kind.CONVERT,
+			"bind":		Kind.BIND,
+			"bindmove": Kind.BIND_MOVE,
+			"using":	Kind.USING,
+			"assert":	Kind.ASSERT,
+			"return":	Kind.RETURN,
+			"if":		Kind.IF,
+			"elif":		Kind.ELIF,
+			"else":		Kind.ELSE,
 			"print": 	Kind.PRINT,
 			"println": 	Kind.PRINTLN,
 			"true":		Kind.BOOL,
@@ -70,6 +83,7 @@ final class Lexer {
 			"float":	Kind.TYPEID,
 			"string":	Kind.TYPEID,
 			"bool": 	Kind.TYPEID,
+			"struct":	Kind.TYPEID,
 		];
 
 		immutable string word = source[start..ip];
@@ -122,13 +136,18 @@ final class Lexer {
 		return new Token(line, col, source[start..ip], kind);
 	}
 
-	auto makeSingle(Kind kind) {
-		ip++;
-		col++;
-		return new Token(line, col, source[ip-1..ip], kind);
+	auto makeCharToken(Kind kind, int count = 1) {
+		ip += count;
+		col += count;
+		return new Token(line, col, source[ip-count..ip], kind);
 	}
 
 	public:
+
+	char peek(int depth) {
+		if (ip + depth >= 0 && ip + depth >= source.length) return '\0';
+		return source[ip + depth];
+	}
 
 	Token getNext() {
 		while (ip < source.length) {
@@ -146,19 +165,29 @@ final class Lexer {
 
 			// Single token or special types
 			switch(source[ip]) {
-				case '+': return makeSingle(Kind.PLUS);
-				case '-': return makeSingle(Kind.MINUS);
-				case '/': return makeSingle(Kind.SLASH);
-				case '*': return makeSingle(Kind.STAR);
-				case '=': return makeSingle(Kind.EQUAL);
-				case ';': return makeSingle(Kind.SEMICOLON);
-				case ':': return makeSingle(Kind.COLON);
-				case ',': return makeSingle(Kind.COMMA);
-				case '.': return makeSingle(Kind.DOT);
-				case '(': return makeSingle(Kind.LBRACKET);
-				case ')': return makeSingle(Kind.RBRACKET);
-				case '{': return makeSingle(Kind.LCURLY);
-				case '}': return makeSingle(Kind.RCURLY);
+				case '+': return makeCharToken(Kind.PLUS);
+				case '-': {
+					if (peek(1) == '>') {
+						return makeCharToken(Kind.ARROW);
+					} else {
+						return makeCharToken(Kind.MINUS);
+					}
+					break;
+				}
+				case '/': return makeCharToken(Kind.SLASH);
+				case '*': return makeCharToken(Kind.STAR);
+				case '=': return makeCharToken(Kind.EQUAL);
+				case ';': return makeCharToken(Kind.SEMICOLON);
+				case ':': return makeCharToken(Kind.COLON);
+				case ',': return makeCharToken(Kind.COMMA);
+				case '.': return makeCharToken(Kind.DOT);
+				case '!': return makeCharToken(Kind.BANG);
+				case '>': return makeCharToken(Kind.GREATER);
+				case '<': return makeCharToken(Kind.LESS);
+				case '(': return makeCharToken(Kind.LBRACKET);
+				case ')': return makeCharToken(Kind.RBRACKET);
+				case '{': return makeCharToken(Kind.LCURLY);
+				case '}': return makeCharToken(Kind.RCURLY);
 				case '\'': return makeString();
 				default: {
 					// FIXME: Use Exceptions here instead of straight up aborting

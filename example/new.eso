@@ -44,6 +44,7 @@ proc return_multiple(a, b, c : int) -> int, int, int {
 	ret
 }
 
+
 proc main() {
 	1 2 3
 	'Hello'

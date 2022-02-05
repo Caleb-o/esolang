@@ -31,3 +31,14 @@ Procedure:
 Structs:
 - Currently are read-only, so you cannot rewrite their values
   without reconstructing the struct
+
+
+Semantic Analysis (Runtime):
+NOTE: This needs to be done at compile time, so we don't get runtime errors
+	  In transpilation, we could just rely on the pascal compiler to complain at us
+- Check the arity of procedures against last N on the stack
+	- Need to check the types of those values against the parameters
+- Check return type of proc and check if matches
+- conv
+	- Needs to check last N items on the stack to see if we can convert to desired type
+	- Struct: We need to check all fields against last N items on the stack (Technically the same analysis as a proc)

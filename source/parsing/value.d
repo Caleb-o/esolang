@@ -4,7 +4,7 @@ import std.stdio;
 
 
 enum ValueKind {
-	VOID, INT, FLOAT, STRING, BOOl,
+	VOID, INT, FLOAT, STRING, BOOl, STRUCT,
 }
 
 union ValueData {
@@ -12,6 +12,7 @@ union ValueData {
 	int idata;
 	float fdata;
 	string sdata;
+	ValueData[string] structdata;
 }
 
 struct Value {
@@ -26,5 +27,11 @@ void writeValue(Value value) {
 		case ValueKind.FLOAT:	write(value.data.fdata); break;
 		case ValueKind.STRING: 	write(value.data.sdata); break;
 		case ValueKind.BOOl: 	write(value.data.bdata); break;
+		case ValueKind.STRUCT: 	{
+			foreach (val; value.data.structdata) {
+				writeValue(val);
+			}
+			break;
+		}
 	}
 }
