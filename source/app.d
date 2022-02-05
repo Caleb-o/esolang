@@ -39,8 +39,9 @@ void main(string[] args) {
 				writeln("Parsing ", fileName);
 				
 				parser.Parser p = new parser.Parser(data);
-				VM vm = new VM(p.parse());
-				vm.interpret();
+				p.parse();
+				// VM vm = new VM(p.parse());
+				// vm.interpret();
 			}
 		} else {
 			repl();

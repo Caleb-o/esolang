@@ -20,6 +20,17 @@ struct Value {
 	ValueData data;
 }
 
+ValueKind getFromString(string typeName) {
+	final switch(typeName) {
+		case "void":	return ValueKind.VOID;
+		case "int":		return ValueKind.INT;
+		case "float":	return ValueKind.FLOAT;
+		case "bool":	return ValueKind.BOOl;
+		case "string":	return ValueKind.STRING;
+		case "struct":	return ValueKind.STRUCT;
+	}
+}
+
 void writeValue(Value value) {
 	final switch(value.kind) {
 		case ValueKind.VOID: 	write("VOID"); break;
@@ -27,11 +38,6 @@ void writeValue(Value value) {
 		case ValueKind.FLOAT:	write(value.data.fdata); break;
 		case ValueKind.STRING: 	write(value.data.sdata); break;
 		case ValueKind.BOOl: 	write(value.data.bdata); break;
-		case ValueKind.STRUCT: 	{
-			foreach (val; value.data.structdata) {
-				writeValue(val);
-			}
-			break;
-		}
+		case ValueKind.STRUCT: 	break; // FIXME: Print struct fields
 	}
 }

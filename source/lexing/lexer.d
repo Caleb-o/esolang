@@ -59,8 +59,8 @@ final class Lexer {
 		while(ip < source.length && (source[ip].isAlpha || source[ip] == '_')) { ip++; col++; }
 
 		// Hack: Must be here, since it does not evaluate as a constant and cannot be static
-		final immutable Kind[string] KEYWORDS = [
-			"proc":		Kind.PROC_DECL,
+		immutable Kind[string] KEYWORDS = [
+			"proc":		Kind.PROC,
 			"dup":		Kind.DUP,
 			"swap":		Kind.SWAP,
 			"input":	Kind.INPUT,
@@ -168,16 +168,15 @@ final class Lexer {
 				case '+': return makeCharToken(Kind.PLUS);
 				case '-': {
 					if (peek(1) == '>') {
+						scope(exit) ip++;
 						return makeCharToken(Kind.ARROW);
 					} else {
 						return makeCharToken(Kind.MINUS);
 					}
-					break;
 				}
 				case '/': return makeCharToken(Kind.SLASH);
 				case '*': return makeCharToken(Kind.STAR);
 				case '=': return makeCharToken(Kind.EQUAL);
-				case ';': return makeCharToken(Kind.SEMICOLON);
 				case ':': return makeCharToken(Kind.COLON);
 				case ',': return makeCharToken(Kind.COMMA);
 				case '.': return makeCharToken(Kind.DOT);

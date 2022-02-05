@@ -8,8 +8,9 @@ final enum ByteCode : ubyte {
 	PRINT, PRINTLN,			// PRINT|PRINTLN
 	POP,					// POP
 	PUSH,					// PUSH IDX
-	STORE,					// STORE IDX
-	LOAD, LOAD_LIT,			// LOAD|LOAD_LIT IDX
+	BIND, BINDMOVE,			// BIND|BINDMOVE
+	CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
+	PROCCALL,				// PROCCALL FUNCTION_ID
 	ADD, SUB, MUL, DIV,		// ADD|SUB|MUL|DIV
 }
 
@@ -23,10 +24,18 @@ void printCode(Environment env) {
 				break;
 			}
 
-			case ByteCode.STORE: .. case ByteCode.LOAD_LIT: {
+			case ByteCode.PROCCALL: {
 				immutable int idx = env.code[i+1];
 				writefln("%s<%s>", env.code[i], idx);
 				i++;
+				break;
+			}
+
+			case ByteCode.CONV: {
+				immutable int idxa = env.code[i+1];
+				immutable int idxb = env.code[i+2];
+				writefln("%s<%s, %s>", env.code[i], idxa, idxb);
+				i+=2;
 				break;
 			}
 

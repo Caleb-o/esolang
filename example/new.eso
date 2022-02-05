@@ -10,7 +10,7 @@ struct TestStruct {
 
 
 # We could make a constructor for our struct
-proc TestStruct_New(str : string, len : int) -> TestStruct {
+proc TestStruct_New(str : string, len : int) -> struct {
 	# Construct a new TestStruct and return (Items must be on the stack)
 	str len conv TestStruct
 	ret
@@ -43,7 +43,6 @@ proc return_multiple(a, b, c : int) -> int, int, int {
 	a b c
 	ret
 }
-
 
 proc main() {
 	1 2 3

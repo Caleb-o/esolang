@@ -46,205 +46,135 @@ final class Parser {
 		if (current.kind == kind) {
 			current = lexer.getNext();
 		} else {
-			writefln("Expected type '%s' but got '%s' on line %d at pos %d", kind, current.kind, current.line, current.col);
+			writefln("Expected type '%s' ('%s') but got '%s' on line %d at pos %d", kind, current.lexeme, current.kind, current.line, current.col);
 			abort();
 		}
 	}
-
-	void addVoidValue(string id, bool literal) {
-		ValueData data = { bdata:false };
-		if (literal)
-			env.literals[env.literals.length++] = Value(ValueKind.VOID, data);
-		else
-			env.variables[id] = Value(ValueKind.VOID, data);
-	}
-
-	void addIntValue(string id, int val, bool literal) {
-		ValueData data = { idata:val };
-		if (literal)
-			env.literals[env.literals.length++] = Value(ValueKind.INT, data);
-		else
-			env.variables[id] = Value(ValueKind.INT, data);
-	}
-
-	void addFloatValue(string id, float val, bool literal) {
-		ValueData data = { fdata:val };
-		if (literal)
-			env.literals[env.literals.length++] = Value(ValueKind.FLOAT, data);
-		else
-			env.variables[id] = Value(ValueKind.FLOAT, data);
-	}
-
-	void addStringValue(string id, string val, bool literal) {
-		ValueData data = { sdata:val };
-		if (literal)
-			env.literals[env.literals.length++] = Value(ValueKind.STRING, data);
-		else
-			env.variables[id] = Value(ValueKind.STRING, data);
-	}
-
-	void addBoolValue(string id, bool val, bool literal) {
-		ValueData data = { bdata:val };
-		if (literal)
-			env.literals[env.literals.length++] = Value(ValueKind.BOOl, data);
-		else
-			env.variables[id] = Value(ValueKind.BOOl, data);
-	}
-
-	void addLiteral() {
-		switch(current.kind) {
-			case Kind.INT: 		addIntValue("int", to!int(current.lexeme), true); break;
-			case Kind.FLOAT: 	addFloatValue("float", to!float(current.lexeme), true); break;
-			case Kind.STRING: 	addStringValue("str", current.lexeme, true); break;
-			case Kind.BOOL: 	addBoolValue("bool", to!bool(current.lexeme), true); break;
-			default:			break;
-		}
-	}
-
+	
 	void expr() {
-		switch(current.kind) {
-			case Kind.BOOL: .. case Kind.STRING: {
-				addLiteral();
-				consume(current.kind);
-				pushBytes(ByteCode.PUSH, env.literals.length-1u);
-				break;
-			}
 
-			default: {
-				writefln("Unexpected statement token found '%s' on line %d at pos %d", current.kind, current.line, current.col);
-				abort();
-			}
-		}
-	}
-
-	// TODO: Add parameter checking
-	void parameterList() {
-		consume(Kind.LBRACKET);
-
-		// TOOD: Double-up as parameter decl (typeidentifier identifier [,])
-		while (current.kind != Kind.RBRACKET) {
-			if (current.kind == Kind.ID) {
-				immutable string id = current.lexeme;
-
-				if (id !in env.variables) {
-					writefln("Trying to access invalid variable '%s' on line %d at pos %d", id, current.line, current.col);
-					abort();
-				}
-
-				consume(current.kind);
-				pushBytes(ByteCode.LOAD, 0);
-			} else {
-				addLiteral();
-				pushBytes(ByteCode.LOAD_LIT, env.literals.length-1u);
-			}
-			consume(current.kind);
-
-			if (current.kind == Kind.COMMA)
-				consume(Kind.COMMA);
-		}
-
-		consume(Kind.RBRACKET);
-	}
-
-	void varDecl() {
-		auto typeToken = current;
-		immutable string type = current.lexeme;
-		consume(Kind.TYPEID);
-		immutable string name = current.lexeme;
-		consume(Kind.ID);
-
-		if (current.kind == Kind.EQUAL) {
-			consume(Kind.EQUAL);
-			expr();
-		}
-
-		// Store variable
-		switch(type) {
-			case "void": 		addVoidValue(name, false); break;
-			case "int":			addIntValue(name, env.literals[$-1].data.idata, false); break;
-			case "float":		addFloatValue(name, env.literals[$-1].data.fdata, false); break;
-			case "bool":		addBoolValue(name, env.literals[$-1].data.bdata, false); break;
-			case "string":		addStringValue(name, env.literals[$-1].data.sdata, false); break;
-
-			default: {
-				writefln("Unexpected typename provided '%s' on line %d at pos %d", type, typeToken.line, typeToken.col);
-				abort();
-			}
-		}
-		pushBytes(ByteCode.STORE, env.literals.length-1u);
-
-		consume(Kind.SEMICOLON);
-	}
-
-	void functionDecl() {
-		consume(Kind.FUNCTION_DECL);
-		immutable string funcName = current.lexeme;
-		consume(Kind.ID);
-
-		env.functions[funcName] = env.code.length-1u;
-
-		parameterList();
-
-		codeBlock();
-	}
-
-	void printStatement(bool line) {
-		consume(current.kind);
-
-		if (current.kind == Kind.ID) 
-			pushBytes(ByteCode.LOAD, countUntil(env.literals, env.variables[current.lexeme]));
-		else { 
-			addLiteral(); 
-			pushBytes(ByteCode.LOAD_LIT, env.literals.length-1u);
-		}
-		consume(current.kind);
-
-		pushByte((line) ? ByteCode.PRINTLN : ByteCode.PRINT);
-
-		consume(Kind.SEMICOLON);
 	}
 
 	void statement() {
-		switch(current.kind) {
-			case Kind.FUNCTION_DECL: {
-				functionDecl();
-				break;
+		
+	}
+
+	void typeList(string id, bool isProc) {
+		auto expected = (isProc) ? Kind.RBRACKET : Kind.RCURLY;
+		
+		while(current.kind != expected) {
+			string[] ids;
+
+			// Parse multiple names for a single type
+			while (current.kind != Kind.COLON) {
+				ids[ids.length++] = current.lexeme;
+				consume(Kind.ID);
+
+				// Multiple names
+				if (current.kind == Kind.COMMA) {
+					consume(current.kind);
+				}
+			}
+			consume(Kind.COLON);
+			bool isMoved = true;
+
+			// Modifier for duplicating data instead of moving
+			if (current.kind == Kind.DUP) {
+				consume(current.kind);
+				isMoved = false;
 			}
 
-			case Kind.TYPEID: {
-				varDecl();
-				break;
+			immutable string typeName = current.lexeme;
+			consume(Kind.TYPEID);
+
+			// FIXME: Use isProc flag to check whether we're in a procedure list or struct
+
+			// Add all parameters to the current proc param list
+			foreach(paramid; ids) {
+				env.defs.procedures[id].parameters[paramid] = Parameter(getFromString(typeName), isMoved);
 			}
 
-			case Kind.PRINT: {
-				printStatement(false);
-				break;
-			}
-
-			case Kind.PRINTLN: {
-				printStatement(true);
-				break;
-			}
-
-			default: {
-				expr();
-				break;
+			// Multiple parameters
+			if (current.kind == Kind.COMMA) {
+				consume(current.kind);
 			}
 		}
 	}
 
-	void codeBlock() {
+	void parameterList(string id) {
+		consume(Kind.LBRACKET);
+		typeList(id, true);
+		consume(Kind.RBRACKET);
+	}
+
+	void usingStatement() {
+
+	}
+
+	void structDefinition() {
+
+	}
+
+	void procedureDefinition() {
+		consume(current.kind);
+		immutable string procName = current.lexeme;
+
+		env.defs.procedures[procName] = ProcedureDef();
+		
+		consume(Kind.ID);
+		parameterList(procName);
+		consume(Kind.ARROW);
+
+		// FIXME: Allow multiple return types, seperated by comma
+		immutable string returnTypeName = current.lexeme;
+		consume(Kind.TYPEID);
+
+		env.defs.procedures[procName]
+			.returnTypes[env.defs.procedures[procName].returnTypes.length++] = getFromString(returnTypeName);
+
 		consume(Kind.LCURLY);
-		while (current.kind != Kind.RCURLY) {
+
+		// Consume statements until we are at the end of the block
+		while(current.kind != Kind.RCURLY) {
 			statement();
 		}
+
 		consume(Kind.RCURLY);
 	}
-	
+
+	void program() {
+		while(current.kind != Kind.EOF) {
+			switch(current.kind) {
+				case Kind.USING: {
+					usingStatement();
+					break;
+				}
+
+				case Kind.STRUCT: {
+					structDefinition();
+					break;
+				}
+
+				case Kind.PROC: {
+					procedureDefinition();
+					break;
+				}
+
+				default: {
+					writeln("Unexpected token found '%s' on line %d at pos %d", current.kind, current.line, current.col);
+					// FIXME: Use exceptions instead, since this will exit the program
+					abort();
+				}
+			}
+		}
+	}
+
+
 	public:
 
 	Environment parse() {
-		statement();
+		env.defs = new Definitions();
+		program();
 		return env;
 	}
 }
