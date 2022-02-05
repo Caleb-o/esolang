@@ -1,6 +1,7 @@
 module interpreter.vm;
 
 import std.stdio;
+import std.format;
 import core.stdc.stdlib : abort;
 
 import parsing.environment;
@@ -113,6 +114,31 @@ final class VM {
 					string procName = getProcName(index);
 
 					callStack[callStack.length++] = CallFrame(procName, ip+1);
+					
+					// Check arguments
+					size_t stackSize = callStack[$-2].stack.length;
+					size_t arity = env.defs.procedures[procName].parameters.length;
+					if (stackSize < arity) {
+						error(format("'%s' expected %d arguments, but got %d.", procName, arity, stackSize));
+					}
+
+
+					// Check parameter types
+					int stackIdx = cast(int)(stackSize-arity);
+					foreach(key, param; env.defs.procedures[procName].parameters) {
+						if (callStack[$-2].stack[stackIdx++].kind != param.kind) {
+							error(format("'%s' at param '%s' expected type %s but got %s", 
+								procName, key,
+								param.kind, callStack[$-2].stack[stackIdx++].kind
+							));
+						}
+
+						// Copy or move to new frame
+						if (param.isMoved) {
+							
+						}
+					}
+
 					ip = env.defs.procedures[procName].startIdx;
 					break;
 				}

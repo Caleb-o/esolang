@@ -140,9 +140,10 @@ final class Parser {
 	}
 
 	void typeList(string id, bool isProc) {
-		auto expected = (isProc) ? Kind.RBRACKET : Kind.RCURLY;
+		auto endType = (isProc) ? Kind.RBRACKET : Kind.RCURLY;
+		bool hasMove = false;
 		
-		while(current.kind != expected) {
+		while(current.kind != endType) {
 			string[] ids;
 
 			// Parse multiple names for a single type
@@ -160,8 +161,15 @@ final class Parser {
 
 			// Modifier for duplicating data instead of moving
 			if (current.kind == Kind.DUP) {
+				if (hasMove) {
+					// We cannot move values from within the stack, it must be at the
+					// end. We can duplicate them all however.
+					error("Cannot use dup modifier after move parameters");
+				}
+				
 				consume(current.kind);
-				isMoved = false;
+			} else {
+				hasMove = true;
 			}
 
 			immutable string typeName = current.lexeme;
@@ -171,12 +179,21 @@ final class Parser {
 
 			// Add all parameters to the current proc param list
 			foreach(paramid; ids) {
-				env.defs.procedures[id].parameters[paramid] = Parameter(getFromString(typeName), isMoved);
+				auto kind = getFromString(typeName);
+
+				if (kind == ValueKind.VOID) {
+					error(format("Cannot use type '%s' in parameter list", kind));
+				}
+				env.defs.procedures[id].parameters[paramid] = Parameter(kind, isMoved);
 			}
 
 			// Multiple parameters
 			if (current.kind == Kind.COMMA) {
 				consume(current.kind);
+
+				if (current.kind == endType && isProc) {
+					error(format("Unexpected character found '%s' after comma", current.kind));
+				}
 			}
 		}
 	}
