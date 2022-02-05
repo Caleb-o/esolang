@@ -117,6 +117,7 @@ final class Parser {
 
 	void statement() {
 		switch(current.kind) {
+			case Kind.POP:		consume(current.kind); pushByte(ByteCode.POP); break;
 			case Kind.PRINT: 	consume(current.kind); pushByte(ByteCode.PRINT); break;
 			case Kind.PRINTLN: 	consume(current.kind); pushByte(ByteCode.PRINTLN); break;
 			default: 			expr(); break;
@@ -208,6 +209,9 @@ final class Parser {
 		while(current.kind != Kind.RCURLY) {
 			statement();
 		}
+
+		// Implicit return added
+		pushByte(ByteCode.RETURN);
 
 		consume(Kind.RCURLY);
 	}

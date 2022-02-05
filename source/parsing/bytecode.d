@@ -11,7 +11,8 @@ final enum ByteCode : ubyte {
 	PUSH,					// PUSH IDX
 	BIND, BINDMOVE,			// BIND|BINDMOVE
 	CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
-	PROCCALL,				// PROCCALL FUNCTION_ID
+	PROCCALL,				// PROCCALL FUNCTION_LOC_ID
+	RETURN,					// RETURN
 	ADD, SUB, MUL, DIV,		// ADD|SUB|MUL|DIV
 }
 

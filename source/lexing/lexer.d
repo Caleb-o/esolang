@@ -65,7 +65,7 @@ final class Lexer {
 			"dup":		Kind.DUP,
 			"swap":		Kind.SWAP,
 			"input":	Kind.INPUT,
-			"pop":		Kind.POP,
+			"drop":		Kind.POP,
 			"conv":		Kind.CONVERT,
 			"bind":		Kind.BIND,
 			"bindmove": Kind.BIND_MOVE,

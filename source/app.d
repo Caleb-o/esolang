@@ -40,10 +40,11 @@ void main(string[] args) {
 				writeln("Parsing ", fileName);
 				
 				parser.Parser p = new parser.Parser(data);
-				auto env = p.parse();
-				printCode(env);
+				// auto env = p.parse();
+				// printCode(env);
 
-				VM vm = new VM(env);
+				// VM vm = new VM(env);
+				VM vm = new VM(p.parse());
 				vm.interpret();
 			}
 		} else {
