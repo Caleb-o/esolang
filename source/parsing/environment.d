@@ -14,6 +14,7 @@ struct Parameter {
 }
 
 struct ProcedureDef {
+	string name;
 	size_t startIdx;
 	Parameter[string] parameters;
 	ValueKind[] returnTypes;
@@ -23,7 +24,7 @@ struct ProcedureDef {
 final class Definitions {
 	public:
 
-	ProcedureDef[string] procedures;
+	ProcedureDef[] procedures;
 	StructDef[string] structs;
 }
 

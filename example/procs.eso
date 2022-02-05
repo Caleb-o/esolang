@@ -1,11 +1,21 @@
-proc test(x, y, z : int) -> void {
+# Procedure we call
+proc test(x, y: int) -> int {
 	'Test Func' println drop
+	
+	println drop
 }
+
+# Empty procedure
+proc test2() -> void {}
 
 # Entry point
 proc main() -> void {
-	1 2 3 !test
-	drop drop drop
+	1 2 !test
+	'Back in main' println drop
+	println drop
+
+	'Calling test2' println drop
+	!test2
 }
 
 # Error: We redefine a proc here

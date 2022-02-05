@@ -60,17 +60,12 @@ final class VM {
 		abort();
 	}
 
-	string getProcName(size_t idx) {
-		size_t i;
-		foreach(key; env.defs.procedures.byKey) {
-			if (idx == i) {
-				return key;
-			}
-			
-			i++;
+	int indexOfProc(string name) {
+		foreach(idx, proc; env.defs.procedures) {
+			if (proc.name == name) return cast(int)idx;
 		}
 
-		return "None";
+		return -1;
 	}
 
 	public:
@@ -79,13 +74,15 @@ final class VM {
 		writeln("Running...");
 
 		// Check for main function
-		if ("main" !in env.defs.procedures) {
+		int mainIdx = indexOfProc("main");
+		if (mainIdx == -1) {
 			error("Could not find main symbol");
 		}
 
 		// Warn about non-supported/unused values
-		if (env.defs.procedures["main"].parameters.length > 0 ||
-			env.defs.procedures["main"].returnTypes[0] != ValueKind.VOID) {
+		if (env.defs.procedures[mainIdx].parameters.length > 0 ||
+			(env.defs.procedures[mainIdx].returnTypes.length > 0 &&
+			env.defs.procedures[mainIdx].returnTypes[0] != ValueKind.VOID)) {
 			writefln("Warning: Main contains arguments or a non-void return type");
 		}
 
@@ -93,7 +90,7 @@ final class VM {
 		callStack[callStack.length++] = CallFrame("main", -1);
 
 		// Fetch entry point and start there
-		ip = env.defs.procedures["main"].startIdx;
+		ip = env.defs.procedures[mainIdx].startIdx;
 
 
 		while (ip < env.code.length) {
@@ -115,13 +112,12 @@ final class VM {
 
 				case ByteCode.PROCCALL: {
 					immutable int index = env.code[++ip];
-					string procName = getProcName(index);
-
+					string procName = env.defs.procedures[index].name;
 					callStack[callStack.length++] = CallFrame(procName, ip+1);
 					
 					// Check arguments
 					size_t stackSize = callStack[$-2].stack.length;
-					size_t arity = env.defs.procedures[procName].parameters.length;
+					size_t arity = env.defs.procedures[index].parameters.length;
 					if (stackSize < arity) {
 						error(format("'%s' expected %d arguments, but got %d.", procName, arity, stackSize));
 					}
@@ -131,7 +127,7 @@ final class VM {
 					int stackIdx = cast(int)(stackSize-arity);
 					int stackMoveFrom = -1;
 
-					foreach(key, param; env.defs.procedures[procName].parameters) {
+					foreach(key, param; env.defs.procedures[index].parameters) {
 						if (callStack[$-2].stack[stackIdx].kind != param.kind) {
 							error(format("'%s' at param '%s' expected type %s but got %s", 
 								procName, key,
@@ -150,17 +146,35 @@ final class VM {
 					}
 
 					if (stackMoveFrom >= 0) {
-						writefln("Removing %d elements", (stackIdx - stackMoveFrom));
 						callStack[$-2].stack.length -= (stackIdx - stackMoveFrom);
 					}
 
-					ip = env.defs.procedures[procName].startIdx;
+					ip = env.defs.procedures[index].startIdx;
 					break;
 				}
 
 				case ByteCode.RETURN: {
-					if (callStack[callStack.length-1u].stack.length > 0) {
+					immutable int index = env.code[++ip];
+					string procName = env.defs.procedures[index].name;
+					size_t retLen = env.defs.procedures[index].returnTypes.length;
+
+					// Check stack size against return size
+					if (callStack[$-1].stack.length > retLen) {
 						error("Values must be dropped from the stack on exit");
+					}
+
+					// Non-void
+					if (env.defs.procedures[index].returnTypes.length > 0) {
+						auto retType = env.defs.procedures[index].returnTypes[0];
+
+						if (callStack[$-1].stack[0].kind != retType) {
+							error(format("'%s' expected return type %s but got %s",
+									procName, retType,
+									callStack[$-1].stack[0].kind
+								));
+						} else {
+							callStack[$-2].stack[callStack[$-2].stack.length++] = callStack[$-1].stack[0];
+						}
 					}
 
 					ip = callStack[$-1].returnIdx;

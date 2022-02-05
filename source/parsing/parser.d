@@ -52,6 +52,24 @@ final class Parser {
 		}
 	}
 
+	size_t addProcDef(string name) {
+		size_t idx = env.defs.procedures.length++;
+
+		env.defs.procedures[idx] = ProcedureDef(name);
+		env.defs.procedures[idx].startIdx = env.code.length;
+
+		return idx;
+	}
+
+	int indexOfProc(string name) {
+		foreach(idx, proc; env.defs.procedures) {
+			if (proc.name == name) return cast(int)idx;
+		}
+
+		return -1;
+	}
+
+
 	void error(string message) {
 		writefln("%s on line %d at pos %d", message, current.line, current.col);
 		// FIXME: Use exceptions instead, since this will exit the program
@@ -121,12 +139,13 @@ final class Parser {
 		immutable string procName = current.lexeme;
 		consume(Kind.ID);
 
-		if (procName !in env.defs.procedures) {
+		int procIdx = indexOfProc(procName);
+		if (procIdx == -1) {
 			error(format("Trying to call procedure that has not been defined yet '%s'", procName));
 		}
 
 		// Push proc call + idx of procedure
-		pushBytes(ByteCode.PROCCALL, countUntil(env.defs.procedures.byKey, procName));
+		pushBytes(ByteCode.PROCCALL, procIdx);
 	}
 
 	void statement() {
@@ -178,6 +197,7 @@ final class Parser {
 
 			// FIXME: Use isProc flag to check whether we're in a procedure list or struct
 
+			int procIdx = indexOfProc(id);
 			// Add all parameters to the current proc param list
 			foreach(paramid; ids) {
 				auto kind = getFromString(typeName);
@@ -185,7 +205,7 @@ final class Parser {
 				if (kind == ValueKind.VOID) {
 					error(format("Cannot use type '%s' in parameter list", kind));
 				}
-				env.defs.procedures[id].parameters[paramid] = Parameter(kind, isMoved);
+				env.defs.procedures[procIdx].parameters[paramid] = Parameter(kind, isMoved);
 			}
 
 			// Multiple parameters
@@ -218,13 +238,11 @@ final class Parser {
 		immutable string procName = current.lexeme;
 		consume(Kind.ID);
 
-		if (procName in env.defs.procedures) {
+		if (indexOfProc(procName) > -1) {
 			error(format("Procedure '%s' has been redefined", procName));
 		}
 
-		env.defs.procedures[procName] = ProcedureDef();
-		env.defs.procedures[procName].startIdx = env.code.length;
-
+		size_t idx = addProcDef(procName);
 
 		parameterList(procName);
 		consume(Kind.ARROW);
@@ -233,8 +251,13 @@ final class Parser {
 		immutable string returnTypeName = current.lexeme;
 		consume(Kind.TYPEID);
 
-		env.defs.procedures[procName]
-			.returnTypes[env.defs.procedures[procName].returnTypes.length++] = getFromString(returnTypeName);
+		auto returnType = getFromString(returnTypeName);
+
+		// Only add if it is not void
+		if (returnType != ValueKind.VOID) {
+			env.defs.procedures[idx]
+				.returnTypes[env.defs.procedures[idx].returnTypes.length++] = returnType;
+		}
 
 		consume(Kind.LCURLY);
 
@@ -242,11 +265,10 @@ final class Parser {
 		while(current.kind != Kind.RCURLY) {
 			statement();
 		}
+		consume(Kind.RCURLY);
 
 		// Implicit return added
-		pushByte(ByteCode.RETURN);
-
-		consume(Kind.RCURLY);
+		pushBytes(ByteCode.RETURN, idx);
 	}
 
 	void program() {

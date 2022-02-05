@@ -30,7 +30,7 @@ void printCode(Environment env) {
 				break;
 			}
 
-			case ByteCode.PROCCALL: {
+			case ByteCode.PROCCALL: .. case ByteCode.RETURN: {
 				immutable int idx = env.code[i+1];
 				writefln("%s<%s>", env.code[i], idx);
 				i++;
