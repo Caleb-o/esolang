@@ -226,11 +226,11 @@ final class Parser {
 	}
 
 	void usingStatement() {
-		assert(0, "TOOD: Unimplemented");
+		writeln("TODO: Unimplemented");
 	}
 
 	void structDefinition() {
-		assert(0, "TOOD: Unimplemented");
+		writeln("TODO: Unimplemented");
 	}
 
 	void procedureDefinition() {

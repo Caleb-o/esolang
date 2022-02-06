@@ -34,24 +34,25 @@ final class VM {
 	}
 
 	void unwindStack() {
-		writeln("== Callstack ==");
-		int i = cast(int)callStack.length-1u;
-		do {
-			writefln("depth %d \"%s\" stack", i, callStack[i].procID);
+		if (callStack.length > 0) {
+			writeln("== Callstack ==");
+			
+			foreach_reverse(idx, frame; callStack) {
+				writefln("depth %d \"%s\" stack", idx, frame.procID);
 
-			if (callStack[i].stack.length == 0) {
-				writeln("-- EMPTY --");
-			}
+				if (frame.stack.length == 0) {
+					writeln("-- EMPTY --");
+					continue;
+				}
 
-			foreach_reverse(idx, val; callStack[i].stack) {
-				writef("[%d] ", idx);
-				writeValue(val);
+				foreach_reverse(val_idx, val; frame.stack) {
+					writef("[%d] ", val_idx);
+					writeValue(val);
+					writeln();
+				}
 				writeln();
 			}
-			writeln();
-
-			i--;
-		} while(i >= 0);
+		}
 	}
 
 	void error(string message) {
