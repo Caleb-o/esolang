@@ -2,6 +2,7 @@ import std.stdio;
 import std.getopt;
 import std.file;
 import parsing.parser;
+import parsing.bytecode;
 import interpreter.vm;
 
 

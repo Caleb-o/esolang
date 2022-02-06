@@ -12,17 +12,20 @@ final enum ByteCode : ubyte {
 	BIND, BINDMOVE,			// BIND|BINDMOVE
 	CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
 	PROCCALL,				// PROCCALL FUNCTION_DEF_ID
+	BINDING,				// BINDING BINDING_ID
 	RETURN,					// RETURN
 	ADD, SUB, MUL, DIV,		// ADD|SUB|MUL|DIV
 }
 
 void printCode(Environment env) {
 	for(size_t i = 0; i < env.code.length; ++i) {
+		writef("%04d ", i);
+
 		switch(env.code[i]) {
 			case ByteCode.PUSH: {
 				immutable int idx = env.code[i+1];
 				
-				writef("%s<", env.code[i]);
+				writef("%s<%d, ", env.code[i], idx);
 				writeValue(env.literals[idx]);
 				writeln(">");
 

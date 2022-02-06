@@ -35,6 +35,8 @@ final class Environment {
 	ByteCode[] code;
 	// Should be unique, if a value already exists, get its index
 	Value[] literals;
+	// IDs
+	string[] idLiterals;
 	// Definitions are compile-time known structs and procedures
 	Definitions defs;
 	// TODO: Callstack

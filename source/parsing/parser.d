@@ -118,11 +118,22 @@ final class Parser {
 			}
 		}
 	}
+
+	size_t addIDLiteral() {
+		env.idLiterals[env.idLiterals.length++] = current.lexeme;
+		return env.idLiterals.length-1u;
+	}
 	
 	void expr() {
 		switch(current.kind) {
 			case Kind.BOOL: .. case Kind.STRING: {
 				pushBytes(ByteCode.PUSH, addLiteral());
+				consume(current.kind);
+				break;
+			}
+			
+			case Kind.ID: {
+				pushBytes(ByteCode.BINDING, addIDLiteral());
 				consume(current.kind);
 				break;
 			}

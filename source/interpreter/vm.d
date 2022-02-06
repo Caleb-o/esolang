@@ -13,6 +13,7 @@ struct CallFrame {
 	string procID;
 	int returnIdx;
 	Value[] stack;
+	Value[string] bindings;
 
 	this(string procID, ulong returnIdx) {
 		this.procID = procID;
@@ -38,7 +39,12 @@ final class VM {
 			writeln("== Callstack ==");
 			
 			foreach_reverse(idx, frame; callStack) {
-				writefln("depth %d \"%s\" stack", idx, frame.procID);
+				writef("depth %d \"%s\" [ ", idx, frame.procID);
+
+				foreach(id, _; frame.bindings) {
+					writef("'%s' ", id);
+				}
+				writeln("] stack");
 
 				if (frame.stack.length == 0) {
 					writeln("-- EMPTY --");
@@ -151,11 +157,10 @@ final class VM {
 		// Fetch entry point and start there
 		ip = env.defs.procedures[mainIdx].startIdx;
 
-
 		while (ip < env.code.length) {
 			switch(env.code[ip]) {
 				case ByteCode.PUSH: {
-					callStack[callStack.length-1u].stack[callStack[callStack.length-1u].stack.length++] = env.literals[env.code[++ip]];
+					pushStack(env.literals[env.code[++ip]]);
 					ip++;
 					break;
 				}
@@ -168,6 +173,13 @@ final class VM {
 
 				case ByteCode.ADD: .. case ByteCode.DIV: {
 					arithmeticOp();
+					break;
+				}
+
+				case ByteCode.BINDING: {
+					immutable int index = env.code[++ip];
+					pushStack(callStack[$-1].bindings[env.idLiterals[index]]);
+					ip++;
 					break;
 				}
 
@@ -201,9 +213,7 @@ final class VM {
 						}
 
 						// Copy values to frame
-						callStack[$-1].stack[callStack[$-1].stack.length++] = callStack[$-2].stack[stackIdx];
-
-						stackIdx++;
+						callStack[$-1].bindings[key] = callStack[$-2].stack[stackIdx++];
 					}
 
 					if (stackMoveFrom >= 0) {
@@ -228,6 +238,11 @@ final class VM {
 					if (env.defs.procedures[index].returnTypes.length > 0) {
 						auto retType = env.defs.procedures[index].returnTypes[0];
 
+						// Empty stack
+						if (callStack[$-1].stack.length == 0) {
+							error(format("'%s' requires %d return values, but 0 were returned.", procName, retLen));
+						}
+
 						if (callStack[$-1].stack[0].kind != retType) {
 							error(format("'%s' expected return type %s but got %s",
 									procName, retType,
@@ -244,17 +259,19 @@ final class VM {
 				}
 
 				case ByteCode.PRINT: {
-					if (callStack[callStack.length-1u].stack.length > 0) {
-						writeValue(callStack[callStack.length-1u].stack[callStack[callStack.length-1u].stack.length-1u]);
+					if (callStack[$-1u].stack.length == 0) {
+						error("Cannot print an empty stack");
 					}
+					writeValue(callStack[$-1u].stack[$-1u]);
 					ip++;
 					break;
 				}
 
 				case ByteCode.PRINTLN: {
-					if (callStack[callStack.length-1u].stack.length > 0) {
-						writeValue(callStack[callStack.length-1u].stack[callStack[callStack.length-1u].stack.length-1u]);
+					if (callStack[$-1u].stack.length == 0) {
+						error("Cannot print an empty stack");
 					}
+					writeValue(callStack[$-1u].stack[$-1u]);
 					writeln();
 					ip++;
 					break;
