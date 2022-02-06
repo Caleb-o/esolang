@@ -56,7 +56,7 @@ final class VM {
 	}
 
 	void error(string message) {
-		writeln("Error: ", message);
+		writeln("Runtime Error: ", message);
 		unwindStack();
 		abort();
 	}
@@ -67,6 +67,64 @@ final class VM {
 		}
 
 		return -1;
+	}
+
+	Value popStack() {
+		if (callStack[$-1].stack.length == 0) {
+			error("Could not pop an empty stack");
+		}
+
+		scope(exit) --callStack[$-1].stack.length;
+		return callStack[$-1].stack[callStack[$-1].stack.length-1u];
+	}
+
+	void pushStack(Value value) {
+		callStack[$-1].stack[callStack[$-1].stack.length++] = value;
+	}
+
+	void arithmeticOp() {
+		auto rhs = popStack();
+		auto lhs = popStack();
+
+		// Type check left and right side kinds
+		if (lhs.kind != rhs.kind) {
+			error(format("Trying to operate on different value types. Lhs '%s', Rhs '%s'", lhs.kind, rhs.kind));
+		}
+
+		auto op = env.code[ip++];
+
+		switch(lhs.kind) {
+			case ValueKind.INT: {
+				switch(op) {
+					case ByteCode.ADD:	pushStack(createValue(lhs.data.idata + rhs.data.idata)); break;
+					case ByteCode.SUB:	pushStack(createValue(lhs.data.idata - rhs.data.idata)); break;
+					case ByteCode.MUL:	pushStack(createValue(rhs.data.idata * lhs.data.idata)); break;
+					case ByteCode.DIV:	pushStack(createValue(rhs.data.idata / lhs.data.idata)); break;
+
+					default:	error(format("Unknown operation '%s'", op)); break;
+				}
+				break;
+			}
+
+			case ValueKind.FLOAT: {
+				switch(op) {
+					case ByteCode.ADD:	pushStack(createValue(lhs.data.fdata + rhs.data.fdata)); break;
+					case ByteCode.SUB:	pushStack(createValue(lhs.data.fdata - rhs.data.fdata)); break;
+					case ByteCode.MUL:	pushStack(createValue(rhs.data.fdata * lhs.data.fdata)); break;
+					case ByteCode.DIV:	pushStack(createValue(rhs.data.fdata / lhs.data.fdata)); break;
+
+					default:	error(format("Unknown operation '%s'", op)); break;
+				}
+				break;
+			}
+
+			case ValueKind.BOOL: .. case ValueKind.STRUCT: {
+				error(format("Cannot use arithmetic operations on type '%s'", lhs.kind));
+				break;
+			}
+
+			default: break;
+		}
 	}
 
 	public:
@@ -103,11 +161,13 @@ final class VM {
 				}
 
 				case ByteCode.POP: {
-					if (callStack[callStack.length-1u].stack.length == 0) {
-						error("Trying to drop an empty stack");
-					}
-					callStack[callStack.length-1u].stack.length--;
+					popStack();
 					ip++;
+					break;
+				}
+
+				case ByteCode.ADD: .. case ByteCode.DIV: {
+					arithmeticOp();
 					break;
 				}
 

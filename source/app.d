@@ -34,11 +34,10 @@ void main(string[] args) {
 				writeln("Parsing ", fileName);
 				
 				Parser p = new Parser(data);
-				// auto env = p.parse();
+				auto env = p.parse();
 				// printCode(env);
 
-				// VM vm = new VM(env);
-				VM vm = new VM(p.parse());
+				VM vm = new VM(env);
 				vm.interpret();
 			}
 		} else {

@@ -8,6 +8,10 @@ proc test(x, y: int) -> int {
 # Empty procedure
 proc test2() -> void {}
 
+proc add(lhs, rhs : int) -> int {
+	+
+}
+
 # Entry point
 proc main() -> void {
 	1 2 !test
@@ -16,6 +20,9 @@ proc main() -> void {
 
 	'Calling test2' println drop
 	!test2
+
+	'Adding ' print drop
+	3 4 !add println drop
 }
 
 # Error: We redefine a proc here

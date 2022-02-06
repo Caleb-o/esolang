@@ -146,6 +146,7 @@ dmypy.json
 # Executables
 *.exe
 *.out
+esolang
 
 vgcore.*
 

@@ -103,7 +103,7 @@ final class Parser {
 
 			case Kind.BOOL: {
 				ValueData data = { bdata:to!bool(current.lexeme) };
-				Value value = Value(ValueKind.BOOl, data);
+				Value value = Value(ValueKind.BOOL, data);
 				return addToList(value);
 			}
 
@@ -148,8 +148,24 @@ final class Parser {
 		pushBytes(ByteCode.PROCCALL, procIdx);
 	}
 
+	void arithmeticStatement() {
+		auto op = current.kind;
+		consume(op);
+
+		switch(op) {
+			case Kind.PLUS:			pushByte(ByteCode.ADD); break;
+			case Kind.MINUS:		pushByte(ByteCode.SUB); break;
+			case Kind.STAR:			pushByte(ByteCode.MUL); break;
+			case Kind.SLASH:		pushByte(ByteCode.DIV); break;
+
+			default: break;
+		}
+	}
+
 	void statement() {
 		switch(current.kind) {
+			case Kind.PLUS: .. case Kind.STAR: arithmeticStatement(); break;
+
 			case Kind.BANG:		procedureCall(); break;
 			case Kind.POP:		consume(current.kind); pushByte(ByteCode.POP); break;
 			case Kind.PRINT: 	consume(current.kind); pushByte(ByteCode.PRINT); break;
@@ -219,6 +235,16 @@ final class Parser {
 		}
 	}
 
+	void codeBlock() {
+		consume(Kind.LCURLY);
+
+		// Consume statements until we are at the end of the block
+		while(current.kind != Kind.RCURLY) {
+			statement();
+		}
+		consume(Kind.RCURLY);
+	}
+
 	void parameterList(string id) {
 		consume(Kind.LBRACKET);
 		typeList(id, true);
@@ -259,13 +285,7 @@ final class Parser {
 				.returnTypes[env.defs.procedures[idx].returnTypes.length++] = returnType;
 		}
 
-		consume(Kind.LCURLY);
-
-		// Consume statements until we are at the end of the block
-		while(current.kind != Kind.RCURLY) {
-			statement();
-		}
-		consume(Kind.RCURLY);
+		codeBlock();
 
 		// Implicit return added
 		pushBytes(ByteCode.RETURN, idx);
