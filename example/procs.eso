@@ -11,9 +11,7 @@ proc add2(lhs, rhs : int) -> int, int {
 proc main() -> void {
 	# 3 88 !add println drop
 
-	4 8 !add2
-	println drop
-	println drop
+	4 8 !add2 drop drop
 }
 
 # Error: We redefine a proc here

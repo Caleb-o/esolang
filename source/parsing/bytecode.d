@@ -15,7 +15,10 @@ final enum ByteCode : ubyte {
 	BINDING,				// BINDING BINDING_ID
 	RETURN,					// RETURN
 	ADD, SUB, MUL, DIV,		// ADD|SUB|MUL|DIV
+	GREATER, LESS, EQUAL,	// GREATER|LESS|EQUAL
+	DUPLICATE, SWAP,		// DUPLICATE|SWAP
 }
+
 
 void printCode(Environment env) {
 	writeln("== ByteCode ==");

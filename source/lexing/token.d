@@ -5,7 +5,7 @@ import std.stdio : writefln;
 final enum Kind : uint {
 	// Operators
 	PLUS, MINUS, SLASH, STAR, COLON,
-	ARROW, EQUAL, BANG, GREATER, LESS,
+	ARROW, BANG, GREATER, LESS, EQUAL,
 	COMMA, DOT, LCURLY, RCURLY, LBRACKET, RBRACKET,
 	
 	// Keywords

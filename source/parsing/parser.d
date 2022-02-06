@@ -173,12 +173,28 @@ final class Parser {
 		}
 	}
 
+	void comparisonStatement() {
+		auto op = current.kind;
+		consume(op);
+
+		switch(op) {
+			case Kind.GREATER:		pushByte(ByteCode.GREATER); break;
+			case Kind.LESS:			pushByte(ByteCode.LESS); break;
+			case Kind.EQUAL:		pushByte(ByteCode.EQUAL); break;
+
+			default: break;
+		}
+	}
+
 	void statement() {
 		switch(current.kind) {
 			case Kind.PLUS: .. case Kind.STAR: arithmeticStatement(); break;
+			case Kind.GREATER: .. case Kind.EQUAL: comparisonStatement(); break;
 
 			case Kind.BANG:		procedureCall(); break;
 			case Kind.POP:		consume(current.kind); pushByte(ByteCode.POP); break;
+			case Kind.DUP:		consume(current.kind); pushByte(ByteCode.DUPLICATE); break;
+			case Kind.SWAP:		consume(current.kind); pushByte(ByteCode.SWAP); break;
 			case Kind.PRINT: 	consume(current.kind); pushByte(ByteCode.PRINT); break;
 			case Kind.PRINTLN: 	consume(current.kind); pushByte(ByteCode.PRINTLN); break;
 			default: 			expr(); break;

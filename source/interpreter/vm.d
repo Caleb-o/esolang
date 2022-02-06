@@ -81,7 +81,15 @@ final class VM {
 		}
 
 		scope(exit) --callStack[$-1].stack.length;
-		return callStack[$-1].stack[callStack[$-1].stack.length-1u];
+		return callStack[$-1].stack[$-1u];
+	}
+
+	Value peekStack() {
+		if (callStack[$-1].stack.length == 0) {
+			error("Could not peek an empty stack");
+		}
+
+		return callStack[$-1].stack[$-1u];
 	}
 
 	void pushStack(Value value) {
@@ -133,6 +141,69 @@ final class VM {
 		}
 	}
 
+	void comparisonOp() {
+		auto rhs = popStack();
+		auto lhs = popStack();
+
+		// Type check left and right side kinds
+		if (lhs.kind != rhs.kind) {
+			error(format("Trying to operate on different value types. Lhs '%s', Rhs '%s'", lhs.kind, rhs.kind));
+		}
+
+		auto op = env.code[ip++];
+
+		switch(lhs.kind) {
+			case ValueKind.INT: {
+				switch(op) {
+					case ByteCode.GREATER:	pushStack(createValue(lhs.data.idata > rhs.data.idata)); break;
+					case ByteCode.LESS:		pushStack(createValue(lhs.data.idata < rhs.data.idata)); break;
+					case ByteCode.EQUAL:	pushStack(createValue(lhs.data.idata == rhs.data.idata)); break;
+
+					default:	error(format("Unknown operation '%s'", op)); break;
+				}
+				break;
+			}
+
+			case ValueKind.FLOAT: {
+				switch(op) {
+					case ByteCode.GREATER:	pushStack(createValue(lhs.data.fdata > rhs.data.fdata)); break;
+					case ByteCode.LESS:		pushStack(createValue(lhs.data.fdata < rhs.data.fdata)); break;
+					case ByteCode.EQUAL:	pushStack(createValue(lhs.data.fdata == rhs.data.fdata)); break;
+
+					default:	error(format("Unknown operation '%s'", op)); break;
+				}
+				break;
+			}
+
+			case ValueKind.BOOL: {
+				switch(op) {
+					case ByteCode.EQUAL:	pushStack(createValue(lhs.data.bdata == rhs.data.bdata)); break;
+
+					default:	error(format("Unknown operation '%s'", op)); break;
+				}
+				break;
+			}
+
+			case ValueKind.STRING: {
+				switch(op) {
+					case ByteCode.GREATER:	pushStack(createValue(lhs.data.sdata.length > rhs.data.sdata.length)); break;
+					case ByteCode.LESS:		pushStack(createValue(lhs.data.sdata.length < rhs.data.sdata.length)); break;
+					case ByteCode.EQUAL:	pushStack(createValue(lhs.data.sdata.length == rhs.data.sdata.length)); break;
+
+					default:	error(format("Unknown operation '%s'", op)); break;
+				}
+				break;
+			}
+
+			case ValueKind.STRUCT: {
+				error(format("Cannot use arithmetic operations on type '%s'", lhs.kind));
+				break;
+			}
+
+			default: break;
+		}
+	}
+
 	public:
 
 	void interpret() {
@@ -171,6 +242,28 @@ final class VM {
 
 				case ByteCode.ADD: .. case ByteCode.DIV: {
 					arithmeticOp();
+					break;
+				}
+
+				case ByteCode.GREATER: .. case ByteCode.EQUAL: {
+					comparisonOp();
+					break;
+				}
+
+				case ByteCode.DUPLICATE: {
+					pushStack(peekStack());
+					ip++;
+					break;
+				}
+
+				case ByteCode.SWAP: {
+					auto rhs = popStack();
+					auto lhs = popStack();
+
+					pushStack(rhs);
+					pushStack(lhs);
+
+					ip++;
 					break;
 				}
 

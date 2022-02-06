@@ -181,11 +181,11 @@ final class Lexer {
 				}
 				case '/': return makeCharToken(Kind.SLASH);
 				case '*': return makeCharToken(Kind.STAR);
-				case '=': return makeCharToken(Kind.EQUAL);
 				case ':': return makeCharToken(Kind.COLON);
 				case ',': return makeCharToken(Kind.COMMA);
 				case '.': return makeCharToken(Kind.DOT);
 				case '!': return makeCharToken(Kind.BANG);
+				case '=': return makeCharToken(Kind.EQUAL);
 				case '>': return makeCharToken(Kind.GREATER);
 				case '<': return makeCharToken(Kind.LESS);
 				case '(': return makeCharToken(Kind.LBRACKET);
