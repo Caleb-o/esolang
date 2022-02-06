@@ -18,6 +18,7 @@ final enum ByteCode : ubyte {
 }
 
 void printCode(Environment env) {
+	writeln("== ByteCode ==");
 	for(size_t i = 0; i < env.code.length; ++i) {
 		writef("%04d ", i);
 
@@ -54,4 +55,5 @@ void printCode(Environment env) {
 			}
 		}
 	}
+	writeln();
 }

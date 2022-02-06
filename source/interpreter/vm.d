@@ -136,8 +136,6 @@ final class VM {
 	public:
 
 	void interpret() {
-		writeln("Running...");
-
 		// Check for main function
 		int mainIdx = indexOfProc("main");
 		if (mainIdx == -1) {

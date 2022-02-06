@@ -20,23 +20,26 @@ void repl() {
 
 void main(string[] args) {
 	string fileName;
-	bool quiet;
+	bool quiet, dbg;
 
 	try {
 		getopt(
 			args,
 			"file",		&fileName,
 			"quiet",	&quiet,
+			"debug",	&dbg,
 		);
 
 		if (fileName !is null) {
 			string data = cast(string)read(fileName);
+
 			if (data !is null && data.length > 0) {
-				writeln("Parsing ", fileName);
-				
 				Parser p = new Parser(data);
 				auto env = p.parse();
-				// printCode(env);
+
+				if (dbg) {
+					printCode(env);
+				}
 
 				VM vm = new VM(env);
 				vm.interpret();
@@ -46,8 +49,10 @@ void main(string[] args) {
 		}
 	} catch (FileException e) {
 		writefln("File Error: %s", e.msg);
-	} catch(Exception) {
+	} catch(Exception e) {
+		writefln("Error: %s", e.msg);
+
 		writeln("Incorrect arguments provided.");
-		writeln("Usage: esolang [--file|--quiet] [filename]");
+		writeln("Usage: esolang [--debug|--file|--quiet] [filename]");
 	}
 }
