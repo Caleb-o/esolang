@@ -155,9 +155,11 @@ final class VM {
 		switch(lhs.kind) {
 			case ValueKind.INT: {
 				switch(op) {
-					case ByteCode.GREATER:	pushStack(createValue(lhs.data.idata > rhs.data.idata)); break;
-					case ByteCode.LESS:		pushStack(createValue(lhs.data.idata < rhs.data.idata)); break;
-					case ByteCode.EQUAL:	pushStack(createValue(lhs.data.idata == rhs.data.idata)); break;
+					case ByteCode.GREATER:		pushStack(createValue(lhs.data.idata > rhs.data.idata)); break;
+					case ByteCode.GREATER_EQ:	pushStack(createValue(lhs.data.idata >= rhs.data.idata)); break;
+					case ByteCode.LESS:			pushStack(createValue(lhs.data.idata < rhs.data.idata)); break;
+					case ByteCode.LESS_EQ:		pushStack(createValue(lhs.data.idata <= rhs.data.idata)); break;
+					case ByteCode.EQUAL:		pushStack(createValue(lhs.data.idata == rhs.data.idata)); break;
 
 					default:	error(format("Unknown operation '%s'", op)); break;
 				}
@@ -166,9 +168,11 @@ final class VM {
 
 			case ValueKind.FLOAT: {
 				switch(op) {
-					case ByteCode.GREATER:	pushStack(createValue(lhs.data.fdata > rhs.data.fdata)); break;
-					case ByteCode.LESS:		pushStack(createValue(lhs.data.fdata < rhs.data.fdata)); break;
-					case ByteCode.EQUAL:	pushStack(createValue(lhs.data.fdata == rhs.data.fdata)); break;
+					case ByteCode.GREATER:		pushStack(createValue(lhs.data.fdata > rhs.data.fdata)); break;
+					case ByteCode.GREATER_EQ:	pushStack(createValue(lhs.data.fdata >- rhs.data.fdata)); break;
+					case ByteCode.LESS:			pushStack(createValue(lhs.data.fdata < rhs.data.fdata)); break;
+					case ByteCode.LESS_EQ:		pushStack(createValue(lhs.data.fdata <= rhs.data.fdata)); break;
+					case ByteCode.EQUAL:		pushStack(createValue(lhs.data.fdata == rhs.data.fdata)); break;
 
 					default:	error(format("Unknown operation '%s'", op)); break;
 				}
@@ -186,9 +190,11 @@ final class VM {
 
 			case ValueKind.STRING: {
 				switch(op) {
-					case ByteCode.GREATER:	pushStack(createValue(lhs.data.sdata.length > rhs.data.sdata.length)); break;
-					case ByteCode.LESS:		pushStack(createValue(lhs.data.sdata.length < rhs.data.sdata.length)); break;
-					case ByteCode.EQUAL:	pushStack(createValue(lhs.data.sdata.length == rhs.data.sdata.length)); break;
+					case ByteCode.GREATER:		pushStack(createValue(lhs.data.sdata.length > rhs.data.sdata.length)); break;
+					case ByteCode.GREATER_EQ:	pushStack(createValue(lhs.data.sdata.length >= rhs.data.sdata.length)); break;
+					case ByteCode.LESS:			pushStack(createValue(lhs.data.sdata.length < rhs.data.sdata.length)); break;
+					case ByteCode.LESS_EQ:		pushStack(createValue(lhs.data.sdata.length <= rhs.data.sdata.length)); break;
+					case ByteCode.EQUAL:		pushStack(createValue(lhs.data.sdata.length == rhs.data.sdata.length)); break;
 
 					default:	error(format("Unknown operation '%s'", op)); break;
 				}
@@ -245,7 +251,7 @@ final class VM {
 					break;
 				}
 
-				case ByteCode.GREATER: .. case ByteCode.EQUAL: {
+				case ByteCode.GREATER: .. case ByteCode.LESS_EQ: {
 					comparisonOp();
 					break;
 				}

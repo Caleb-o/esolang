@@ -1,11 +1,13 @@
-proc return_true() -> bool {
-	true
+proc fib(n : int) -> int {
+	n 1 <= if { n }
+	n 1 > if {
+		n 1 - !fib n 2 - !fib +
+	}
 }
 
+# 6 seconds on my lower-spec Linux laptop
+# Fib to 28
 proc main() -> void {
-	!return_true println drop
-
-	false if {
-		'TRUE' println drop
-	}
+	'Fibonacci ' print drop
+	28 !fib println drop
 }

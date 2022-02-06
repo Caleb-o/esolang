@@ -179,7 +179,9 @@ final class Parser {
 
 		switch(op) {
 			case Kind.GREATER:		pushByte(ByteCode.GREATER); break;
+			case Kind.GREATER_EQ:	pushByte(ByteCode.GREATER_EQ); break;
 			case Kind.LESS:			pushByte(ByteCode.LESS); break;
+			case Kind.LESS_EQ:		pushByte(ByteCode.LESS_EQ); break;
 			case Kind.EQUAL:		pushByte(ByteCode.EQUAL); break;
 
 			default: break;

@@ -186,8 +186,22 @@ final class Lexer {
 				case '.': return makeCharToken(Kind.DOT);
 				case '!': return makeCharToken(Kind.BANG);
 				case '=': return makeCharToken(Kind.EQUAL);
-				case '>': return makeCharToken(Kind.GREATER);
-				case '<': return makeCharToken(Kind.LESS);
+				case '>': {
+					if (peek(1) == '=') {
+						scope(exit) ip++;
+						return makeCharToken(Kind.GREATER_EQ);
+					} else {
+						return makeCharToken(Kind.GREATER);
+					}
+				}
+				case '<': {
+					if (peek(1) == '=') {
+						scope(exit) ip++;
+						return makeCharToken(Kind.LESS_EQ);
+					} else {
+						return makeCharToken(Kind.LESS);
+					}
+				}
 				case '(': return makeCharToken(Kind.LBRACKET);
 				case ')': return makeCharToken(Kind.RBRACKET);
 				case '{': return makeCharToken(Kind.LCURLY);
