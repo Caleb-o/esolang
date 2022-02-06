@@ -274,6 +274,23 @@ final class VM {
 					break;
 				}
 
+				case ByteCode.IF: {
+					immutable int index = env.code[++ip];
+					ip++;
+
+					auto condition = popStack();
+					
+					if (condition.kind != ValueKind.BOOL) {
+						error("If statement depends on non-boolean value");
+					}
+
+					// Jump to position if false
+					if (!condition.data.bdata) {
+						ip = index;
+					}
+					break;
+				}
+
 				case ByteCode.PROCCALL: {
 					immutable int index = env.code[++ip];
 					string procName = env.defs.procedures[index].name;

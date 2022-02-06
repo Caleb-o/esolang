@@ -1,0 +1,11 @@
+proc return_true() -> bool {
+	true
+}
+
+proc main() -> void {
+	!return_true println drop
+
+	false if {
+		'TRUE' println drop
+	}
+}

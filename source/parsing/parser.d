@@ -186,11 +186,23 @@ final class Parser {
 		}
 	}
 
+	void ifStatement() {
+		consume(current.kind);
+
+		pushBytes(ByteCode.IF, 0);
+		size_t index = env.code.length-1u;
+
+		codeBlock();
+
+		env.code[index] = cast(ByteCode)(cast(ubyte)env.code.length);
+	}
+
 	void statement() {
 		switch(current.kind) {
 			case Kind.PLUS: .. case Kind.STAR: arithmeticStatement(); break;
 			case Kind.GREATER: .. case Kind.EQUAL: comparisonStatement(); break;
 
+			case Kind.IF:		ifStatement(); break;
 			case Kind.BANG:		procedureCall(); break;
 			case Kind.POP:		consume(current.kind); pushByte(ByteCode.POP); break;
 			case Kind.DUP:		consume(current.kind); pushByte(ByteCode.DUPLICATE); break;

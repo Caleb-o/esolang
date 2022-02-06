@@ -13,6 +13,7 @@ final enum ByteCode : ubyte {
 	CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
 	PROCCALL,				// PROCCALL FUNCTION_DEF_ID
 	BINDING,				// BINDING BINDING_ID
+	IF,						// IF GOTO_POS
 	RETURN,					// RETURN
 	ADD, SUB, MUL, DIV,		// ADD|SUB|MUL|DIV
 	GREATER, LESS, EQUAL,	// GREATER|LESS|EQUAL
@@ -40,6 +41,8 @@ void printCode(Environment env) {
 			case ByteCode.PROCCALL: .. case ByteCode.RETURN: {
 				immutable int idx = env.code[i+1];
 				writefln("%s<%s>", env.code[i], idx);
+				if (env.code[i] == ByteCode.RETURN) writeln();
+
 				i++;
 				break;
 			}
