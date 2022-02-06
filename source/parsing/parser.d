@@ -284,16 +284,36 @@ final class Parser {
 		parameterList(procName);
 		consume(Kind.ARROW);
 
-		// FIXME: Allow multiple return types, seperated by comma
-		immutable string returnTypeName = current.lexeme;
-		consume(Kind.TYPEID);
+		bool containsVoid = false;
 
-		auto returnType = getFromString(returnTypeName);
+		// Check for multiple return types
+		while(current.kind == Kind.TYPEID) {
+			immutable string returnTypeName = current.lexeme;
+			consume(Kind.TYPEID);
 
-		// Only add if it is not void
-		if (returnType != ValueKind.VOID) {
-			env.defs.procedures[idx]
-				.returnTypes[env.defs.procedures[idx].returnTypes.length++] = returnType;
+			auto returnType = getFromString(returnTypeName);
+
+			// Only add if it is not void
+			if (returnType != ValueKind.VOID) {
+				env.defs.procedures[idx]
+					.returnTypes[env.defs.procedures[idx].returnTypes.length++] = returnType;
+			} else {
+				containsVoid = true;
+			}
+
+			// Void exists in return list
+			if (containsVoid && env.defs.procedures[idx].returnTypes.length > 0) {
+				error(format("'%s' has multiple return types and contains a void", procName));
+			}
+
+			// Comma
+			if (current.kind == Kind.COMMA) {
+				consume(current.kind);
+
+				if (current.kind == Kind.LCURLY) {
+					error(format("'%s' return list contains a trailing comma", procName));
+				}
+			}
 		}
 
 		codeBlock();

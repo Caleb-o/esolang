@@ -103,6 +103,11 @@ final class Lexer {
 		return new Token(line, col, source[start..ip-1], Kind.STRING);
 	}
 
+	void error(string message) {
+		writefln("%s on line %d at pos %d", message, line, col);
+		abort();
+	}
+
 	auto makeNumber() {
 		immutable size_t start = ip++;
 		auto kind = Kind.INT;
@@ -111,10 +116,8 @@ final class Lexer {
 		auto checkFloat = {
 			if (source[ip] == '.') {
 				if (isFloat) {
-					writeln("Trying to use multiple decimals in a single number");
-					abort();
+					error("Trying to use multiple decimals in a single number");
 				}
-
 				isFloat = true;
 				kind = Kind.FLOAT;
 				ip++;
@@ -126,12 +129,13 @@ final class Lexer {
 
 
 		while(ip < source.length && source[ip].isDigit) {
+			col++;
+			ip++;
+
 			if (source[ip] == '.') {
 				checkFloat();
 				continue;
 			}
-			col++;
-			ip++;
 		}
 
 		return new Token(line, col, source[start..ip], kind);

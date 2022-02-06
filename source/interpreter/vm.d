@@ -47,7 +47,7 @@ final class VM {
 				writeln("] stack");
 
 				if (frame.stack.length == 0) {
-					writeln("-- EMPTY --");
+					writeln("-- EMPTY --\n");
 					continue;
 				}
 
@@ -228,28 +228,29 @@ final class VM {
 					immutable int index = env.code[++ip];
 					string procName = env.defs.procedures[index].name;
 					size_t retLen = env.defs.procedures[index].returnTypes.length;
+					size_t stackSize = callStack[$-1].stack.length;
 
 					// Check stack size against return size
-					if (callStack[$-1].stack.length > retLen) {
-						error("Values must be dropped from the stack on exit");
+					if (stackSize > retLen) {
+						error(format("'%s' returned with %d items on the stack, return count is %d.",
+							procName, stackSize, retLen
+						));
+					}
+
+					if (stackSize < retLen) {
+						error(format("'%s' requires %d return values, but only %d was returned.", procName, retLen, stackSize));
 					}
 
 					// Non-void
-					if (env.defs.procedures[index].returnTypes.length > 0) {
-						auto retType = env.defs.procedures[index].returnTypes[0];
-
-						// Empty stack
-						if (callStack[$-1].stack.length == 0) {
-							error(format("'%s' requires %d return values, but 0 were returned.", procName, retLen));
-						}
-
-						if (callStack[$-1].stack[0].kind != retType) {
+					foreach(idx, retType; env.defs.procedures[index].returnTypes) {
+						// Check return values against required types
+						if (callStack[$-1].stack[idx].kind != retType) {
 							error(format("'%s' expected return type %s but got %s",
 									procName, retType,
-									callStack[$-1].stack[0].kind
+									callStack[$-1].stack[idx].kind
 								));
 						} else {
-							callStack[$-2].stack[callStack[$-2].stack.length++] = callStack[$-1].stack[0];
+							callStack[$-2].stack[callStack[$-2].stack.length++] = callStack[$-1].stack[idx];
 						}
 					}
 
