@@ -24,8 +24,14 @@ final enum ByteCode : ubyte {
 
 void printCode(Environment env) {
 	writeln("== ByteCode ==");
+	size_t ops = 0;
+	int[ByteCode] opCalls;
+
 	for(size_t i = 0; i < env.code.length; ++i) {
 		writef("%04d ", i);
+		ops++;
+
+		opCalls[env.code[i]]++;
 
 		switch(env.code[i]) {
 			case ByteCode.PUSH: {
@@ -61,6 +67,10 @@ void printCode(Environment env) {
 				break;
 			}
 		}
+	}
+	writefln("== Ops %d ==", ops);
+	foreach (op, calls; opCalls) {
+		writefln("%s %d", op, calls);
 	}
 	writeln();
 }
