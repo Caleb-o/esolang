@@ -1,5 +1,5 @@
 DEFS 	:=
-OPS		:=-w
+OPS		:=-w -std=c++2a
 OUT		:=eso
 
 .DEFAULT_GOAL := debug
