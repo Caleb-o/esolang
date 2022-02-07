@@ -22,7 +22,11 @@ namespace Process {
 
 		void consume(TokenKind);
 
+		size_t add_literal_to_env(Value value);
+		ByteCode add_literal();
+
 		void expr();
+		void arithmetic_statement();
 		void statement();
 		void statement_list();
 		void code_block();
@@ -38,6 +42,6 @@ namespace Process {
 		// We will need to delete the last token
 		~Parser() { delete m_current; }
 
-		Environment *parse(std::string);
+		Environment *parse(char *);
 	};
 }

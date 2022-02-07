@@ -3,6 +3,7 @@
 #include <string>
 #include <cstring>
 #include <exception>
+#include "process/bytecode.hpp"
 #include "process/util.hpp"
 #include "process/parser.hpp"
 
@@ -16,6 +17,7 @@ static char *read_file(const char *file_name) {
 
 	if (file.is_open())
 	{
+		file.seekg(0, std::ios::end);
 		size = file.tellg();
 		memblock = new char[size];
 		file.seekg(0, std::ios::beg);
@@ -69,6 +71,9 @@ int main(int argc, char **argv) {
 		}
 
 		Environment *env = p.parse(buffer);
+
+		print_code(env);
+
 		delete env;
 	} catch (const char *msg) {
 		std::cerr << "Runtime: " << msg << "\n";

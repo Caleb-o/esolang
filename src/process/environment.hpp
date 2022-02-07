@@ -1,7 +1,11 @@
 #pragma once
+#include <iostream>
 #include <map>
 #include <vector>
 #include "../runtime/value.hpp"
+#include "bytecode.hpp"
+#include "util.hpp"
+
 
 using namespace Runtime;
 
@@ -36,4 +40,40 @@ namespace Process {
 		// Definitions are compile-time known structs and procedures
 		Definitions defs;
 	};
+
+
+	static void print_code(Environment *env) {
+		std::cout << "=== ByteCode ===\n";
+
+		if (env == nullptr) {
+			std::cout << "KEK\n";
+			return;
+		}
+
+		size_t i = 0;
+		while(i < env->code.size()) {
+			std::cout << Util::string_format("%04d ", i);
+
+			switch(env->code[i]) {
+				case ByteCode::PROCCALL:
+				case ByteCode::GOTO:
+				case ByteCode::RETURN:
+				case ByteCode::PUSH:
+				case ByteCode::IF: {
+					int val_idx = (int)env->code[i+1];
+					std::cout << get_bytecode_name(env->code[i]) << "<" << val_idx << ">\n";
+
+					i++;
+					break;
+				}
+
+				default: {
+					std::cout << get_bytecode_name(env->code[i]) << std::endl;
+					break;
+				}
+			}
+
+			i++;
+		}
+	}
 }

@@ -20,8 +20,9 @@ namespace Process {
 	}
 
 	// Lexer
-	Lexer::Lexer(std::string source)
-		:m_source(source) {}
+	Lexer::Lexer(char *source) :m_source(source) {
+		delete[] source;
+	}
 
 	// Helper methods
 	void Lexer::skip_whitespace() {
@@ -31,7 +32,7 @@ namespace Process {
 				case '#': {
 					m_ip++;
 					
-					while(m_ip < m_source.size() && m_source[m_ip++] != '\n');
+					while(m_ip < m_source.size() && m_source[m_ip] != '\n') m_ip++;
 					break;
 				}
 
@@ -85,6 +86,7 @@ namespace Process {
 			if (m_source[m_ip] == '.') {
 				if (isFloat) {
 					// TODO: Throw exception, trying to add multiple decimal points
+					throw "Trying to add multiple decimal points in number";
 				}
 				m_ip++;
 
@@ -94,7 +96,7 @@ namespace Process {
 		}
 
 		std::string lexeme(m_source.substr(start_ip, m_ip - start_ip));
-		return new (Token){ Util::get_keyword_kind(lexeme), m_line, m_col, lexeme };
+		return new (Token){ kind, m_line, m_col, lexeme };
 	}
 
 	Token *Lexer::make_single(TokenKind kind) {
@@ -112,12 +114,12 @@ namespace Process {
 			if (m_ip >= m_source.size()) break;
 
 
-			if (is_alpha(m_source[m_ip])) {
-				return make_identifier();
-			}
-
 			if (is_numeric(m_source[m_ip])) {
 				return make_number();
+			}
+			
+			if (is_alpha(m_source[m_ip])) {
+				return make_identifier();
 			}
 
 			// Single character tokens
@@ -160,8 +162,8 @@ namespace Process {
 				case '}': return make_single(TokenKind::RCURLY);
 				// case '\'': return makeString();
 				default: {
-					m_ip++;
 					// FIXME: Use Exceptions here instead of straight up aborting
+					throw "Unknown token";
 					break;
 				}
 			}
