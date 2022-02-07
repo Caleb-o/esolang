@@ -2,9 +2,9 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include "util.hpp"
 #include "../runtime/value.hpp"
 #include "bytecode.hpp"
-#include "util.hpp"
 
 
 using namespace Runtime;
@@ -40,6 +40,11 @@ namespace Process {
 		// Definitions are compile-time known structs and procedures
 		Definitions defs;
 	};
+
+
+	static size_t get_proc_idx(Environment *env, const char *proc_id) {
+		return std::distance(env->defs.procedures.begin(), env->defs.procedures.find(proc_id));
+	}
 
 
 	static void print_code(Environment *env) {
@@ -89,9 +94,16 @@ namespace Process {
 					break;
 				}
 
+				case ByteCode::PUSH: {
+					int val_idx = (int)env->code[++i];
+					std::cout << get_bytecode_name(env->code[i-1]) << "<" << val_idx << ", '";
+					write_value(env->literals[val_idx]);
+					std::cout << "'>\n";
+					break;
+				}
+
 				case ByteCode::PROCCALL:
 				case ByteCode::GOTO:
-				case ByteCode::PUSH:
 				case ByteCode::IF: {
 					int val_idx = (int)env->code[++i];
 					std::cout << get_bytecode_name(env->code[i-1]) << "<" << val_idx << ">\n";
@@ -106,5 +118,7 @@ namespace Process {
 
 			i++;
 		}
+
+		std::cout << std::endl;
 	}
 }

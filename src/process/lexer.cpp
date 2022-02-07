@@ -74,6 +74,17 @@ namespace Process {
 		return new (Token){ Util::get_keyword_kind(lexeme), m_line, m_col, lexeme };
 	}
 
+	Token *Lexer::make_string() {
+		size_t start_ip = ++m_ip;
+
+		while(m_ip < m_source.size() && m_source[m_ip] != '\'') m_ip++;
+		std::string lexeme(m_source.substr(start_ip, m_ip - start_ip));
+
+		// Skip next quote
+		m_ip++;
+		return new (Token){ TokenKind::STRING_LIT, m_line, m_col, lexeme };
+	}
+
 	Token *Lexer::make_number() {
 		size_t start_ip = m_ip;
 		TokenKind kind = TokenKind::INT_LIT;
@@ -159,7 +170,7 @@ namespace Process {
 				case ')': return make_single(TokenKind::RPAREN);
 				case '{': return make_single(TokenKind::LCURLY);
 				case '}': return make_single(TokenKind::RCURLY);
-				// case '\'': return makeString();
+				case '\'': return make_string();
 				default: {
 					// FIXME: Use Exceptions here instead of straight up aborting
 					throw "Unknown token";

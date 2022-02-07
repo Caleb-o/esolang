@@ -1,4 +1,12 @@
 proc test() -> void {}
 proc test(b : bool) -> void {}
-proc main() -> void { 10 1 2 + - / * }
+proc main() -> void { 
+	10 println drop
+	1 println drop
+	2 println drop
+	+ - / * 
+	'hello' println drop
+	false println drop
+	true println drop
+}
 proc test2(b : bool) -> bool {}

@@ -1,5 +1,7 @@
 #pragma once
+#include <iostream>
 #include <string>
+#include <cstring>
 #include "../process/util.hpp"
 
 
@@ -20,6 +22,18 @@ namespace Runtime {
 		ValueData data;
 		bool read_only;
 	};
+
+	
+	static void write_value(Value& value) {
+		switch(value.kind) {
+			case ValueKind::VOID: 		std::cout << "void"; break;
+			case ValueKind::INT: 		std::cout << value.data.integer; break;
+			case ValueKind::FLOAT: 		std::cout << value.data.floating; break;
+			case ValueKind::BOOL: 		std::cout << value.data.boolean; break;
+			case ValueKind::STRING: 	std::cout << value.data.string; break;
+			case ValueKind::STRUCT: 	std::cout << "struct"; break;
+		}
+	}
 
 
 	static ValueKind kind_from_str(const char *name) {

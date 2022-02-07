@@ -7,6 +7,7 @@
 #include "process/bytecode.hpp"
 #include "process/util.hpp"
 #include "process/parser.hpp"
+#include "runtime/vm.hpp"
 
 using namespace Process;
 
@@ -69,10 +70,10 @@ int main(int argc, char **argv) {
 		}
 
 		Environment *env = p.parse(buffer);
-
 		print_code(env);
 
-		delete env;
+		VM vm(env);
+		vm.run();
 	} catch (const char *msg) {
 		std::cerr << "Runtime: " << msg << "\n";
 	} catch (std::string& msg) {
@@ -80,9 +81,6 @@ int main(int argc, char **argv) {
 	} catch (std::exception& e) {
 		std::cerr << "Pre-process: " << e.what() << "\n";
 	}
-
-	std::cout << "Done.\n";
-
 
 	return 0;
 }

@@ -97,6 +97,37 @@ namespace Process {
 					true
 				});
 			}
+
+			case TokenKind::FLOAT_LIT: {
+				return (ByteCode)add_literal_to_env({ 
+					ValueKind::STRING,
+					{ .floating=std::stof(m_current->lexeme) }, 
+					true
+				});
+			}
+
+			case TokenKind::BOOL_LIT: {
+				bool value;
+
+				if (m_current->lexeme == "true") {
+					value = true;
+				} else if (m_current->lexeme == "false") {
+					value = false;
+				}
+				return (ByteCode)add_literal_to_env({ 
+					ValueKind::BOOL,
+					{ .boolean=value }, 
+					true
+				});
+			}
+
+			case TokenKind::STRING_LIT: {
+				return (ByteCode)add_literal_to_env({ 
+					ValueKind::STRING,
+					{ .string=copy_lexeme(m_current) }, 
+					true
+				});
+			}
 		}
 	}
 
@@ -131,6 +162,13 @@ namespace Process {
 				break;
 			}
 
+			case TokenKind::DUP:		consume(m_current->kind); push_byte(ByteCode::DUPLICATE); break;
+			case TokenKind::POP:		consume(m_current->kind); push_byte(ByteCode::DROP); break;
+			case TokenKind::SWAP:		consume(m_current->kind); push_byte(ByteCode::SWAP); break;
+
+			case TokenKind::PRINT:		consume(m_current->kind); push_byte(ByteCode::PRINT); break;
+			case TokenKind::PRINTLN:	consume(m_current->kind); push_byte(ByteCode::PRINTLN); break;
+
 			default: expr(); break;
 		}
 	}
@@ -148,7 +186,9 @@ namespace Process {
 		consume(TokenKind::RCURLY);
 	}
 
-	void Parser::using_statement() {}
+	void Parser::using_statement() {
+		consume(m_current->kind);
+	}
 
 	void Parser::type_list(const char *id, bool is_proc) {
 		// FIXME: This will be geared towards a proc, but will be required for structs
