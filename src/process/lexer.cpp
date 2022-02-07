@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 #include "lexer.hpp"
 #include "util.hpp"
 
@@ -21,7 +20,7 @@ namespace Process {
 	}
 
 	// Lexer
-	Lexer::Lexer(const char *source)
+	Lexer::Lexer(std::string source)
 		:m_source(source) {}
 
 	// Helper methods
@@ -126,6 +125,7 @@ namespace Process {
 				case '+': return make_single(TokenKind::PLUS);
 				case '-': {
 					if (peek(1) == '>') {
+						m_ip++;
 						return make_single(TokenKind::ARROW);
 					} else {
 						return make_single(TokenKind::MINUS);
@@ -140,6 +140,7 @@ namespace Process {
 				case '=': return make_single(TokenKind::EQUAL);
 				case '>': {
 					if (peek(1) == '=') {
+						m_ip++;
 						return make_single(TokenKind::GREATER_EQ);
 					} else {
 						return make_single(TokenKind::GREATER);
@@ -147,13 +148,14 @@ namespace Process {
 				}
 				case '<': {
 					if (peek(1) == '=') {
+						m_ip++;
 						return make_single(TokenKind::LESS_EQ);
 					} else {
 						return make_single(TokenKind::LESS);
 					}
 				}
-				case '(': return make_single(TokenKind::LBRACKET);
-				case ')': return make_single(TokenKind::RBRACKET);
+				case '(': return make_single(TokenKind::LPAREN);
+				case ')': return make_single(TokenKind::RPAREN);
 				case '{': return make_single(TokenKind::LCURLY);
 				case '}': return make_single(TokenKind::RCURLY);
 				// case '\'': return makeString();

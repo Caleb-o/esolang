@@ -1,12 +1,31 @@
 #pragma once
-#include <cstdint>
 #include "token.hpp"
+
+#pragma warning(disable : 4996)
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <stdexcept>
 
 using namespace Process;
 
 namespace Util {
-	//https://stackoverflow.com/questions/650162/why-the-switch-statement-cannot-be-applied-on-strings
-	constexpr uint32_t hash(const char* data, size_t const size) noexcept{
+	// https://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
+	template<typename ... Args>
+	static std::string string_format(const std::string& format, Args ... args)
+	{
+		int size_s = std::snprintf(nullptr, 0, format.c_str(), args ...) + 1; // Extra space for '\0'
+		if (size_s <= 0){ throw std::runtime_error("Error during formatting."); }
+
+		auto size = static_cast<size_t>(size_s);
+		auto buf = std::make_unique<char[]>(size);
+		
+		std::snprintf(buf.get(), size, format.c_str(), args ...);
+		return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
+	}
+
+	// https://stackoverflow.com/questions/650162/why-the-switch-statement-cannot-be-applied-on-strings
+	static constexpr uint32_t hash(const char* data, size_t const size) noexcept{
 		uint32_t hash = 5381;
 
 		for(const char *c = data; c < data + size; ++c)
@@ -54,6 +73,7 @@ namespace Util {
 			case hash("using", 5):		return TokenKind::USING;
 			case hash("return", 6):		return TokenKind::RETURN;
 			case hash("if", 2):			return TokenKind::IF;
+			case hash("else", 4):		return TokenKind::ELSE;
 			case hash("print", 5):		return TokenKind::PRINT;
 			case hash("println", 7):	return TokenKind::PRINTLN;
 			case hash("true", 4):		return TokenKind::BOOL_LIT;

@@ -13,3 +13,7 @@ ProcNode:
 ProcDef struct
 ProcNode* next
 
+if/else
+
+Inside a true body, an explicit goto must be inserted, so we do not run the false body just after. We could essentially
+chain ifs together so we jump to the next if, instead of using an elif keyword.

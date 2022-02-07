@@ -1,0 +1,21 @@
+#pragma once
+
+namespace Process {
+	enum class ByteCode {
+		HALT,					// HALT
+		PRINT, PRINTLN,			// PRINT|PRINTLN
+		DROP,					// POP
+		PUSH,					// PUSH IDX
+		BIND, BINDMOVE,			// BIND|BINDMOVE
+		CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
+		PROCCALL,				// PROCCALL FUNCTION_DEF_ID
+		BINDING,				// BINDING BINDING_ID
+		GOTO,					// GOTO POS
+		IF,						// IF GOTO POS
+		RETURN,					// RETURN
+		ADD, SUB, MUL, DIV,		// ADD|SUB|MUL|DIV
+		GREATER, LESS, EQUAL,	// GREATER|LESS|EQUAL
+		GREATER_EQ, LESS_EQ,	// GREATER_EQ|LESS_EQ
+		DUPLICATE, SWAP,		// DUPLICATE|SWAP
+	};
+}

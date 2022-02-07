@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "token.hpp"
 
 namespace Process {
@@ -18,7 +19,7 @@ namespace Process {
 		Token *make_single(TokenKind);
 
 	public:
-		Lexer(const char *);
+		Lexer(std::string);
 
 		Token *get_token();
 	};
