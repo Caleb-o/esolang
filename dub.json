@@ -1,9 +1,0 @@
-{
-	"authors": [
-		"caleb"
-	],
-	"copyright": "Copyright © 2022, caleb",
-	"description": "A stack-based concatenative language in D",
-	"license": "MIT",
-	"name": "esolang"
-}
