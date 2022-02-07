@@ -1,3 +1,4 @@
 # 6 seconds on my lower-spec Linux laptop
 # Fib to 28
-proc main() -> void { 10 1 2 + - / * }
+proc main(a, b, c : int) -> void { 10 1 2 + - / * }
+proc main(a, b, c : int) -> void { 10 1 2 + - / * }

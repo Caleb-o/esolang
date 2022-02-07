@@ -31,8 +31,8 @@ namespace Process {
 		void statement_list();
 		void code_block();
 		void using_statement();
-		void type_list();
-		void parameter_list();
+		size_t type_list(const char *, bool);
+		size_t parameter_list(const char *);
 		void struct_def();
 		void procedure_def();
 		void program();

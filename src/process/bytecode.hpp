@@ -8,7 +8,7 @@ namespace Process {
 		PUSH,					// PUSH IDX
 		BIND, BINDMOVE,			// BIND|BINDMOVE
 		CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
-		PROCCALL,				// PROCCALL FUNCTION_DEF_ID
+		PROCCALL,				// PROCCALL FUNCTION_DEF_ID SUB_ID
 		BINDING,				// BINDING BINDING_ID
 		GOTO,					// GOTO POS
 		IF,						// IF GOTO_FALSE_POS

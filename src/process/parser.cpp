@@ -15,6 +15,64 @@ namespace Process {
 		throw msg;
 	}
 
+	static char *copy_lexeme(Token *current) {
+		char *id = new char[current->lexeme.size() + 1];
+		std::strncpy(id, current->lexeme.c_str(), current->lexeme.size());
+		id[current->lexeme.size()] = '\0';
+		return id;
+	}
+
+	static size_t add_proc_def_tmp(Environment *env, const char *id) {
+		// Does not exist yet, we can just add it
+		auto def_it = env->defs.procedures.find(id);
+
+		if (def_it == env->defs.procedures.end()) {
+			env->defs.procedures[id].push_back({});
+		}
+		return std::distance(env->defs.procedures.begin(), def_it);
+	}
+
+	static size_t add_proc_def(Environment *env, const char *id, ProcedureDef def) {
+		// Find the index of 
+		size_t proc_idx = std::distance(env->defs.procedures.begin(), env->defs.procedures.find(id));
+
+		// We must linearly search for a definition
+		for(size_t defidx = 0; defidx < env->defs.procedures[id].size(); ++defidx) {
+			if (env->defs.procedures[id][defidx].parameters.size() !=
+				def.parameters.size()) {
+				// Cannot compare
+				continue;
+			}
+
+			auto params_it = env->defs.procedures[id][defidx].parameters.begin();
+			auto def_params_it = def.parameters.begin();
+
+			bool sameParams = true;
+			
+			// Similar parameter count, now we compare types
+			while(params_it != env->defs.procedures[id][defidx].parameters.end()) {
+				if (params_it->second.kind != def_params_it->second.kind) {
+					sameParams = false;
+					break;
+				}
+
+				params_it++;
+				def_params_it++;
+			}
+
+			// A proc was found with the same parameters
+			if (sameParams) {
+				throw Util::string_format("Overload for '%s' already exists with current parameters");
+			}
+		}
+
+		// Nothing was found, we can make an overload
+		env->defs.procedures[id].push_back(def);
+		return env->defs.procedures[id].size() - 1;
+	}
+
+	// Parser
+
 	void Parser::push_byte(ByteCode byte) {
 		m_env->code.push_back(byte);
 	}
@@ -103,14 +161,78 @@ namespace Process {
 
 	void Parser::using_statement() {}
 
-	void Parser::type_list() {
+	size_t Parser::type_list(const char *id, bool is_proc) {
+		// FIXME: This will be geared towards a proc, but will be required for structs
+		TokenKind endType = (is_proc) ? TokenKind::RPAREN : TokenKind::RCURLY;
+		bool hasMove = false;
 
+		while(m_current->kind != endType) {
+			std::vector<std::string> ids;
+
+			// Parse multiple names for a single type
+			while (m_current->kind != TokenKind::COLON) {
+				ids.push_back(m_current->lexeme);
+				consume(TokenKind::ID);
+
+				// Multiple names
+				if (m_current->kind == TokenKind::COMMA) {
+					consume(m_current->kind);
+				}
+			}
+
+			consume(TokenKind::COLON);
+			bool isMoved = true;
+
+			// Modifier for duplicating data instead of moving
+			if (m_current->kind == TokenKind::DUP) {
+				if (hasMove) {
+					// We cannot move values from within the stack, it must be at the
+					// end. We can duplicate them all however.
+					error("Cannot use dup modifier after move parameters");
+				}
+
+				consume(m_current->kind);
+				isMoved = false;
+			} else {
+				hasMove = true;
+			}
+
+			char *type_id = copy_lexeme(m_current);
+			consume(TokenKind::TYPEID);
+
+			auto *params = &m_env->defs.procedures[id][m_env->defs.procedures[id].size()-1];
+
+			// Create each parameter
+			for(auto& id : ids) {
+				ValueKind kind = kind_from_str(type_id);
+
+				if (kind == ValueKind::VOID) {
+					error(Util::string_format("Cannot use type '%s' in parameter list", id));
+				}
+				params->parameters[id] = { kind, hasMove };
+			}
+
+			// Cleanup
+			delete type_id;
+
+			// Multiple parameters
+			if (m_current->kind == TokenKind::COMMA) {
+				consume(m_current->kind);
+
+				if (m_current->kind == endType && is_proc) {
+					error(Util::string_format("Unexpected character found '%s' after comma", get_token_name(m_current->kind)));
+				}
+			}
+		}
+
+		return 0;
 	}
 
-	void Parser::parameter_list() {
+	size_t Parser::parameter_list(const char *id) {
 		consume(TokenKind::LPAREN);
-		type_list();
+		size_t idx = type_list(id, true);
 		consume(TokenKind::RPAREN);
+		return idx;
 	}
 
 	void Parser::struct_def() {}
@@ -119,15 +241,13 @@ namespace Process {
 		consume(TokenKind::PROC);
 
 		// We must copy here since pointing to the c_str gives us a weird result
-		char *id = new char[m_current->lexeme.size() + 1];
-		std::strncpy(id, m_current->lexeme.c_str(), m_current->lexeme.size());
-		id[m_current->lexeme.size()] = '\0';
-
+		char *id = copy_lexeme(m_current);
 		consume(TokenKind::ID);
 
-		// TODO: Add proc def and get idx
+		size_t proc_idx = add_proc_def_tmp(m_env, id);
 
-		parameter_list();
+		// TODO: Add proc def and get idx
+		size_t sub_idx = parameter_list(id);
 		consume(TokenKind::ARROW);
 		
 		// TODO: Multiple return types
@@ -138,10 +258,13 @@ namespace Process {
 
 		// Conditional bytes, since main cannot return
 		if (std::strcmp(id, "main") != 0) {
-			push_bytes(ByteCode::RETURN, (ByteCode)0);
+			push_bytes(ByteCode::RETURN, (ByteCode)proc_idx);
+			push_byte((ByteCode)sub_idx);
 		} else {
 			push_byte(ByteCode::HALT);
 		}
+
+		delete id;
 	}
 
 	void Parser::program() {

@@ -43,6 +43,32 @@ namespace Process {
 
 
 	static void print_code(Environment *env) {
+		std::cout << "=== Procedures ===\n";
+		size_t idx = 0;
+		for(auto& proc : env->defs.procedures) {
+			std::cout << "Proc '" << proc.first << "' #" << idx << "\n";
+
+			size_t variation = 0;
+			for(auto& procDef : proc.second) {
+				std::cout << "variation #" << variation << ", starts at: " << procDef.startIdx << std::endl;
+				std::cout << "== Params == " << std::endl;
+				
+				for(auto& param : procDef.parameters) {
+					std::cout << param.first << " : " << kind_as_str(param.second.kind) << std::endl;
+				}
+
+				std::cout << "== Return == " << std::endl;
+				
+				for(auto& ret : procDef.returnTypes) {
+					std::cout << kind_as_str(ret) << std::endl;
+				}
+
+				std::cout << std::endl;
+				variation++;
+			}
+			idx++;
+		}
+
 		std::cout << "=== ByteCode ===\n";
 
 		if (env == nullptr) {
