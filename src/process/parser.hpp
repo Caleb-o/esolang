@@ -31,8 +31,8 @@ namespace Process {
 		void statement_list();
 		void code_block();
 		void using_statement();
-		size_t type_list(const char *, bool);
-		size_t parameter_list(const char *);
+		void type_list(const char *, bool);
+		void parameter_list(const char *);
 		void struct_def();
 		void procedure_def();
 		void program();
@@ -42,6 +42,6 @@ namespace Process {
 		// We will need to delete the last token
 		~Parser() { delete m_current; }
 
-		Environment *parse(char *);
+		Environment *parse(std::string);
 	};
 }

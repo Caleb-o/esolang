@@ -23,6 +23,9 @@ namespace Process {
 		switch(byte) {
 			case ByteCode::PUSH:		return "PUSH";
 			case ByteCode::DROP:		return "DROP";
+			case ByteCode::BIND:		return "BIND";
+			case ByteCode::BINDMOVE:	return "BIND-MOVE";
+			case ByteCode::BINDING:		return "BINDING";
 
 			case ByteCode::ADD:			return "ADD";
 			case ByteCode::SUB:			return "SUB";

@@ -17,7 +17,7 @@ namespace Runtime {
 	
 	struct Value {
 		ValueKind kind;
-		ValueData* data;
+		ValueData data;
 		bool read_only;
 	};
 

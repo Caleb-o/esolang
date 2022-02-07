@@ -48,10 +48,14 @@ namespace Process {
 		for(auto& proc : env->defs.procedures) {
 			std::cout << "Proc '" << proc.first << "' #" << idx << "\n";
 
-			size_t variation = 0;
+			size_t overload = 0;
 			for(auto& procDef : proc.second) {
-				std::cout << "variation #" << variation << ", starts at: " << procDef.startIdx << std::endl;
+				std::cout << "overload #" << overload << ", starts at pos: " << procDef.startIdx << std::endl;
 				std::cout << "== Params == " << std::endl;
+
+				if (procDef.parameters.size() == 0) {
+					std::cout << "-- Empty --\n";
+				}
 				
 				for(auto& param : procDef.parameters) {
 					std::cout << param.first << " : " << kind_as_str(param.second.kind) << std::endl;
@@ -64,32 +68,31 @@ namespace Process {
 				}
 
 				std::cout << std::endl;
-				variation++;
+				overload++;
 			}
 			idx++;
 		}
 
 		std::cout << "=== ByteCode ===\n";
-
-		if (env == nullptr) {
-			std::cout << "KEK\n";
-			return;
-		}
-
 		size_t i = 0;
+
 		while(i < env->code.size()) {
 			std::cout << Util::string_format("%04d ", i);
 
 			switch(env->code[i]) {
+				case ByteCode::RETURN: {
+					int proc_idx = (int)env->code[++i];
+					int sub_idx = (int)env->code[++i];
+					std::cout << get_bytecode_name(env->code[i-2]) << "<" << proc_idx << ", " << sub_idx << ">\n";
+					break;
+				}
+
 				case ByteCode::PROCCALL:
 				case ByteCode::GOTO:
-				case ByteCode::RETURN:
 				case ByteCode::PUSH:
 				case ByteCode::IF: {
-					int val_idx = (int)env->code[i+1];
-					std::cout << get_bytecode_name(env->code[i]) << "<" << val_idx << ">\n";
-
-					i++;
+					int val_idx = (int)env->code[++i];
+					std::cout << get_bytecode_name(env->code[i-1]) << "<" << val_idx << ">\n";
 					break;
 				}
 

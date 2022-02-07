@@ -22,25 +22,19 @@ namespace Process {
 		return id;
 	}
 
+	// Returns the sub index
 	static size_t add_proc_def_tmp(Environment *env, const char *id) {
 		// Does not exist yet, we can just add it
-		auto def_it = env->defs.procedures.find(id);
-
-		if (def_it == env->defs.procedures.end()) {
-			env->defs.procedures[id].push_back({});
-		}
-		return std::distance(env->defs.procedures.begin(), def_it);
+		env->defs.procedures[id].push_back({});
+		return env->defs.procedures[id].size() - 1;
 	}
 
-	static size_t add_proc_def(Environment *env, const char *id, ProcedureDef def) {
-		// Find the index of 
-		size_t proc_idx = std::distance(env->defs.procedures.begin(), env->defs.procedures.find(id));
-
+	static void verify_proc_def(Environment *env, const char *id, ProcedureDef def) {
 		// We must linearly search for a definition
-		for(size_t defidx = 0; defidx < env->defs.procedures[id].size(); ++defidx) {
+		for(size_t defidx = 0; defidx < env->defs.procedures[id].size() - 1; ++defidx) {
+			// Cannot compare different length param count
 			if (env->defs.procedures[id][defidx].parameters.size() !=
 				def.parameters.size()) {
-				// Cannot compare
 				continue;
 			}
 
@@ -62,13 +56,9 @@ namespace Process {
 
 			// A proc was found with the same parameters
 			if (sameParams) {
-				throw Util::string_format("Overload for '%s' already exists with current parameters");
+				throw Util::string_format("Overload for '%s' already exists with current parameters", id);
 			}
 		}
-
-		// Nothing was found, we can make an overload
-		env->defs.procedures[id].push_back(def);
-		return env->defs.procedures[id].size() - 1;
 	}
 
 	// Parser
@@ -101,12 +91,11 @@ namespace Process {
 	ByteCode Parser::add_literal() {
 		switch(m_current->kind) {
 			case TokenKind::INT_LIT: {
-				Value val = { 
+				return (ByteCode)add_literal_to_env({ 
 					ValueKind::INT, 
-					new (ValueData){ .integer=std::stoi(m_current->lexeme.c_str()) }, 
+					{ .integer=std::stoi(m_current->lexeme) }, 
 					true
-				};
-				return (ByteCode)add_literal_to_env(val);
+				});
 			}
 		}
 	}
@@ -161,7 +150,7 @@ namespace Process {
 
 	void Parser::using_statement() {}
 
-	size_t Parser::type_list(const char *id, bool is_proc) {
+	void Parser::type_list(const char *id, bool is_proc) {
 		// FIXME: This will be geared towards a proc, but will be required for structs
 		TokenKind endType = (is_proc) ? TokenKind::RPAREN : TokenKind::RCURLY;
 		bool hasMove = false;
@@ -201,6 +190,7 @@ namespace Process {
 			consume(TokenKind::TYPEID);
 
 			auto *params = &m_env->defs.procedures[id][m_env->defs.procedures[id].size()-1];
+			ProcedureDef procDef = {0};
 
 			// Create each parameter
 			for(auto& id : ids) {
@@ -209,11 +199,14 @@ namespace Process {
 				if (kind == ValueKind::VOID) {
 					error(Util::string_format("Cannot use type '%s' in parameter list", id));
 				}
+				procDef.parameters[id] = { kind, hasMove };
 				params->parameters[id] = { kind, hasMove };
 			}
 
+			verify_proc_def(m_env, id, procDef);
+
 			// Cleanup
-			delete type_id;
+			delete[] type_id;
 
 			// Multiple parameters
 			if (m_current->kind == TokenKind::COMMA) {
@@ -224,15 +217,12 @@ namespace Process {
 				}
 			}
 		}
-
-		return 0;
 	}
 
-	size_t Parser::parameter_list(const char *id) {
+	void Parser::parameter_list(const char *id) {
 		consume(TokenKind::LPAREN);
-		size_t idx = type_list(id, true);
+		type_list(id, true);
 		consume(TokenKind::RPAREN);
-		return idx;
 	}
 
 	void Parser::struct_def() {}
@@ -244,32 +234,39 @@ namespace Process {
 		char *id = copy_lexeme(m_current);
 		consume(TokenKind::ID);
 
-		size_t proc_idx = add_proc_def_tmp(m_env, id);
+		size_t sub_idx = add_proc_def_tmp(m_env, id);
+		m_env->defs.procedures[id][sub_idx].startIdx = (m_env->code.size() == 0) ? 0 : m_env->code.size() - 1;
 
 		// TODO: Add proc def and get idx
-		size_t sub_idx = parameter_list(id);
+		parameter_list(id);
 		consume(TokenKind::ARROW);
 		
 		// TODO: Multiple return types
-		const char *retid = m_current->lexeme.c_str();
+		const char *retid = copy_lexeme(m_current);
 		consume(TokenKind::TYPEID);
+		m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid));
 
 		code_block();
 
 		// Conditional bytes, since main cannot return
 		if (std::strcmp(id, "main") != 0) {
+			size_t proc_idx = std::distance(m_env->defs.procedures.begin(), m_env->defs.procedures.find(id));
 			push_bytes(ByteCode::RETURN, (ByteCode)proc_idx);
 			push_byte((ByteCode)sub_idx);
 		} else {
+			// Check for main def count
+			if (m_env->defs.procedures[id].size() > 1) {
+				error("Multiple definitions of main");
+			}
+
 			push_byte(ByteCode::HALT);
 		}
 
-		delete id;
+		delete[] retid;
+		delete[] id;
 	}
 
 	void Parser::program() {
-		std::cout << "Current " << get_token_name(m_current->kind) << std::endl;
-
 		while(m_current->kind != TokenKind::ENDOFFILE) {
 			switch(m_current->kind) {
 				case TokenKind::USING: {
@@ -300,7 +297,7 @@ namespace Process {
 		m_env = new Environment();
 	}
 
-	Environment *Parser::parse(char *source) {
+	Environment *Parser::parse(std::string source) {
 		m_lexer = new Lexer(source);
 		m_current = m_lexer->get_token();
 

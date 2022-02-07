@@ -19,7 +19,7 @@ namespace Process {
 		Token *make_single(TokenKind);
 
 	public:
-		Lexer(char *);
+		Lexer(std::string);
 
 		Token *get_token();
 	};

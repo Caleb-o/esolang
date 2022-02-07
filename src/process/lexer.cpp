@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include "lexer.hpp"
 #include "util.hpp"
 
@@ -20,9 +21,7 @@ namespace Process {
 	}
 
 	// Lexer
-	Lexer::Lexer(char *source) :m_source(source) {
-		delete[] source;
-	}
+	Lexer::Lexer(std::string source) :m_source(source) {}
 
 	// Helper methods
 	void Lexer::skip_whitespace() {

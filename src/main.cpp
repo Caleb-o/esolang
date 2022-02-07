@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <streambuf>
 #include <string>
 #include <cstring>
 #include <exception>
@@ -9,22 +10,19 @@
 
 using namespace Process;
 
-static char *read_file(const char *file_name) {
-	std::streampos size;
-	char *memblock = nullptr;
+std::string read_file(const char *file_name) {
+	std::ifstream file(file_name);
+	std::string str;
 
-	std::ifstream file(file_name, std::ios::in);
-
-	if (file.is_open())
-	{
-		file.seekg(0, std::ios::end);
-		size = file.tellg();
-		memblock = new char[size];
+	if (file.is_open()) {
+		file.seekg(0, std::ios::end);   
+		str.reserve(file.tellg());
 		file.seekg(0, std::ios::beg);
-		file.read(memblock, size);
-		file.close();
+
+		str.assign((std::istreambuf_iterator<char>(file)),
+					std::istreambuf_iterator<char>());
 	}
-	return memblock;
+	return str;
 }
 
 static void usage() {
@@ -64,10 +62,10 @@ int main(int argc, char **argv) {
 	Parser p;
 		
 	try {
-		char *buffer = read_file(filename);
+		std::string buffer = read_file(filename);
 
-		if (buffer == nullptr) {
-			throw "File could not be read";
+		if (buffer.size() == 0) {
+			throw "File could not be read or is empty";
 		}
 
 		Environment *env = p.parse(buffer);
