@@ -1,22 +1,25 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 #include <exception>
+#include "process/util.hpp"
 #include "process/parser.hpp"
 
 using namespace Process;
 
-static const char *read_file(const char *file_name) {
+static char *read_file(const char *file_name) {
 	std::streampos size;
-	char * memblock;
+	char *memblock = nullptr;
 
 	std::ifstream file(file_name, std::ios::in);
+
 	if (file.is_open())
 	{
 		size = file.tellg();
-		memblock = new char [size];
-		file.seekg (0, std::ios::beg);
-		file.read (memblock, size);
+		memblock = new char[size];
+		file.seekg(0, std::ios::beg);
+		file.read(memblock, size);
 		file.close();
 	}
 	return memblock;
@@ -31,23 +34,51 @@ int main(int argc, char **argv) {
 		usage();
 		return 0;
 	}
+	
+	// Simple argument parsing
+	bool debug = false;
+	char *filename = nullptr;
 
-	if (argc == 2) {
-		Parser p;
+	for(int i = 1; i < argc; ++i) {
+		switch(Util::hash(argv[i], std::strlen(argv[i]))) {
+			case Util::hash("-d", 2): 		debug = true; break;
+			default: {
+				std::string arg(argv[i]);
+
+				if (arg.find('.') != std::string::npos ||
+					arg.find('/') != std::string::npos) {
+					filename = argv[i];
+				}
+				break;
+			}
+		}
+	}
+
+	if (filename == nullptr) {
+		usage();
+		return 0;
+	}
+
+	Parser p;
 		
-		try {
-			Environment *env = p.parse(read_file(argv[1]));
-			delete env;
-		} catch (std::string& msg) {
-			std::cerr << "Runtime: " << msg << "\n";
-		} catch (std::exception& e) {
-			std::cerr << "Pre-process: " << e.what() << "\n";
+	try {
+		char *buffer = read_file(filename);
+
+		if (buffer == nullptr) {
+			throw "File could not be read";
 		}
 
-		std::cout << "Done.\n";
-	} else {
-		usage();
+		Environment *env = p.parse(buffer);
+		delete env;
+	} catch (const char *msg) {
+		std::cerr << "Runtime: " << msg << "\n";
+	} catch (std::string& msg) {
+		std::cerr << "Runtime: " << msg << "\n";
+	} catch (std::exception& e) {
+		std::cerr << "Pre-process: " << e.what() << "\n";
 	}
+
+	std::cout << "Done.\n";
 
 
 	return 0;
