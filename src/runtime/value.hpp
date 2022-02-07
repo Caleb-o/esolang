@@ -23,16 +23,36 @@ namespace Runtime {
 		bool read_only;
 	};
 
-	
-	static void write_value(Value& value) {
-		switch(value.kind) {
-			case ValueKind::VOID: 		std::cout << "void"; break;
-			case ValueKind::INT: 		std::cout << value.data.integer; break;
-			case ValueKind::FLOAT: 		std::cout << value.data.floating; break;
-			case ValueKind::BOOL: 		std::cout << value.data.boolean; break;
-			case ValueKind::STRING: 	std::cout << value.data.string; break;
-			case ValueKind::STRUCT: 	std::cout << "struct"; break;
-		}
+	static Value create_value(int value, bool read_only = true) {
+		return { 
+			ValueKind::INT,
+			{ .integer=value },
+			read_only
+		};
+	}
+
+	static Value create_value(float value, bool read_only = true) {
+		return { 
+			ValueKind::FLOAT,
+			{ .floating=value },
+			read_only
+		};
+	}
+
+	static Value create_value(bool value, bool read_only = true) {
+		return { 
+			ValueKind::BOOL,
+			{ .boolean=value },
+			read_only
+		};
+	}
+
+	static Value create_value(char *value, bool read_only = true) {
+		return {
+			ValueKind::STRING,
+			{ .string=value },
+			read_only
+		};
 	}
 
 
@@ -55,6 +75,17 @@ namespace Runtime {
 			case ValueKind::BOOL:		return "bool";
 			case ValueKind::STRING:		return "string";
 			case ValueKind::STRUCT:		return "struct";
+		}
+	}
+
+	static void write_value(Value& value) {
+		switch(value.kind) {
+			case ValueKind::VOID: 		std::cout << "void"; break;
+			case ValueKind::INT: 		std::cout << value.data.integer; break;
+			case ValueKind::FLOAT: 		std::cout << value.data.floating; break;
+			case ValueKind::BOOL: 		std::cout << ((value.data.boolean) ? "true" : "false"); break;
+			case ValueKind::STRING: 	std::cout << value.data.string; break;
+			case ValueKind::STRUCT: 	std::cout << "struct"; break;
 		}
 	}
 }

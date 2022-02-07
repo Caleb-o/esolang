@@ -88,6 +88,7 @@ namespace Process {
 		return m_env->literals.size() - 1;
 	}
 
+	// TODO: Update these cases to use Value's create_value instead of initialising literal
 	ByteCode Parser::add_literal() {
 		switch(m_current->kind) {
 			case TokenKind::INT_LIT: {
@@ -154,14 +155,37 @@ namespace Process {
 		}
 	}
 
+	void Parser::comparison_statement() {
+		auto op = m_current->kind;
+		consume(op);
+
+		switch(op) {
+			case TokenKind::GREATER:		push_byte(ByteCode::GREATER); break;
+			case TokenKind::GREATER_EQ:		push_byte(ByteCode::GREATER_EQ); break;
+			case TokenKind::LESS:			push_byte(ByteCode::LESS); break;
+			case TokenKind::LESS_EQ:		push_byte(ByteCode::LESS_EQ); break;
+			case TokenKind::EQUAL:			push_byte(ByteCode::EQUAL); break;
+		}
+	}
+
 	void Parser::statement() {
 		switch(m_current->kind) {
+			// Arithmetic
 			case TokenKind::PLUS: case TokenKind::MINUS:
 			case TokenKind::STAR: case TokenKind::SLASH: {
 				arithmetic_statement();
 				break;
 			}
 
+			// Comparison operators
+			case TokenKind::GREATER: case TokenKind::GREATER_EQ:
+			case TokenKind::LESS: case TokenKind::LESS_EQ: 
+			case TokenKind::EQUAL: {
+				comparison_statement();
+				break;
+			}
+
+			// Keywords
 			case TokenKind::DUP:		consume(m_current->kind); push_byte(ByteCode::DUPLICATE); break;
 			case TokenKind::POP:		consume(m_current->kind); push_byte(ByteCode::DROP); break;
 			case TokenKind::SWAP:		consume(m_current->kind); push_byte(ByteCode::SWAP); break;

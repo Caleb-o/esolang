@@ -31,6 +31,12 @@ namespace Process {
 			case ByteCode::SUB:			return "SUB";
 			case ByteCode::MUL:			return "MUL";
 			case ByteCode::DIV:			return "DIV";
+
+			case ByteCode::GREATER:		return "GREATER";
+			case ByteCode::GREATER_EQ:	return "GREATER_EQ";
+			case ByteCode::LESS:		return "LESS";
+			case ByteCode::LESS_EQ:		return "LESS_EQ";
+			case ByteCode::EQUAL:		return "EQUAL";
 			
 			case ByteCode::PROCCALL:	return "PROCCALL";
 			case ByteCode::HALT:		return "HALT";

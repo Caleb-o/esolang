@@ -29,6 +29,7 @@ namespace Process {
 
 		void expr();
 		void arithmetic_statement();
+		void comparison_statement();
 		void statement();
 		void statement_list();
 		void code_block();

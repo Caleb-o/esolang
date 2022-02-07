@@ -24,6 +24,8 @@ namespace Runtime {
 		void unwind_stack();
 		void error(bool, std::string);
 		void push_stack(Value);
+		void arithmetic_op();
+		void comparison_op();
 		Value pop_stack();
 		Value peek_stack();
 
