@@ -17,6 +17,8 @@ namespace Process {
 		Environment *m_env;
 
 	private:
+		void error(std::string msg);
+		
 		void push_byte(ByteCode);
 		void push_bytes(ByteCode, ByteCode);
 

@@ -11,8 +11,8 @@ using namespace Runtime;
 
 namespace Process {
 	// Helpers
-	static void error(std::string msg) {
-		throw msg;
+	void Parser::error(std::string msg) {
+		throw Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col);
 	}
 
 	static char *copy_lexeme(Token *current) {
@@ -235,7 +235,7 @@ namespace Process {
 		consume(TokenKind::ID);
 
 		size_t sub_idx = add_proc_def_tmp(m_env, id);
-		m_env->defs.procedures[id][sub_idx].startIdx = (m_env->code.size() == 0) ? 0 : m_env->code.size() - 1;
+		m_env->defs.procedures[id][sub_idx].startIdx = (m_env->code.size() == 0) ? 0 : m_env->code.size();
 
 		// TODO: Add proc def and get idx
 		parameter_list(id);
@@ -257,6 +257,13 @@ namespace Process {
 			// Check for main def count
 			if (m_env->defs.procedures[id].size() > 1) {
 				error("Multiple definitions of main");
+			}
+
+			// Check main arguments and return
+			if (m_env->defs.procedures[id][0].parameters.size() > 0 ||
+				m_env->defs.procedures[id][0].returnTypes.size() > 1 ||
+				m_env->defs.procedures[id][0].returnTypes[0] != ValueKind::VOID) {
+				error("Main must be defined without arguments and return void");
 			}
 
 			push_byte(ByteCode::HALT);

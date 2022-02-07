@@ -58,7 +58,9 @@ namespace Process {
 				}
 				
 				for(auto& param : procDef.parameters) {
-					std::cout << param.first << " : " << kind_as_str(param.second.kind) << std::endl;
+					std::cout << param.first << " : ";
+					std::cout << ((param.second.isMoved) ? "move" : "copy") << " ";
+					std::cout << kind_as_str(param.second.kind) << std::endl;
 				}
 
 				std::cout << "== Return == " << std::endl;

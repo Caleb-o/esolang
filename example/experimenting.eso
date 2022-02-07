@@ -1,4 +1,4 @@
 proc test() -> void {}
 proc test(b : bool) -> void {}
+proc main() -> void { 10 1 2 + - / * }
 proc test2(b : bool) -> bool {}
-proc main(a, b, c : int) -> void { 10 1 2 + - / * }
