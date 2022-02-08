@@ -10,6 +10,7 @@ namespace Process {
 
 	private:
 		// Helper methods
+		void error(std::string);
 		void skip_whitespace();
 		char peek(size_t);
 
@@ -20,6 +21,7 @@ namespace Process {
 
 	public:
 		Lexer(std::string);
+		~Lexer() {}
 
 		Token *get_token();
 	};

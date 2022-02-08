@@ -2,5 +2,11 @@ proc test() -> void {}
 proc test(b : bool) -> void {}
 proc main() -> void { 
 	1 1 = println drop
+
+	true if {
+		'true' println drop
+	} else {
+		'false' println drop
+	}
 }
 proc test2(b : bool) -> bool { 1 1 }

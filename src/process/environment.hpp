@@ -47,7 +47,7 @@ namespace Process {
 	}
 
 
-	static void print_code(Environment *env) {
+	static void print_env(Environment *env) {
 		std::cout << "=== Procedures ===\n";
 		size_t idx = 0;
 		for(auto& proc : env->defs.procedures) {

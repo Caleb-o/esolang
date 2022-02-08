@@ -15,11 +15,8 @@ namespace Process {
 		throw Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col);
 	}
 
-	static char *copy_lexeme(Token *current) {
-		char *id = new char[current->lexeme.size() + 1];
-		std::strncpy(id, current->lexeme.c_str(), current->lexeme.size());
-		id[current->lexeme.size()] = '\0';
-		return id;
+	static std::string copy_lexeme(Token *current) {
+		return std::string(current->lexeme);
 	}
 
 	// Returns the sub index
@@ -67,9 +64,18 @@ namespace Process {
 		m_env->code.push_back(byte);
 	}
 
+	void Parser::push_byte(size_t byte) {
+		m_env->code.push_back((ByteCode)byte);
+	}
+
 	void Parser::push_bytes(ByteCode byte_a, ByteCode byte_b) {
 		m_env->code.push_back(byte_a);
 		m_env->code.push_back(byte_b);
+	}
+
+	void Parser::push_bytes(ByteCode byte_a, size_t byte_b) {
+		m_env->code.push_back(byte_a);
+		m_env->code.push_back((ByteCode)byte_b);
 	}
 
 	void Parser::consume(TokenKind expected) {
@@ -88,46 +94,23 @@ namespace Process {
 		return m_env->literals.size() - 1;
 	}
 
-	// TODO: Update these cases to use Value's create_value instead of initialising literal
-	ByteCode Parser::add_literal() {
+	size_t Parser::add_literal() {
 		switch(m_current->kind) {
 			case TokenKind::INT_LIT: {
-				return (ByteCode)add_literal_to_env({ 
-					ValueKind::INT, 
-					{ .integer=std::stoi(m_current->lexeme) }, 
-					true
-				});
+				return add_literal_to_env(create_value(std::stoi(m_current->lexeme)));
 			}
 
 			case TokenKind::FLOAT_LIT: {
-				return (ByteCode)add_literal_to_env({ 
-					ValueKind::STRING,
-					{ .floating=std::stof(m_current->lexeme) }, 
-					true
-				});
+				return add_literal_to_env(create_value(std::stof(m_current->lexeme)));
 			}
 
 			case TokenKind::BOOL_LIT: {
-				bool value;
-
-				if (m_current->lexeme == "true") {
-					value = true;
-				} else if (m_current->lexeme == "false") {
-					value = false;
-				}
-				return (ByteCode)add_literal_to_env({ 
-					ValueKind::BOOL,
-					{ .boolean=value }, 
-					true
-				});
+				bool value = (m_current->lexeme == "true") ? true : false;
+				return add_literal_to_env(create_value(value));
 			}
 
-			case TokenKind::STRING_LIT: {
-				return (ByteCode)add_literal_to_env({ 
-					ValueKind::STRING,
-					{ .string=copy_lexeme(m_current) }, 
-					true
-				});
+			case TokenKind::STRING_LIT:	{
+				return add_literal_to_env(create_value(copy_lexeme(m_current).c_str()));
 			}
 		}
 	}
@@ -168,6 +151,36 @@ namespace Process {
 		}
 	}
 
+	void Parser::if_statement() {
+		consume(TokenKind::IF);
+
+		push_bytes(ByteCode::IF, 0);
+		size_t false_idx = m_env->code.size() - 1;
+
+		code_block();
+
+		// Patch false path to here
+		m_env->code[false_idx] = (ByteCode)m_env->code.size();
+
+		// Parse the else path
+		if (m_current->kind == TokenKind::ELSE) {
+			consume(TokenKind::ELSE);
+
+			// Patch a jump to end for true body
+			push_bytes(ByteCode::GOTO, 0);
+			size_t goto_idx = m_env->code.size() - 1;
+
+			code_block();
+			// Patch goto path to here
+			m_env->code[goto_idx] = (ByteCode)m_env->code.size();
+		}
+
+		// Another else block, which is not allowed
+		if (m_current->kind == TokenKind::ELSE) {
+			error("If block cannot contain several else blocks");
+		}
+	}
+
 	void Parser::statement() {
 		switch(m_current->kind) {
 			// Arithmetic
@@ -186,6 +199,7 @@ namespace Process {
 			}
 
 			// Keywords
+			case TokenKind::IF:			if_statement(); break;
 			case TokenKind::DUP:		consume(m_current->kind); push_byte(ByteCode::DUPLICATE); break;
 			case TokenKind::POP:		consume(m_current->kind); push_byte(ByteCode::DROP); break;
 			case TokenKind::SWAP:		consume(m_current->kind); push_byte(ByteCode::SWAP); break;
@@ -199,7 +213,7 @@ namespace Process {
 
 	void Parser::statement_list() {
 		// Consume statements until we are at the end of the block
-		while(m_current->kind != TokenKind::RCURLY) {
+		while(m_current->kind != TokenKind::ENDOFFILE && m_current->kind != TokenKind::RCURLY) {
 			statement();
 		}
 	}
@@ -211,7 +225,7 @@ namespace Process {
 	}
 
 	void Parser::using_statement() {
-		consume(m_current->kind);
+		error("Using is unimplemented");
 	}
 
 	void Parser::type_list(const char *id, bool is_proc) {
@@ -250,7 +264,7 @@ namespace Process {
 				hasMove = true;
 			}
 
-			char *type_id = copy_lexeme(m_current);
+			std::string type_id = copy_lexeme(m_current);
 			consume(TokenKind::TYPEID);
 
 			auto *params = &m_env->defs.procedures[id][m_env->defs.procedures[id].size()-1];
@@ -258,7 +272,7 @@ namespace Process {
 
 			// Create each parameter
 			for(auto& id : ids) {
-				ValueKind kind = kind_from_str(type_id);
+				ValueKind kind = kind_from_str(type_id.c_str());
 
 				if (kind == ValueKind::VOID) {
 					error(Util::string_format("Cannot use type '%s' in parameter list", id));
@@ -268,9 +282,6 @@ namespace Process {
 			}
 
 			verify_proc_def(m_env, id, procDef);
-
-			// Cleanup
-			delete[] type_id;
 
 			// Multiple parameters
 			if (m_current->kind == TokenKind::COMMA) {
@@ -289,32 +300,35 @@ namespace Process {
 		consume(TokenKind::RPAREN);
 	}
 
-	void Parser::struct_def() {}
+	void Parser::struct_def() {
+		error("Struct is unimplemented");
+	}
 
 	void Parser::procedure_def() {
 		consume(TokenKind::PROC);
 
 		// We must copy here since pointing to the c_str gives us a weird result
-		char *id = copy_lexeme(m_current);
+		std::string id = copy_lexeme(m_current);
 		consume(TokenKind::ID);
 
-		size_t sub_idx = add_proc_def_tmp(m_env, id);
+		size_t sub_idx = add_proc_def_tmp(m_env, id.c_str());
 		m_env->defs.procedures[id][sub_idx].startIdx = (m_env->code.size() == 0) ? 0 : m_env->code.size();
 
 		// TODO: Add proc def and get idx
-		parameter_list(id);
+		parameter_list(id.c_str());
 		consume(TokenKind::ARROW);
 		
 		// TODO: Multiple return types
-		const char *retid = copy_lexeme(m_current);
+		std::string retid = copy_lexeme(m_current);
 		consume(TokenKind::TYPEID);
-		m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid));
+		m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
 
 		code_block();
 
 		// Conditional bytes, since main cannot return
-		if (std::strcmp(id, "main") != 0) {
+		if (std::strcmp(id.c_str(), "main") != 0) {
 			size_t proc_idx = std::distance(m_env->defs.procedures.begin(), m_env->defs.procedures.find(id));
+			
 			push_bytes(ByteCode::RETURN, (ByteCode)proc_idx);
 			push_byte((ByteCode)sub_idx);
 		} else {
@@ -332,9 +346,6 @@ namespace Process {
 
 			push_byte(ByteCode::HALT);
 		}
-
-		delete[] retid;
-		delete[] id;
 	}
 
 	void Parser::program() {
@@ -356,7 +367,6 @@ namespace Process {
 				}
 
 				default: {
-					// TODO: Throw exception
 					error(Util::string_format("Unknown token found '%s'\n", get_token_name(m_current->kind)));
 				}
 			}
@@ -373,8 +383,8 @@ namespace Process {
 		m_current = m_lexer->get_token();
 
 		program();
+		m_completed = true;
 
-		delete m_lexer;
 		return m_env;
 	}
 }

@@ -24,6 +24,10 @@ namespace Process {
 	Lexer::Lexer(std::string source) :m_source(source) {}
 
 	// Helper methods
+	void Lexer::error(std::string msg) {
+		throw Util::string_format("%s on line %d at pos %d", msg.c_str(), m_line, m_col);
+	}
+
 	void Lexer::skip_whitespace() {
 		while(m_ip < m_source.size()) {
 			switch(m_source[m_ip]) {
@@ -78,6 +82,7 @@ namespace Process {
 		size_t start_ip = ++m_ip;
 
 		while(m_ip < m_source.size() && m_source[m_ip] != '\'') m_ip++;
+
 		std::string lexeme(m_source.substr(start_ip, m_ip - start_ip));
 
 		// Skip next quote
@@ -95,8 +100,7 @@ namespace Process {
 
 			if (m_source[m_ip] == '.') {
 				if (isFloat) {
-					// TODO: Throw exception, trying to add multiple decimal points
-					throw "Trying to add multiple decimal points in number";
+					error("Trying to add multiple decimal points in number");
 				}
 				m_ip++;
 

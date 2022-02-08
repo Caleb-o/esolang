@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 		}
 
 		Environment *env = p.parse(buffer);
-		print_code(env);
+		if (debug) print_env(env);
 
 		VM vm(env);
 		vm.run();

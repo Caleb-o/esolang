@@ -15,21 +15,25 @@ namespace Process {
 		Lexer *m_lexer = { 0 };
 		Token *m_current = { 0 };
 		Environment *m_env;
+		bool m_completed = { false };
 
 	private:
 		void error(std::string msg);
 		
 		void push_byte(ByteCode);
+		void push_byte(size_t);
 		void push_bytes(ByteCode, ByteCode);
+		void push_bytes(ByteCode, size_t);
 
 		void consume(TokenKind);
 
 		size_t add_literal_to_env(Value value);
-		ByteCode add_literal();
+		size_t add_literal();
 
 		void expr();
 		void arithmetic_statement();
 		void comparison_statement();
+		void if_statement();
 		void statement();
 		void statement_list();
 		void code_block();
@@ -43,7 +47,21 @@ namespace Process {
 	public:
 		Parser();
 		// We will need to delete the last token
-		~Parser() { delete m_current; }
+		~Parser() { 
+			if(m_current) delete m_current;
+			if (m_lexer) delete m_lexer;
+
+			if (!m_completed) {
+				if (m_env) {
+					for(Value& val : m_env->literals) {
+						if (val.kind == ValueKind::STRING)
+							delete[] val.data.string;
+					}
+
+					delete m_env;
+				}
+			}
+		}
 
 		Environment *parse(std::string);
 	};

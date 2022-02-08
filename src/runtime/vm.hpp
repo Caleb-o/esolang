@@ -32,11 +32,15 @@ namespace Runtime {
 	public:
 		VM(Environment *env) { m_env = env; }
 		~VM() {
-			for(Value& val : m_env->literals) {
-				if (val.kind == ValueKind::STRING)
-					delete[] val.data.string;
+			if (m_env) {
+				for(Value& val : m_env->literals) {
+					if (val.kind == ValueKind::STRING)
+						if (val.data.string)
+							delete[] val.data.string;
+				}
+
+				delete m_env;
 			}
-			delete m_env;
 		}
 
 		void run();

@@ -243,6 +243,28 @@ void VM::run() {
 				break;
 			}
 
+			case ByteCode::IF: {
+				size_t false_idx = m_env->code[++m_ip];
+
+				if (m_top_stack->stack.size() == 0 || peek_stack().kind != ValueKind::BOOL) {
+					error(false, "Cannot evaluate an empty stack or non-boolean value");
+				}
+
+				Value condition = pop_stack();
+
+				// Jump if false
+				if (!condition.data.boolean) {
+					m_ip = false_idx - 1;
+				}
+				break;
+			}
+
+			case ByteCode::GOTO: {
+				size_t jump_idx = m_env->code[++m_ip];
+				m_ip = jump_idx - 1;
+				break;
+			}
+
 			case ByteCode::DROP: 		pop_stack(); break;
 			case ByteCode::DUPLICATE:	push_stack(peek_stack()); break;
 			case ByteCode::HALT: {
@@ -273,6 +295,12 @@ void VM::run() {
 				write_value(val);
 				std::cout << std::endl;
 				break;
+			}
+
+			default: {
+				error(false,
+					Util::string_format("Unknown opcode %d at pos %d", m_env->code[m_ip], m_ip)
+				);
 			}
 		}
 
