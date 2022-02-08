@@ -27,7 +27,7 @@ namespace Process {
 
 		void consume(TokenKind);
 
-		size_t add_literal_to_env(Value value);
+		size_t add_literal_to_env(Value *value);
 		size_t add_literal();
 		void capture_list();
 
@@ -55,9 +55,8 @@ namespace Process {
 
 			if (!m_completed) {
 				if (m_env) {
-					for(Value& val : m_env->literals) {
-						if (val.kind == ValueKind::STRING)
-							delete[] val.data.string;
+					for(size_t i = 0; i < m_env->literals.size(); ++i) {
+						delete m_env->literals[i];
 					}
 
 					delete m_env;

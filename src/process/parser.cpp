@@ -96,7 +96,7 @@ namespace Process {
 		}
 	}
 
-	size_t Parser::add_literal_to_env(Value value) {
+	size_t Parser::add_literal_to_env(Value *value) {
 		m_env->literals.push_back(value);
 		return m_env->literals.size() - 1;
 	}
@@ -117,7 +117,6 @@ namespace Process {
 			}
 
 			case TokenKind::STRING_LIT:	{
-
 				return add_literal_to_env(create_value(copy_lexeme(m_current)));
 			}
 		}
@@ -147,11 +146,6 @@ namespace Process {
 			case TokenKind::BOOL_LIT: case TokenKind::STRING_LIT: {
 				push_bytes(ByteCode::PUSH, add_literal());
 				consume(m_current->kind);
-				break;
-			}
-
-			case TokenKind::CAPTURE: {
-				capture_list();
 				break;
 			}
 
@@ -236,8 +230,6 @@ namespace Process {
 			));
 		}
 
-		
-
 		// Get the current procedure idx and push it to the proc call
 		// Note: We infer which overload to call at run-time
 		size_t proc_idx = std::distance(m_env->defs.procedures.begin(), proc_it);
@@ -270,6 +262,11 @@ namespace Process {
 
 			case TokenKind::PRINT:		consume(m_current->kind); push_byte(ByteCode::PRINT); break;
 			case TokenKind::PRINTLN:	consume(m_current->kind); push_byte(ByteCode::PRINTLN); break;
+
+			case TokenKind::CAPTURE: {
+				capture_list();
+				break;
+			}
 
 			default: expr(); break;
 		}
@@ -328,7 +325,7 @@ namespace Process {
 				hasMove = true;
 			}
 
-			std::string type_id = copy_lexeme(m_current);
+			std::string type_id = copy_lexeme_str(m_current);
 			consume(TokenKind::TYPEID);
 
 			auto *params = &m_env->defs.procedures[id][m_env->defs.procedures[id].size()-1];

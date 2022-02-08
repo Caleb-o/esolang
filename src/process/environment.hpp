@@ -34,7 +34,7 @@ namespace Process {
 		// TODO: Maybe consider an array here
 		std::vector<ByteCode> code;
 		// Should be unique, if a value already exists, get its index
-		std::vector<Value> literals;
+		std::vector<Value *> literals;
 		// IDs - these are used for bindings
 		std::vector<std::string> idLiterals;
 		// Definitions are compile-time known structs and procedures

@@ -35,10 +35,15 @@ namespace Process {
 
 			case TokenKind::IF:			return "if";
 			case TokenKind::ELSE:		return "else";
+			case TokenKind::DUP:		return "dup";
+			case TokenKind::POP:		return "drop";
+			case TokenKind::PRINT:		return "print";
+			case TokenKind::PRINTLN:	return "println";
 
 			case TokenKind::PROC:		return "proc";
 			case TokenKind::CAPTURE:	return "capture";
 			case TokenKind::ID:			return "ID";
+			case TokenKind::COMMA:		return "comma";
 			case TokenKind::TYPEID:		return "typeid";
 			case TokenKind::LPAREN:		return "lparen";
 			case TokenKind::RPAREN:		return "rparen";

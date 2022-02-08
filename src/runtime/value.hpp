@@ -22,55 +22,62 @@ namespace Runtime {
 		ValueKind kind;
 		ValueData data;
 		bool read_only;
-		// std::vector<Value> capture;
-		Value *capture;
+
+		size_t capture_len;
+		Value **capture;
+		
+
+		~Value() {
+			if (kind == ValueKind::STRING) delete[] data.string;
+
+			if (kind == ValueKind::CAPTURE) {
+				for(int i = 0; i < capture_len; ++i) {
+					delete capture[i];
+				}
+				delete[] capture;
+			}
+		}
 	};
 
-	static Value create_value(int value, bool read_only = true) {
-		return { 
+	static Value *create_value(int value, bool read_only = true) {
+		return new (Value){ 
 			ValueKind::INT,
 			{ .integer=value },
 			read_only
 		};
 	}
 
-	static Value create_value(float value, bool read_only = true) {
-		return { 
+	static Value *create_value(float value, bool read_only = true) {
+		return new (Value){ 
 			ValueKind::FLOAT,
 			{ .floating=value },
 			read_only
 		};
 	}
 
-	static Value create_value(bool value, bool read_only = true) {
-		return { 
+	static Value *create_value(bool value, bool read_only = true) {
+		return new (Value){ 
 			ValueKind::BOOL,
 			{ .boolean=value },
 			read_only
 		};
 	}
 
-	static Value create_value(char *value, bool read_only = true) {
-		return {
+	static Value *create_value(char *value, bool read_only = true) {
+		return new (Value){ 
 			ValueKind::STRING,
 			{ .string=value },
 			read_only
 		};
 	}
 
-	static Value create_value(std::vector<Value>& capture, bool read_only = true) {
-		Value *values = new Value[capture.size()];
-		size_t i = 0;
-
-		for(auto val : capture) {
-			values[i++] = val;
-		}
-
-		return {
+	static Value *create_value(Value **capture, size_t capture_len, bool read_only = true) {
+		return new (Value){
 			ValueKind::CAPTURE,
 			{ 0 },
 			read_only,
-			values,
+			capture_len,
+			capture,
 		};
 	}
 
@@ -98,13 +105,13 @@ namespace Runtime {
 		}
 	}
 
-	static void write_value(Value& value) {
-		switch(value.kind) {
+	static void write_value(Value *value) {
+		switch(value->kind) {
 			case ValueKind::VOID: 		std::cout << "void"; break;
-			case ValueKind::INT: 		std::cout << value.data.integer; break;
-			case ValueKind::FLOAT: 		std::cout << value.data.floating; break;
-			case ValueKind::BOOL: 		std::cout << ((value.data.boolean) ? "true" : "false"); break;
-			case ValueKind::STRING: 	std::cout << value.data.string; break;
+			case ValueKind::INT: 		std::cout << value->data.integer; break;
+			case ValueKind::FLOAT: 		std::cout << value->data.floating; break;
+			case ValueKind::BOOL: 		std::cout << ((value->data.boolean) ? "true" : "false"); break;
+			case ValueKind::STRING: 	std::cout << value->data.string; break;
 			case ValueKind::STRUCT: 	std::cout << "struct"; break;
 			case ValueKind::CAPTURE: 	std::cout << "capture"; break;
 		}

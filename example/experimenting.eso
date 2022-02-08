@@ -1,6 +1,5 @@
-proc test(a : int) -> void {}
+proc test(a, b, c : int) -> void { }
 
 proc main() -> void { 
-	'calling test' println drop
-	| 1 2 3 | !test drop
+	'abc' println drop
 }
