@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <memory>
 #include "token.hpp"
 
 namespace Process {
@@ -14,15 +15,15 @@ namespace Process {
 		void skip_whitespace();
 		char peek(size_t);
 
-		Token *make_identifier();
-		Token *make_string();
-		Token *make_number();
-		Token *make_single(TokenKind);
+		std::shared_ptr<Token> make_identifier();
+		std::shared_ptr<Token> make_string();
+		std::shared_ptr<Token> make_number();
+		std::shared_ptr<Token> make_single(TokenKind);
 
 	public:
 		Lexer(std::string);
 		~Lexer() {}
 
-		Token *get_token();
+		std::shared_ptr<Token> get_token();
 	};
 }

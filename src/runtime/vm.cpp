@@ -4,7 +4,7 @@
 
 
 void VM::add_call_frame(std::string proc_name, size_t ret_idx) {
-	CallFrame *frame = new CallFrame;
+	std::shared_ptr<CallFrame> frame = std::make_shared<CallFrame>();
 	frame->proc_id = proc_name;
 	frame->return_idx = ret_idx;
 
@@ -13,17 +13,9 @@ void VM::add_call_frame(std::string proc_name, size_t ret_idx) {
 }
 
 void VM::kill_frame() {
-	if (m_top_stack != nullptr) {
-		for(int i = m_top_stack->stack.size() - 1; i >= 0; --i) {
-			if (m_top_stack->stack[i]) delete m_top_stack->stack[i];
-		}
-
-		delete m_top_stack;
-
-		size_t new_size = m_call_stack.size();
-		m_top_stack = (new_size > 0) ? m_call_stack[new_size-1] : nullptr;
-		std::cout << "Killed stack\n";
-	}
+	m_call_stack.pop_back();
+	size_t new_size = m_call_stack.size();
+	m_top_stack = (new_size > 0) ? m_call_stack[new_size-1] : nullptr;
 }
 
 
@@ -32,7 +24,7 @@ void VM::unwind_stack() {
 		std::cout << "== Call Stack ==\n";
 		
 		for(int frame_idx = m_call_stack.size()-1; frame_idx >= 0; --frame_idx) {
-			CallFrame *frame = m_call_stack[frame_idx];
+			std::shared_ptr<CallFrame> frame = m_call_stack[frame_idx];
 			std::cout << "depth " << frame_idx << " '" <<  frame->proc_id << "' [";
 			// TODO: Print each binding here
 			std::cout << "] stack\n";
@@ -47,8 +39,6 @@ void VM::unwind_stack() {
 				write_value(frame->stack[stack_idx]);
 				std::cout << " : " << kind_as_str(frame->stack[stack_idx]->kind);
 				std::cout << std::endl;
-
-				delete frame->stack[stack_idx];
 			}
 
 			frame->stack.clear();
@@ -68,28 +58,28 @@ void VM::error(bool internal, std::string msg) {
 	throw "Runtime exception occured";
 }
 
-void VM::push_stack(Value *value) {
+void VM::push_stack(std::shared_ptr<Value> value) {
 	m_top_stack->stack.push_back(value);
 }
 
-Value *VM::pop_stack() {
+std::shared_ptr<Value> VM::pop_stack() {
 	if (m_top_stack->stack.size() == 0) {
 		error(false, "Trying to pop an empty stack");
 	}
 
-	Value *tmp = m_top_stack->stack[m_top_stack->stack.size()-1];
+	std::shared_ptr<Value> tmp = m_top_stack->stack[m_top_stack->stack.size()-1];
 	m_top_stack->stack.pop_back();
 	return tmp;
 }
 
-Value *VM::peek_stack(size_t idx) {
+std::shared_ptr<Value> VM::peek_stack(size_t idx) {
 	return m_top_stack->stack[m_top_stack->stack.size() - (idx + 1)];
 }
 
 
 void VM::arithmetic_op() {
-	Value *rhs = pop_stack();
-	Value *lhs = pop_stack();
+	std::shared_ptr<Value> rhs = pop_stack();
+	std::shared_ptr<Value> lhs = pop_stack();
 
 	// Type check left and right side kinds
 	if (lhs->kind != rhs->kind) {
@@ -146,8 +136,8 @@ void VM::arithmetic_op() {
 }
 
 void VM::comparison_op() {
-		Value *rhs = pop_stack();
-		Value *lhs = pop_stack();
+		std::shared_ptr<Value> rhs = pop_stack();
+		std::shared_ptr<Value> lhs = pop_stack();
 
 		// Type check left and right side kinds
 		if (lhs->kind != rhs->kind) {
@@ -224,11 +214,11 @@ void VM::comparison_op() {
 
 			case ValueKind::STRING: {
 				switch(op) {
-					case ByteCode::GREATER:		push_stack(create_value(std::strlen(lhs->data.string) >  std::strlen(rhs->data.string))); break;
-					case ByteCode::GREATER_EQ:	push_stack(create_value(std::strlen(lhs->data.string) >= std::strlen(rhs->data.string))); break;
-					case ByteCode::LESS:		push_stack(create_value(std::strlen(lhs->data.string) <  std::strlen(rhs->data.string))); break;
-					case ByteCode::LESS_EQ:		push_stack(create_value(std::strlen(lhs->data.string) <= std::strlen(rhs->data.string))); break;
-					case ByteCode::EQUAL:		push_stack(create_value(std::strlen(lhs->data.string) == std::strlen(rhs->data.string))); break;
+					case ByteCode::GREATER:		push_stack(create_value(lhs->string.size() >  rhs->string.size())); break;
+					case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->string.size() >= rhs->string.size())); break;
+					case ByteCode::LESS:		push_stack(create_value(lhs->string.size() <  rhs->string.size())); break;
+					case ByteCode::LESS_EQ:		push_stack(create_value(lhs->string.size() <= rhs->string.size())); break;
+					case ByteCode::EQUAL:		push_stack(create_value(lhs->string.size() == rhs->string.size())); break;
 
 					default:	error(false,
 									Util::string_format("Unknown operation '%s'",
@@ -248,9 +238,6 @@ void VM::comparison_op() {
 
 			default: break;
 		}
-
-		delete rhs;
-		delete lhs;
 	}
 
 
@@ -295,13 +282,12 @@ void VM::run() {
 					error(false, "Cannot evaluate an empty stack or non-boolean value");
 				}
 
-				Value *condition = pop_stack();
+				std::shared_ptr<Value> condition = pop_stack();
 
 				// Jump if false
 				if (!condition->data.boolean) {
 					m_ip = false_idx;
 				}
-				delete condition;
 				break;
 			}
 
@@ -326,7 +312,7 @@ void VM::run() {
 				size_t capture_count = m_env->code[++m_ip];
 
 				if (capture_count > 0) {
-					Value ** values = new Value *[capture_count];
+					std::vector<std::shared_ptr<Value>> values(capture_count);
 
 					for(int i = capture_count - 1; i >= 0; --i) {
 						values[i] = pop_stack();
@@ -347,7 +333,7 @@ void VM::run() {
 					error(false, "Procedure call requires a capture list on the stack top");
 				}
 
-				Value *capture_list = pop_stack();
+				std::shared_ptr<Value> capture_list = pop_stack();
 
 				if (proc_it->second.size() > 1) {
 					// We must linearly check each overload + each parameter
@@ -381,7 +367,6 @@ void VM::run() {
 
 				// Failed to find a valid procedure that matches stack items
 				if (sub_idx >= proc_it->second.size()) {
-					delete capture_list;
 					error(false, "Could not find a procedure that matches stack values");
 				}
 
@@ -394,7 +379,6 @@ void VM::run() {
 					m_top_stack->stack.push_back(capture_list->capture[i]);
 				}
 
-				delete capture_list;
 				m_ip = proc_it->second[sub_idx].startIdx - 1;
 				break;
 			}
@@ -433,7 +417,7 @@ void VM::run() {
 				break;
 			}
 
-			case ByteCode::DROP: 		delete pop_stack(); break;
+			case ByteCode::DROP: 		pop_stack(); break;
 			case ByteCode::DUPLICATE:	push_stack(peek_stack()); break;
 
 			case ByteCode::HALT: {
@@ -448,8 +432,8 @@ void VM::run() {
 			}
 
 			case ByteCode::SWAP: {
-				Value *rhs = pop_stack();
-				Value *lhs = pop_stack();
+				std::shared_ptr<Value> rhs = pop_stack();
+				std::shared_ptr<Value> lhs = pop_stack();
 
 				push_stack(rhs);
 				push_stack(lhs);
@@ -457,13 +441,13 @@ void VM::run() {
 			}
 
 			case ByteCode::PRINT: {
-				Value *val = peek_stack();
+				std::shared_ptr<Value> val = peek_stack();
 				write_value(val);
 				break;
 			}
 
 			case ByteCode::PRINTLN: {
-				Value *val = peek_stack();
+				std::shared_ptr<Value> val = peek_stack();
 				write_value(val);
 				std::cout << std::endl;
 				break;

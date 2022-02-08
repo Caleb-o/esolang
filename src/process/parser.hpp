@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <unordered_set>
+#include <memory>
 #include "bytecode.hpp"
 #include "environment.hpp"
 #include "lexer.hpp"
@@ -12,9 +13,9 @@ namespace Process {
 		// Hash each file we include, so we can check it when importing, mitigates including the same file twice
 		std::unordered_set<size_t> m_file_hashes;
 		// This is a pointer, so we can later swap it out when importing another module
-		Lexer *m_lexer = { 0 };
-		Token *m_current = { 0 };
-		Environment *m_env;
+		std::unique_ptr<Lexer> m_lexer;
+		std::shared_ptr<Token> m_current;
+		std::shared_ptr<Environment> m_env;
 		bool m_completed = { false };
 
 	private:
@@ -27,7 +28,7 @@ namespace Process {
 
 		void consume(TokenKind);
 
-		size_t add_literal_to_env(Value *value);
+		size_t add_literal_to_env(std::shared_ptr<Value> value);
 		size_t add_literal();
 		void capture_list();
 
@@ -48,22 +49,7 @@ namespace Process {
 
 	public:
 		Parser();
-		// We will need to delete the last token
-		~Parser() { 
-			if(m_current) delete m_current;
-			if (m_lexer) delete m_lexer;
 
-			if (!m_completed) {
-				if (m_env) {
-					for(size_t i = 0; i < m_env->literals.size(); ++i) {
-						delete m_env->literals[i];
-					}
-
-					delete m_env;
-				}
-			}
-		}
-
-		Environment *parse(std::string);
+		std::shared_ptr<Environment> parse(std::string);
 	};
 }

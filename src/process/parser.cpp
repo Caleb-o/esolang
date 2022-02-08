@@ -15,25 +15,18 @@ namespace Process {
 		throw Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col);
 	}
 
-	static char *copy_lexeme(Token *current) {
-		char *tmp = new char[current->lexeme.size() + 1];
-		strcpy(tmp, current->lexeme.c_str());
-		tmp[current->lexeme.size()] = '\0';
-		return tmp;
-	}
-
-	static std::string copy_lexeme_str(Token *current) {
+	static std::string copy_lexeme_str(std::shared_ptr<Token> current) {
 		return std::string(current->lexeme);
 	}
 
 	// Returns the sub index
-	static size_t add_proc_def_tmp(Environment *env, const char *id) {
+	static size_t add_proc_def_tmp(std::shared_ptr<Environment> env, const char *id) {
 		// Does not exist yet, we can just add it
 		env->defs.procedures[id].push_back({});
 		return env->defs.procedures[id].size() - 1;
 	}
 
-	static void verify_proc_def(Environment *env, const char *id, ProcedureDef def) {
+	static void verify_proc_def(std::shared_ptr<Environment> env, const char *id, ProcedureDef def) {
 		// We must linearly search for a definition
 		for(size_t defidx = 0; defidx < env->defs.procedures[id].size() - 1; ++defidx) {
 			// Cannot compare different length param count
@@ -87,16 +80,14 @@ namespace Process {
 
 	void Parser::consume(TokenKind expected) {
 		if (m_current->kind == expected) {
-			delete m_current;
 			m_current = m_lexer->get_token();
 		} else {
 			// TODO: Throw exception
 			error(Util::string_format("Expected token '%s' but got '%s' (%s) on line %d at pos %d\n", get_token_name(expected), get_token_name(m_current->kind), m_current->lexeme.c_str(), m_current->line, m_current->col));
-			delete m_current;
 		}
 	}
 
-	size_t Parser::add_literal_to_env(Value *value) {
+	size_t Parser::add_literal_to_env(std::shared_ptr<Value> value) {
 		m_env->literals.push_back(value);
 		return m_env->literals.size() - 1;
 	}
@@ -117,7 +108,7 @@ namespace Process {
 			}
 
 			case TokenKind::STRING_LIT:	{
-				return add_literal_to_env(create_value(copy_lexeme(m_current)));
+				return add_literal_to_env(create_value(copy_lexeme_str(m_current)));
 			}
 		}
 	}
@@ -451,11 +442,11 @@ namespace Process {
 
 
 	Parser::Parser() {
-		m_env = new Environment();
+		m_env = std::shared_ptr<Environment>(new Environment());
 	}
 
-	Environment *Parser::parse(std::string source) {
-		m_lexer = new Lexer(source);
+	std::shared_ptr<Environment> Parser::parse(std::string source) {
+		m_lexer = std::make_unique<Lexer>(Lexer(source));
 		m_current = m_lexer->get_token();
 
 		program();

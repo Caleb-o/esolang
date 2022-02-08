@@ -3,5 +3,5 @@ proc test(a : int) -> void {
 }
 	
 proc main() -> void {
-	|  | !test
+	| 1 | !test
 }

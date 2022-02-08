@@ -3,6 +3,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <memory>
 #include "../process/util.hpp"
 
 
@@ -15,7 +16,6 @@ namespace Runtime {
 		int integer;
 		float floating;
 		bool boolean;
-		char *string;
 	};
 	
 	struct Value {
@@ -24,55 +24,62 @@ namespace Runtime {
 		bool read_only;
 
 		size_t capture_len;
-		Value **capture;
+		std::vector<std::shared_ptr<Value>> capture;
 		
-
-		~Value() {
-			if (kind == ValueKind::STRING) delete[] data.string;
-			if (kind == ValueKind::CAPTURE) delete[] capture;
-		}
+		std::string string;
 	};
 
-	static Value *create_value(int value, bool read_only = true) {
-		return new (Value){ 
+	static std::shared_ptr<Value> create_value(int value, bool read_only = true) {
+		std::shared_ptr<Value> val = std::make_shared<Value>();
+		*val = (Value){ 
 			ValueKind::INT,
 			{ .integer=value },
 			read_only
 		};
+		return val;
 	}
 
-	static Value *create_value(float value, bool read_only = true) {
-		return new (Value){ 
+	static std::shared_ptr<Value> create_value(float value, bool read_only = true) {
+		std::shared_ptr<Value> val = std::make_shared<Value>();
+		*val = (Value){ 
 			ValueKind::FLOAT,
 			{ .floating=value },
 			read_only
 		};
+		return val;
 	}
 
-	static Value *create_value(bool value, bool read_only = true) {
-		return new (Value){ 
+	static std::shared_ptr<Value> create_value(bool value, bool read_only = true) {
+		std::shared_ptr<Value> val = std::make_shared<Value>();
+		*val = (Value){ 
 			ValueKind::BOOL,
 			{ .boolean=value },
 			read_only
 		};
+		return val;
 	}
 
-	static Value *create_value(char *value, bool read_only = true) {
-		return new (Value){ 
+	static std::shared_ptr<Value> create_value(std::string value, bool read_only = true) {
+		std::shared_ptr<Value> val = std::make_shared<Value>();
+		*val = (Value){
 			ValueKind::STRING,
-			{ .string=value },
+			{ 0 },
 			read_only
 		};
+		val->string = value;
+		return val;
 	}
 
-	static Value *create_value(Value **capture, size_t capture_len, bool read_only = true) {
-		return new (Value){
+	static std::shared_ptr<Value> create_value(std::vector<std::shared_ptr<Value>> capture, size_t capture_len, bool read_only = true) {
+		std::shared_ptr<Value> val = std::make_shared<Value>();
+		*val = (Value){
 			ValueKind::CAPTURE,
 			{ 0 },
 			read_only,
 			capture_len,
 			capture,
 		};
+		return val;
 	}
 
 
@@ -100,13 +107,13 @@ namespace Runtime {
 		}
 	}
 
-	static void write_value(Value *value) {
+	static void write_value(std::shared_ptr<Value> value) {
 		switch(value->kind) {
 			case ValueKind::VOID: 		std::cout << "void"; break;
 			case ValueKind::INT: 		std::cout << value->data.integer; break;
 			case ValueKind::FLOAT: 		std::cout << value->data.floating; break;
 			case ValueKind::BOOL: 		std::cout << ((value->data.boolean) ? "true" : "false"); break;
-			case ValueKind::STRING: 	std::cout << value->data.string; break;
+			case ValueKind::STRING: 	std::cout << value->string; break;
 			case ValueKind::STRUCT: 	std::cout << "struct"; break;
 			case ValueKind::CAPTURE: {
 				std::cout << "capture: ";

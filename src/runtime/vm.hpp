@@ -10,8 +10,8 @@ namespace Runtime {
 	struct CallFrame {
 		std::string proc_id;
 		size_t return_idx;
-		std::map<std::string, Value *> bindings;
-		std::vector<Value *> stack;
+		std::map<std::string, std::shared_ptr<Value> > bindings;
+		std::vector<std::shared_ptr<Value> > stack;
 
 		~CallFrame() {
 			bindings.clear();
@@ -20,27 +20,24 @@ namespace Runtime {
 	};
 
 	class VM {
-		Environment *m_env;
+		std::shared_ptr<Environment> m_env;
 		size_t m_ip = { 0 };
-		CallFrame *m_top_stack = { 0 };
-		std::vector<CallFrame *> m_call_stack;
+		std::shared_ptr<CallFrame> m_top_stack = { 0 };
+		std::vector<std::shared_ptr<CallFrame> > m_call_stack;
 
 	private:
 		void add_call_frame(std::string, size_t);
 		void kill_frame();
 		void unwind_stack();
 		void error(bool, std::string);
-		void push_stack(Value *);
+		void push_stack(std::shared_ptr<Value>);
 		void arithmetic_op();
 		void comparison_op();
-		Value *pop_stack();
-		Value *peek_stack(size_t idx = 0);
+		std::shared_ptr<Value> pop_stack();
+		std::shared_ptr<Value> peek_stack(size_t idx = 0);
 
 	public:
-		VM(Environment *env) { m_env = env; }
-		~VM() {
-			if (m_env) delete m_env;
-		}
+		VM(std::shared_ptr<Environment> env) { m_env = env; }
 
 		void run();
 	};

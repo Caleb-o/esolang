@@ -34,28 +34,25 @@ namespace Process {
 		// TODO: Maybe consider an array here
 		std::vector<ByteCode> code;
 		// Should be unique, if a value already exists, get its index
-		std::vector<Value *> literals;
+		std::vector<std::shared_ptr<Value>> literals;
 		// IDs - these are used for bindings
 		std::vector<std::string> idLiterals;
 		// Definitions are compile-time known structs and procedures
 		Definitions defs;
 
 		~Environment() {
-			for(int i = literals.size()-1; i >= 0; --i) {
-				if (literals[i]) delete literals[i];
-			}
 			literals.clear();
 			idLiterals.clear();
 		}
 	};
 
 
-	static size_t get_proc_idx(Environment *env, const char *proc_id) {
+	static size_t get_proc_idx(std::shared_ptr<Environment> env, const char *proc_id) {
 		return std::distance(env->defs.procedures.begin(), env->defs.procedures.find(proc_id));
 	}
 
 
-	static void print_env(Environment *env) {
+	static void print_env(std::shared_ptr<Environment> env) {
 		std::cout << "=== Procedures ===\n";
 		size_t idx = 0;
 		for(auto& proc : env->defs.procedures) {

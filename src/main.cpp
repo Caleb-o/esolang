@@ -4,6 +4,7 @@
 #include <string>
 #include <cstring>
 #include <exception>
+#include <memory>
 #include "process/bytecode.hpp"
 #include "process/util.hpp"
 #include "process/parser.hpp"
@@ -69,7 +70,7 @@ int main(int argc, char **argv) {
 			throw "File could not be read or is empty";
 		}
 
-		Environment *env = p.parse(buffer);
+		std::shared_ptr<Environment> env = p.parse(buffer);
 		if (debug) print_env(env);
 
 		VM vm(env);

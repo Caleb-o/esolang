@@ -69,16 +69,18 @@ namespace Process {
 
 	// Main
 
-	Token *Lexer::make_identifier() {
+	std::shared_ptr<Token> Lexer::make_identifier() {
 		size_t start_ip = m_ip++;
 
 		while(m_ip < m_source.size() && is_alphanum(m_source[m_ip])) m_ip++;
 
 		std::string lexeme(m_source.substr(start_ip, m_ip - start_ip));
-		return new (Token){ Util::get_keyword_kind(lexeme), m_line, m_col, lexeme };
+		std::shared_ptr<Token> tok = std::make_shared<Token>();
+		*tok = (Token){ Util::get_keyword_kind(lexeme), m_line, m_col, lexeme };
+		return tok;
 	}
 
-	Token *Lexer::make_string() {
+	std::shared_ptr<Token> Lexer::make_string() {
 		size_t start_ip = ++m_ip;
 
 		while(m_ip < m_source.size() && m_source[m_ip] != '\'') m_ip++;
@@ -87,10 +89,12 @@ namespace Process {
 
 		// Skip next quote
 		m_ip++;
-		return new (Token){ TokenKind::STRING_LIT, m_line, m_col, lexeme };
+		std::shared_ptr<Token> tok = std::make_shared<Token>();
+		*tok = (Token){ TokenKind::STRING_LIT, m_line, m_col, lexeme };
+		return tok;
 	}
 
-	Token *Lexer::make_number() {
+	std::shared_ptr<Token> Lexer::make_number() {
 		size_t start_ip = m_ip;
 		TokenKind kind = TokenKind::INT_LIT;
 		bool isFloat = false;
@@ -110,17 +114,21 @@ namespace Process {
 		}
 
 		std::string lexeme(m_source.substr(start_ip, m_ip - start_ip));
-		return new (Token){ kind, m_line, m_col, lexeme };
+		std::shared_ptr<Token> tok = std::make_shared<Token>();
+		*tok = (Token){ kind, m_line, m_col, lexeme };
+		return tok;
 	}
 
-	Token *Lexer::make_single(TokenKind kind) {
+	std::shared_ptr<Token> Lexer::make_single(TokenKind kind) {
 		m_ip++;
 		std::string lexeme(m_source.substr(m_ip - 1, 1));
-		return new (Token){ kind, m_line, m_col, lexeme };
+		std::shared_ptr<Token> tok = std::make_shared<Token>();
+		*tok = (Token){ kind, m_line, m_col, lexeme };
+		return tok;
 	}
 
 
-	Token *Lexer::get_token() {
+	std::shared_ptr<Token> Lexer::get_token() {
 		while(m_ip < m_source.size()) {
 			skip_whitespace();
 
@@ -184,6 +192,8 @@ namespace Process {
 			}
 		}
 
-		return new (Token){ TokenKind::ENDOFFILE, m_line, m_col, "EOF" };
+		std::shared_ptr<Token> tok = std::make_shared<Token>();
+		*tok = (Token){ TokenKind::ENDOFFILE, m_line, m_col, "EOF" };
+		return tok;
 	}
 }
