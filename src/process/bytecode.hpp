@@ -37,6 +37,8 @@ namespace Process {
 			case ByteCode::LESS:		return "LESS";
 			case ByteCode::LESS_EQ:		return "LESS_EQ";
 			case ByteCode::EQUAL:		return "EQUAL";
+
+			case ByteCode::IF:			return "IF";
 			
 			case ByteCode::PROCCALL:	return "PROCCALL";
 			case ByteCode::HALT:		return "HALT";

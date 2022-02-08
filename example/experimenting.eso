@@ -1,12 +1,9 @@
-proc test() -> void {}
-proc test(b : bool) -> void {}
 proc main() -> void { 
-	1 1 = println drop
-
-	true if {
-		'true' println drop
+	2 1 > if {
+		1 println drop
 	} else {
-		'false' println drop
+		'b' println drop
 	}
+	
+	'end' printlnd drop
 }
-proc test2(b : bool) -> bool { 1 1 }

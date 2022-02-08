@@ -15,7 +15,14 @@ namespace Process {
 		throw Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col);
 	}
 
-	static std::string copy_lexeme(Token *current) {
+	static char *copy_lexeme(Token *current) {
+		char *tmp = new char[current->lexeme.size() + 1];
+		strcpy(tmp, current->lexeme.c_str());
+		tmp[current->lexeme.size()] = '\0';
+		return tmp;
+	}
+
+	static std::string copy_lexeme_str(Token *current) {
 		return std::string(current->lexeme);
 	}
 
@@ -110,7 +117,8 @@ namespace Process {
 			}
 
 			case TokenKind::STRING_LIT:	{
-				return add_literal_to_env(create_value(copy_lexeme(m_current).c_str()));
+
+				return add_literal_to_env(create_value(copy_lexeme(m_current)));
 			}
 		}
 	}
@@ -122,6 +130,10 @@ namespace Process {
 				push_bytes(ByteCode::PUSH, add_literal());
 				consume(m_current->kind);
 				break;
+			}
+
+			default: {
+				error(Util::string_format("Unknown token found '%s'", m_current->lexeme.c_str()));
 			}
 		}
 	}
@@ -159,9 +171,6 @@ namespace Process {
 
 		code_block();
 
-		// Patch false path to here
-		m_env->code[false_idx] = (ByteCode)m_env->code.size();
-
 		// Parse the else path
 		if (m_current->kind == TokenKind::ELSE) {
 			consume(TokenKind::ELSE);
@@ -170,9 +179,16 @@ namespace Process {
 			push_bytes(ByteCode::GOTO, 0);
 			size_t goto_idx = m_env->code.size() - 1;
 
+			// Patch false path to here
+			m_env->code[false_idx] = (ByteCode)(m_env->code.size() - 1);
+
 			code_block();
+
 			// Patch goto path to here
-			m_env->code[goto_idx] = (ByteCode)m_env->code.size();
+			m_env->code[goto_idx] = (ByteCode)(m_env->code.size() - 1);
+		} else {
+			// Patch false path to here
+			m_env->code[false_idx] = (ByteCode)(m_env->code.size() - 1);
 		}
 
 		// Another else block, which is not allowed
@@ -308,7 +324,7 @@ namespace Process {
 		consume(TokenKind::PROC);
 
 		// We must copy here since pointing to the c_str gives us a weird result
-		std::string id = copy_lexeme(m_current);
+		std::string id = copy_lexeme_str(m_current);
 		consume(TokenKind::ID);
 
 		size_t sub_idx = add_proc_def_tmp(m_env, id.c_str());
@@ -319,7 +335,7 @@ namespace Process {
 		consume(TokenKind::ARROW);
 		
 		// TODO: Multiple return types
-		std::string retid = copy_lexeme(m_current);
+		std::string retid = copy_lexeme_str(m_current);
 		consume(TokenKind::TYPEID);
 		m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
 

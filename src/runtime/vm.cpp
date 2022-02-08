@@ -38,7 +38,7 @@ void VM::unwind_stack() {
 }
 
 void VM::error(bool internal, std::string msg) {
-	std::cout << msg << std::endl;
+	std::cout << msg << " at code " << get_bytecode_name(m_env->code[m_ip]) << " at pos " << m_ip << std::endl;
 	if (!internal) unwind_stack();
 	throw "Runtime exception occured";
 }
@@ -254,25 +254,27 @@ void VM::run() {
 
 				// Jump if false
 				if (!condition.data.boolean) {
-					m_ip = false_idx - 1;
+					m_ip = false_idx;
 				}
 				break;
 			}
 
 			case ByteCode::GOTO: {
 				size_t jump_idx = m_env->code[++m_ip];
-				m_ip = jump_idx - 1;
+				m_ip = jump_idx;
 				break;
 			}
 
 			case ByteCode::DROP: 		pop_stack(); break;
 			case ByteCode::DUPLICATE:	push_stack(peek_stack()); break;
+
 			case ByteCode::HALT: {
 				if (m_top_stack->stack.size() > 0) {
 					error(false, "Program exiting with non-empty stack");
 				}
 
-				running = false; break;
+				running = false; 
+				break;
 			}
 
 			case ByteCode::SWAP: {
