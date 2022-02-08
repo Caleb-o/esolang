@@ -388,7 +388,7 @@ namespace Process {
 
 		// Check each parameter and push a bind opcode with each param
 		if (m_env->defs.procedures[id][sub_idx].parameters.size() > 0) {
-			push_bytes(ByteCode::BIND, m_env->defs.procedures[id][sub_idx].parameters.size());
+			push_bytes(ByteCode::BIND_MOVE, m_env->defs.procedures[id][sub_idx].parameters.size());
 
 			for(auto param : m_env->defs.procedures[id][sub_idx].parameters) {
 				auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), param.first);

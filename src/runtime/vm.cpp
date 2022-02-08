@@ -303,7 +303,24 @@ void VM::run() {
 
 				while(i++ < bind_count) {
 					bind_idx = m_env->code[++m_ip];
-					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = pop_stack();
+					// Whether we can unbind or not
+					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
+					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = false;
+					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->value = pop_stack();
+				}
+				break;
+			}
+
+			case ByteCode::BIND_MOVE: {
+				size_t bind_count = m_env->code[++m_ip];
+				size_t i = 0, bind_idx = 0;
+
+				while(i++ < bind_count) {
+					bind_idx = m_env->code[++m_ip];
+					// We cannot unbind parameter bindings
+					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
+					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = true;
+					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->value = pop_stack();
 				}
 				break;
 			}
@@ -335,7 +352,7 @@ void VM::run() {
 					));
 				}
 
-				push_stack(m_top_stack->bindings[binding]);
+				push_stack(m_top_stack->bindings[binding]->value);
 				break;
 			}
 

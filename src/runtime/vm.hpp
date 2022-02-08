@@ -7,10 +7,15 @@
 
 
 namespace Runtime {
+	struct Binding {
+		bool strict; // Whether we can unbind or not
+		std::shared_ptr<Value> value;	
+	};
+
 	struct CallFrame {
 		std::string proc_id;
 		size_t return_idx;
-		std::map<std::string, std::shared_ptr<Value> > bindings;
+		std::map<std::string, std::shared_ptr<Binding>> bindings;
 		std::vector<std::shared_ptr<Value> > stack;
 
 		~CallFrame() {

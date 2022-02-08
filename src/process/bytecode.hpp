@@ -8,6 +8,7 @@ namespace Process {
 		PUSH,					// PUSH IDX
 		CAPTURE,				// CAPTURE COUNT
 		BIND,					// BIND
+		BIND_MOVE,				// BIND_MOVE
 		LOAD_BINDING,			// LOAD_BINDING IDX
 		CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
 		PROCCALL,				// PROCCALL FUNCTION_DEF_IDX
