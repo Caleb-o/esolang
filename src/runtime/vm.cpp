@@ -335,9 +335,11 @@ void VM::run() {
 
 				// Failed to find a valid procedure that matches stack items
 				if (sub_idx >= proc_it->second.size() || capture_list->capture_len != proc_it->second[sub_idx].parameters.size()) {
+					delete capture_list;
 					error(false, "Could not find a procedure that matches stack values");
 				}
 
+				// TODO pass into callee stack (unpack, since we bind)
 				delete capture_list;
 
 				std::cout << "Valid proc found : '" << proc_it->first << "' at " << sub_idx << std::endl;
