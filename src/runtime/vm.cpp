@@ -310,19 +310,21 @@ void VM::run() {
 					// We must linearly check each overload + each parameter
 					// It is possible to immediately skip
 					for(auto it = proc_it->second.begin(); it != proc_it->second.end(); ++it) {
-						sub_idx++;
-
 						size_t param_idx = 0;
 						bool found = true;
 
+						// Skip if arguments aren't correct count
 						if (capture_list->capture_len != it->parameters.size()) {
+							sub_idx++;
 							continue;
 						}
 
 						// Check all parameters
-						for(auto param_it = it->parameters.end(); param_it != it->parameters.begin(); --param_it) {
+						for(int param_idx = it->parameters.size() - 1; param_idx >= 0; --param_idx) {
 							// Types don't equal then it's correct
-							if (param_it->second.kind != capture_list->capture[param_idx++]->kind) {
+							auto param = std::next(it->parameters.begin(), param_idx);
+
+							if (param->second.kind != capture_list->capture[param_idx]->kind) {
 								found = false;
 								continue;
 							}
@@ -330,11 +332,12 @@ void VM::run() {
 
 						// Correct type found
 						if (found) break;
+						sub_idx++;
 					}
 				}
 
 				// Failed to find a valid procedure that matches stack items
-				if (sub_idx >= proc_it->second.size() || capture_list->capture_len != proc_it->second[sub_idx].parameters.size()) {
+				if (sub_idx >= proc_it->second.size()) {
 					delete capture_list;
 					error(false, "Could not find a procedure that matches stack values");
 				}
