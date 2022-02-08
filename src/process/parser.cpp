@@ -229,6 +229,15 @@ namespace Process {
 		push_bytes(ByteCode::PROCCALL, proc_idx);
 	}
 
+	void Parser::binding_access_statement() {
+		std::string binding = copy_lexeme_str(m_current);
+		consume(TokenKind::ID);
+
+		m_env->idLiterals.push_back(binding);
+
+		push_bytes(ByteCode::LOAD_BINDING, m_env->idLiterals.size()-1);
+	}
+
 	void Parser::statement() {
 		switch(m_current->kind) {
 			// Arithmetic
@@ -247,6 +256,7 @@ namespace Process {
 			}
 
 			// Keywords
+			case TokenKind::ID:			binding_access_statement(); break;
 			case TokenKind::BANG:		proc_call_statement(); break;
 			case TokenKind::IF:			if_statement(); break;
 			case TokenKind::DUP:		consume(m_current->kind); push_byte(ByteCode::DUPLICATE); break;

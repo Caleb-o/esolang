@@ -37,6 +37,7 @@ namespace Process {
 		void comparison_statement();
 		void if_statement();
 		void proc_call_statement();
+		void binding_access_statement();
 		void statement();
 		void statement_list();
 		void code_block();

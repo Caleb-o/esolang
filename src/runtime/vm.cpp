@@ -323,6 +323,22 @@ void VM::run() {
 				break;
 			}
 
+			case ByteCode::LOAD_BINDING: {
+				size_t binding_idx = m_env->code[++m_ip];
+				std::string binding = m_env->idLiterals[binding_idx];
+
+				// Does not exist
+				if (m_top_stack->bindings.find(binding) == m_top_stack->bindings.end()) {
+					error(false,
+						Util::string_format("Trying to access unbound binding '%s'",
+						binding.c_str()
+					));
+				}
+
+				push_stack(m_top_stack->bindings[binding]);
+				break;
+			}
+
 			case ByteCode::PROCCALL: {
 				auto proc_it = std::next(m_env->defs.procedures.begin(), m_env->code[++m_ip]);
 				int sub_idx = 0;
