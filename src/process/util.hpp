@@ -5,11 +5,27 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <fstream>
 #include <stdexcept>
 
 using namespace Process;
 
 namespace Util {
+	static std::string read_file(const char *file_name) {
+		std::ifstream file(file_name);
+		std::string str;
+
+		if (file.is_open()) {
+			file.seekg(0, std::ios::end);   
+			str.reserve(file.tellg());
+			file.seekg(0, std::ios::beg);
+
+			str.assign((std::istreambuf_iterator<char>(file)),
+						std::istreambuf_iterator<char>());
+		}
+		return str;
+	}
+
 	// https://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
 	template<typename ... Args>
 	static std::string string_format(const std::string& format, Args ... args)

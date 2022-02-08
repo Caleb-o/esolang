@@ -13,10 +13,12 @@ namespace Process {
 		// Hash each file we include, so we can check it when importing, mitigates including the same file twice
 		std::unordered_set<size_t> m_file_hashes;
 		// This is a pointer, so we can later swap it out when importing another module
-		std::unique_ptr<Lexer> m_lexer;
+		std::shared_ptr<Lexer> m_lexer;
+		std::vector<std::shared_ptr<Lexer>> m_lexers;
 		std::shared_ptr<Token> m_current;
 		std::shared_ptr<Environment> m_env;
 		bool m_completed = { false };
+		bool m_ignore_main = { false };
 
 	private:
 		void error(std::string msg);

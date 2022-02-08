@@ -307,7 +307,32 @@ namespace Process {
 	}
 
 	void Parser::using_statement() {
-		error("Using is unimplemented");
+		consume(TokenKind::USING);
+
+		std::string import = copy_lexeme_str(m_current);
+		consume(TokenKind::STRING_LIT);
+
+		std::string source = Util::read_file(import.c_str());
+
+		size_t hash = Util::hash(source.c_str(), source.size());
+		if (m_file_hashes.find(hash) != m_file_hashes.end()) {
+			return;
+		}
+
+		m_file_hashes.insert(hash);
+
+		m_lexers.push_back(m_lexer);
+		m_lexer = std::make_shared<Lexer>(Lexer(source));
+		m_current = m_lexer->get_token();
+
+		m_ignore_main = true;
+
+		program();
+
+		m_ignore_main = false;
+
+		m_lexer = m_lexers.back();
+		m_lexers.pop_back();
 	}
 
 	void Parser::type_list(const char *id, bool is_proc) {
@@ -478,6 +503,9 @@ namespace Process {
 	std::shared_ptr<Environment> Parser::parse(std::string source) {
 		m_lexer = std::make_unique<Lexer>(Lexer(source));
 		m_current = m_lexer->get_token();
+
+		size_t hash = Util::hash(source.c_str(), source.size());
+		m_file_hashes.insert(hash);
 
 		program();
 		m_completed = true;

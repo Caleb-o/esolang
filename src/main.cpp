@@ -1,8 +1,7 @@
 #include <iostream>
-#include <fstream>
-#include <streambuf>
 #include <string>
 #include <cstring>
+#include <sstream>
 #include <exception>
 #include <memory>
 #include "process/bytecode.hpp"
@@ -11,21 +10,6 @@
 #include "runtime/vm.hpp"
 
 using namespace Process;
-
-std::string read_file(const char *file_name) {
-	std::ifstream file(file_name);
-	std::string str;
-
-	if (file.is_open()) {
-		file.seekg(0, std::ios::end);   
-		str.reserve(file.tellg());
-		file.seekg(0, std::ios::beg);
-
-		str.assign((std::istreambuf_iterator<char>(file)),
-					std::istreambuf_iterator<char>());
-	}
-	return str;
-}
 
 static void usage() {
 	std::cout << "Usage: eso filename\n";
@@ -64,7 +48,7 @@ int main(int argc, char **argv) {
 	Parser p;
 		
 	try {
-		std::string buffer = read_file(filename);
+		std::string buffer = Util::read_file(filename);
 
 		if (buffer.size() == 0) {
 			throw "File could not be read or is empty";
