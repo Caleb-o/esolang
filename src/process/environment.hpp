@@ -39,6 +39,14 @@ namespace Process {
 		std::vector<std::string> idLiterals;
 		// Definitions are compile-time known structs and procedures
 		Definitions defs;
+
+		~Environment() {
+			for(int i = literals.size()-1; i >= 0; --i) {
+				if (literals[i]) delete literals[i];
+			}
+			literals.clear();
+			idLiterals.clear();
+		}
 	};
 
 
@@ -87,13 +95,6 @@ namespace Process {
 			std::cout << Util::string_format("%04d ", i);
 
 			switch(env->code[i]) {
-				case ByteCode::RETURN: {
-					int proc_idx = (int)env->code[++i];
-					int sub_idx = (int)env->code[++i];
-					std::cout << get_bytecode_name(env->code[i-2]) << "<" << proc_idx << ", " << sub_idx << ">\n";
-					break;
-				}
-
 				case ByteCode::PUSH: {
 					int val_idx = (int)env->code[++i];
 					std::cout << get_bytecode_name(env->code[i-1]) << "<" << val_idx << ", '";
@@ -122,6 +123,7 @@ namespace Process {
 					break;
 				}
 
+				case ByteCode::RETURN:
 				case ByteCode::PROCCALL:
 				case ByteCode::CAPTURE:
 				case ByteCode::GOTO:

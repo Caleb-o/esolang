@@ -404,10 +404,7 @@ namespace Process {
 
 		// Conditional bytes, since main cannot return
 		if (std::strcmp(id.c_str(), "main") != 0) {
-			size_t proc_idx = std::distance(m_env->defs.procedures.begin(), m_env->defs.procedures.find(id));
-			
-			push_bytes(ByteCode::RETURN, (ByteCode)proc_idx);
-			push_byte((ByteCode)sub_idx);
+			push_bytes(ByteCode::RETURN, sub_idx);
 		} else {
 			// Check for main def count
 			if (m_env->defs.procedures[id].size() > 1) {

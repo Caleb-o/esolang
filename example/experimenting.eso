@@ -1,9 +1,7 @@
-proc test(a, b, c : int) -> void { }
-proc test(a, b: int) -> void { }
-
-proc main() -> void { 
-	'Calling test' println drop
-
-	| 1 2 3 | !test
-	| 1 2 | !test
+proc test() -> void {
+	'test' println drop
+}
+	
+proc main() -> void {
+	!test
 }

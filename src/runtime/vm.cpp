@@ -3,12 +3,27 @@
 #include "../process/util.hpp"
 
 
-static void add_call_frame(std::vector<CallFrame>& stack, std::string proc_name, size_t ret_idx) {
-	CallFrame frame;
-	frame.proc_id = proc_name;
-	frame.return_idx = ret_idx;
+void VM::add_call_frame(std::string proc_name, size_t ret_idx) {
+	CallFrame *frame = new CallFrame;
+	frame->proc_id = proc_name;
+	frame->return_idx = ret_idx;
 
-	stack.push_back(frame);
+	m_call_stack.push_back(frame);
+	m_top_stack = frame;
+}
+
+void VM::kill_frame() {
+	if (m_top_stack) {
+		for(int i = m_top_stack->stack.size() - 1; i >= 0; --i) {
+			if (m_top_stack->stack[i]) delete m_top_stack->stack[i];
+		}
+
+		delete m_top_stack;
+
+		size_t new_size = m_call_stack.size();
+		m_top_stack = (new_size > 0) ? m_call_stack[new_size-1] : nullptr;
+		std::cout << "Killed stack\n";
+	}
 }
 
 
@@ -16,8 +31,8 @@ void VM::unwind_stack() {
 	if (m_call_stack.size() > 0) {
 		std::cout << "== Call Stack ==\n";
 		
-		for(int frame_idx = m_call_stack.size()-1; frame_idx >= 0; frame_idx--) {
-			CallFrame *frame = &m_call_stack[frame_idx];
+		for(int frame_idx = m_call_stack.size()-1; frame_idx >= 0; --frame_idx) {
+			CallFrame *frame = m_call_stack[frame_idx];
 			std::cout << "depth " << frame_idx << " '" <<  frame->proc_id << "' [";
 			// TODO: Print each binding here
 			std::cout << "] stack\n";
@@ -27,12 +42,16 @@ void VM::unwind_stack() {
 				continue;
 			}
 
-			for(int stack_idx = frame->stack.size()-1; stack_idx >= 0; stack_idx--) {
+			for(int stack_idx = frame->stack.size()-1; stack_idx >= 0; --stack_idx) {
 				std::cout << "[" << stack_idx << "] ";
 				write_value(frame->stack[stack_idx]);
 				std::cout << " : " << kind_as_str(frame->stack[stack_idx]->kind);
 				std::cout << std::endl;
+
+				delete frame->stack[stack_idx];
 			}
+
+			kill_frame();
 			std::cout << std::endl;
 		}
 	}
@@ -64,8 +83,8 @@ Value *VM::peek_stack(size_t idx) {
 
 
 void VM::arithmetic_op() {
-	auto rhs = pop_stack();
-	auto lhs = pop_stack();
+	Value *rhs = pop_stack();
+	Value *lhs = pop_stack();
 
 	// Type check left and right side kinds
 	if (lhs->kind != rhs->kind) {
@@ -168,6 +187,24 @@ void VM::comparison_op() {
 				break;
 			}
 
+			case ValueKind::CAPTURE: {
+				switch(op) {
+					case ByteCode::GREATER:		push_stack(create_value(lhs->capture_len >  rhs->capture_len)); break;
+					case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->capture_len >- rhs->capture_len)); break;
+					case ByteCode::LESS:		push_stack(create_value(lhs->capture_len <  rhs->capture_len)); break;
+					case ByteCode::LESS_EQ:		push_stack(create_value(lhs->capture_len <= rhs->capture_len)); break;
+					
+					// TODO: Check for equality in length and types
+					// case ByteCode::EQUAL:	push_stack(create_value(lhs->capture_len == rhs->capture_len)); break;
+
+					default:	error(false,
+									Util::string_format("Unknown operation '%s'",
+									get_bytecode_name(op)
+								)); break;
+				}
+				break;
+			}
+
 			case ValueKind::BOOL: {
 				switch(op) {
 					case ByteCode::EQUAL:	push_stack(create_value(lhs->data.boolean == rhs->data.boolean)); break;
@@ -220,11 +257,10 @@ void VM::run() {
 	}
 
 	// Setup a callframe
-	add_call_frame(m_call_stack, "main", -1);
+	add_call_frame("main", -1);
 	m_ip = m_env->defs.procedures["main"][0].startIdx;
 
 	const size_t code_len = m_env->code.size();
-	m_top_stack = &m_call_stack[m_call_stack.size()-1];
 	bool running = true;
 
 	while(running && m_ip < code_len) {
@@ -276,7 +312,6 @@ void VM::run() {
 
 				while(i++ < bind_count) {
 					bind_idx = m_env->code[++m_ip];
-
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = pop_stack();
 				}
 				break;
@@ -284,7 +319,7 @@ void VM::run() {
 
 			case ByteCode::CAPTURE: {
 				size_t capture_count = m_env->code[++m_ip];
-				Value **values = new Value*[capture_count];
+				Value ** values = new Value *[capture_count];
 
 				for(int i = capture_count - 1; i >= 0; --i) {
 					values[i] = pop_stack();
@@ -298,13 +333,13 @@ void VM::run() {
 				auto proc_it = std::next(m_env->defs.procedures.begin(), m_env->code[++m_ip]);
 				int sub_idx = 0;
 
-				Value *capture_list = pop_stack();
-
 				// TODO: Make it so void procs can go without a capture list
 				// Must be a capture list
-				if (capture_list->kind != ValueKind::CAPTURE) {
+				if (m_top_stack->stack.size() == 0 || peek_stack()->kind != ValueKind::CAPTURE) {
 					error(false, "Procedure call requires a capture list on the stack top");
 				}
+
+				Value *capture_list = pop_stack();
 
 				if (proc_it->second.size() > 1) {
 					// We must linearly check each overload + each parameter
@@ -342,10 +377,51 @@ void VM::run() {
 					error(false, "Could not find a procedure that matches stack values");
 				}
 
-				// TODO pass into callee stack (unpack, since we bind)
-				delete capture_list;
+				// Setup a callframe
+				size_t return_idx = m_ip;
+				add_call_frame(proc_it->first, return_idx);
 
-				std::cout << "Valid proc found : '" << proc_it->first << "' at " << sub_idx << std::endl;
+				// TODO pass into callee stack (unpack, since we bind)
+				for(size_t i = 0; i < capture_list->capture_len; ++i) {
+					m_top_stack->stack.push_back(capture_list->capture[i]);
+				}
+
+				delete capture_list;
+				m_ip = proc_it->second[sub_idx].startIdx - 1;
+				break;
+			}
+
+			case ByteCode::RETURN: {
+				size_t sub_idx = m_env->code[++m_ip];
+				ProcedureDef *proc_def = &m_env->defs.procedures[m_top_stack->proc_id][sub_idx];
+				size_t last_frame = m_call_stack.size() - 2;
+
+				// Handle return data
+				if (proc_def->returnTypes[0] != ValueKind::VOID) {
+					for(int ret_idx = proc_def->returnTypes.size(); ret_idx >= 0; --ret_idx) {
+						if (peek_stack()->kind != proc_def->returnTypes[ret_idx]) {
+							error(false, Util::string_format(
+								"Expected type '%s' but got '%s'",
+								kind_as_str(proc_def->returnTypes[ret_idx]),
+								kind_as_str(peek_stack()->kind)
+							));
+						}
+
+						// Add to previous call-frame
+						m_call_stack[last_frame]->stack.push_back(pop_stack());
+					}
+				}
+
+				// Too many values on the stack
+				if (m_top_stack->stack.size() > 0) {
+					error(false, Util::string_format(
+						"Trying to return with more than %d items on the stack",
+						m_top_stack->stack.size()
+					));
+				}
+
+				m_ip = m_top_stack->return_idx;
+				kill_frame();
 				break;
 			}
 
@@ -353,9 +429,11 @@ void VM::run() {
 			case ByteCode::DUPLICATE:	push_stack(peek_stack()); break;
 
 			case ByteCode::HALT: {
-				if (m_top_stack->stack.size() > 0) {
+				if (m_call_stack[0]->stack.size() > 0) {
 					error(false, "Program exiting with non-empty stack");
 				}
+
+				kill_frame();
 
 				running = false; 
 				break;

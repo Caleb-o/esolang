@@ -29,13 +29,7 @@ namespace Runtime {
 
 		~Value() {
 			if (kind == ValueKind::STRING) delete[] data.string;
-
-			if (kind == ValueKind::CAPTURE) {
-				for(int i = 0; i < capture_len; ++i) {
-					delete capture[i];
-				}
-				delete[] capture;
-			}
+			if (kind == ValueKind::CAPTURE) delete[] capture;
 		}
 	};
 
@@ -90,6 +84,7 @@ namespace Runtime {
 			case Util::hash("bool", 4): 		return ValueKind::BOOL;
 			case Util::hash("string", 6): 		return ValueKind::STRING;
 			case Util::hash("struct", 6): 		return ValueKind::STRUCT;
+			case Util::hash("capture", 8): 		return ValueKind::CAPTURE;
 		}
 	}
 
@@ -113,7 +108,14 @@ namespace Runtime {
 			case ValueKind::BOOL: 		std::cout << ((value->data.boolean) ? "true" : "false"); break;
 			case ValueKind::STRING: 	std::cout << value->data.string; break;
 			case ValueKind::STRUCT: 	std::cout << "struct"; break;
-			case ValueKind::CAPTURE: 	std::cout << "capture"; break;
+			case ValueKind::CAPTURE: {
+				std::cout << "capture: ";
+				for(size_t i = 0; i < value->capture_len; ++i) {
+					write_value(value->capture[i]);
+					std::cout << " ";
+				}
+				break;
+			}
 		}
 	}
 }
