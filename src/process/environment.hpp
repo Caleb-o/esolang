@@ -100,7 +100,8 @@ namespace Process {
 					break;
 				}
 
-				case ByteCode::BIND: {
+				case ByteCode::BIND:
+				case ByteCode::BIND_MOVE:{
 					int bindings = (int)env->code[++i];
 					int count = i + bindings;
 
@@ -122,8 +123,10 @@ namespace Process {
 
 				case ByteCode::RETURN:
 				case ByteCode::PROCCALL:
+				case ByteCode::BINDING:
 				case ByteCode::CAPTURE:
 				case ByteCode::GOTO:
+				case ByteCode::LOAD_BINDING:
 				case ByteCode::IF: {
 					int val_idx = (int)env->code[++i];
 					std::cout << get_bytecode_name(env->code[i-1]) << "<" << val_idx << ">\n";

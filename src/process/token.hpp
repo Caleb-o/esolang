@@ -41,6 +41,8 @@ namespace Process {
 			case TokenKind::PRINTLN:	return "println";
 
 			case TokenKind::PROC:		return "proc";
+			case TokenKind::BIND:		return "bind";
+			case TokenKind::BIND_MOVE:	return "bind-move";
 			case TokenKind::CAPTURE:	return "capture";
 			case TokenKind::ID:			return "ID";
 			case TokenKind::COMMA:		return "comma";

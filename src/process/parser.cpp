@@ -117,14 +117,32 @@ namespace Process {
 		consume(TokenKind::CAPTURE);
 		size_t capture_count = 0;
 
-		while(m_current->kind != TokenKind::CAPTURE) {
-			if (m_current->kind == TokenKind::ENDOFFILE) {
-				error("Unterminated capture list");
+		if (m_current->kind == TokenKind::BANG) {
+			// Bind values from the stack, dynamicall
+			consume(TokenKind::BANG);
+
+			if (m_current->kind != TokenKind::INT_LIT) {
+				error("Dynamic capture requires an integer literal");
 			}
 
+			// Get the count
 			expr();
-			capture_count++;
+			capture_count = m_env->literals[m_env->code[m_env->code.size()-1]]->data.integer;
+
+			// Remove push
+			m_env->code.pop_back(); m_env->code.pop_back();
+		} else {
+			// We will bind a series of expressions
+			while(m_current->kind != TokenKind::CAPTURE) {
+				if (m_current->kind == TokenKind::ENDOFFILE) {
+					error("Unterminated capture list");
+				}
+
+				expr();
+				capture_count++;
+			}
 		}
+
 		consume(TokenKind::CAPTURE);
 
 		// Note: This has to come last since we will capture values previous
