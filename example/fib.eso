@@ -1,0 +1,13 @@
+proc fib(n : int) -> int {
+	n 1 <= if { n }
+	else { n 1 - |!1| !fib n 2 - |!1| !fib + }
+}
+
+# 7 seconds on lower-spec laptop (Release)
+proc main() -> void {
+	32
+	'Fibonacci to ' print drop
+	print ' = ' print drop
+
+	| !1 | !fib println drop
+}

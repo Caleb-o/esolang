@@ -2,8 +2,13 @@ proc test(a : int) -> void {
 	a println drop
 	'test' println drop
 }
+
+proc test(a, b : int) -> void {
+	a println drop
+	b println drop
+	'test2' println drop
+}
 	
 proc main() -> void {
-	5
-	| !2 | !test
+	1 2 | !2 | !test
 }

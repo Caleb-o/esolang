@@ -333,18 +333,19 @@ namespace Process {
 			bool isMoved = true;
 
 			// Modifier for duplicating data instead of moving
-			if (m_current->kind == TokenKind::DUP) {
-				if (hasMove) {
-					// We cannot move values from within the stack, it must be at the
-					// end. We can duplicate them all however.
-					error("Cannot use dup modifier after move parameters");
-				}
+			// TODO: Find a way to incorporate this with the new capture
+			// if (m_current->kind == TokenKind::DUP) {
+			// 	if (hasMove) {
+			// 		// We cannot move values from within the stack, it must be at the
+			// 		// end. We can duplicate them all however.
+			// 		error("Cannot use dup modifier after move parameters");
+			// 	}
 
-				consume(m_current->kind);
-				isMoved = false;
-			} else {
-				hasMove = true;
-			}
+			// 	consume(m_current->kind);
+			// 	isMoved = false;
+			// } else {
+			// 	hasMove = true;
+			// }
 
 			std::string type_id = copy_lexeme_str(m_current);
 			consume(TokenKind::TYPEID);
@@ -402,6 +403,7 @@ namespace Process {
 		// TODO: Multiple return types
 		std::string retid = copy_lexeme_str(m_current);
 		consume(TokenKind::TYPEID);
+
 		m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
 
 		// Check each parameter and push a bind opcode with each param

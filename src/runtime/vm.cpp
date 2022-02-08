@@ -368,34 +368,32 @@ void VM::run() {
 
 				std::shared_ptr<Value> capture_list = pop_stack();
 
-				if (proc_it->second.size() > 1) {
-					// We must linearly check each overload + each parameter
-					// It is possible to immediately skip
-					for(auto it = proc_it->second.begin(); it != proc_it->second.end(); ++it) {
-						size_t param_idx = 0;
-						bool found = true;
+				// We must linearly check each overload + each parameter
+				// It is possible to immediately skip
+				for(auto it = proc_it->second.begin(); it != proc_it->second.end(); ++it) {
+					size_t param_idx = 0;
+					bool found = true;
 
-						// Skip if arguments aren't correct count
-						if (capture_list->capture_len != it->parameters.size()) {
-							sub_idx++;
+					// Skip if arguments aren't correct count
+					if (capture_list->capture_len != it->parameters.size()) {
+						sub_idx++;
+						continue;
+					}
+
+					// Check all parameters
+					for(int param_idx = it->parameters.size() - 1; param_idx >= 0; --param_idx) {
+						// Types don't equal then it's correct
+						auto param = std::next(it->parameters.begin(), param_idx);
+
+						if (param->second.kind != capture_list->capture[param_idx]->kind) {
+							found = false;
 							continue;
 						}
-
-						// Check all parameters
-						for(int param_idx = it->parameters.size() - 1; param_idx >= 0; --param_idx) {
-							// Types don't equal then it's correct
-							auto param = std::next(it->parameters.begin(), param_idx);
-
-							if (param->second.kind != capture_list->capture[param_idx]->kind) {
-								found = false;
-								continue;
-							}
-						}
-
-						// Correct type found
-						if (found) break;
-						sub_idx++;
 					}
+
+					// Correct type found
+					if (found) break;
+					sub_idx++;
 				}
 
 				// Failed to find a valid procedure that matches stack items
@@ -407,8 +405,8 @@ void VM::run() {
 				size_t return_idx = m_ip;
 				add_call_frame(proc_it->first, return_idx);
 
-				// TODO pass into callee stack (unpack, since we bind)
-				for(size_t i = 0; i < capture_list->capture_len; ++i) {
+				// Pass into callee stack (unpack, since we bind)
+				for(int i = capture_list->capture_len-1; i >= 0; --i) {
 					m_top_stack->stack.push_back(capture_list->capture[i]);
 				}
 
@@ -418,12 +416,13 @@ void VM::run() {
 
 			case ByteCode::RETURN: {
 				size_t sub_idx = m_env->code[++m_ip];
+
 				ProcedureDef *proc_def = &m_env->defs.procedures[m_top_stack->proc_id][sub_idx];
 				size_t last_frame = m_call_stack.size() - 2;
 
 				// Handle return data
 				if (proc_def->returnTypes[0] != ValueKind::VOID) {
-					for(int ret_idx = proc_def->returnTypes.size(); ret_idx >= 0; --ret_idx) {
+					for(int ret_idx = proc_def->returnTypes.size() - 1; ret_idx >= 0; --ret_idx) {
 						if (peek_stack()->kind != proc_def->returnTypes[ret_idx]) {
 							error(false, Util::string_format(
 								"Expected type '%s' but got '%s'",
