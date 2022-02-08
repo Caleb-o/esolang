@@ -137,7 +137,9 @@ namespace Process {
 		consume(TokenKind::CAPTURE);
 
 		// Note: This has to come last since we will capture values previous
-		push_bytes(ByteCode::CAPTURE, capture_count);
+		if (capture_count > 0) {
+			push_bytes(ByteCode::CAPTURE, capture_count);
+		}
 	}
 
 	void Parser::expr() {

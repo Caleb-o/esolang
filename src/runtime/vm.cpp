@@ -13,7 +13,7 @@ void VM::add_call_frame(std::string proc_name, size_t ret_idx) {
 }
 
 void VM::kill_frame() {
-	if (m_top_stack) {
+	if (m_top_stack != nullptr) {
 		for(int i = m_top_stack->stack.size() - 1; i >= 0; --i) {
 			if (m_top_stack->stack[i]) delete m_top_stack->stack[i];
 		}
@@ -51,9 +51,14 @@ void VM::unwind_stack() {
 				delete frame->stack[stack_idx];
 			}
 
+			frame->stack.clear();
+
 			kill_frame();
 			std::cout << std::endl;
 		}
+
+		if (m_call_stack.size() > 0)
+			kill_frame();
 	}
 }
 
@@ -72,7 +77,7 @@ Value *VM::pop_stack() {
 		error(false, "Trying to pop an empty stack");
 	}
 
-	Value *tmp = m_top_stack->stack.back();
+	Value *tmp = m_top_stack->stack[m_top_stack->stack.size()-1];
 	m_top_stack->stack.pop_back();
 	return tmp;
 }
@@ -319,13 +324,16 @@ void VM::run() {
 
 			case ByteCode::CAPTURE: {
 				size_t capture_count = m_env->code[++m_ip];
-				Value ** values = new Value *[capture_count];
 
-				for(int i = capture_count - 1; i >= 0; --i) {
-					values[i] = pop_stack();
+				if (capture_count > 0) {
+					Value ** values = new Value *[capture_count];
+
+					for(int i = capture_count - 1; i >= 0; --i) {
+						values[i] = pop_stack();
+					}
+
+					push_stack(create_value(values, capture_count));
 				}
-
-				push_stack(create_value(values, capture_count));
 				break;
 			}
 

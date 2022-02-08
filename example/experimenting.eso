@@ -1,7 +1,7 @@
-proc test() -> void {
+proc test(a : int) -> void {
 	'test' println drop
 }
 	
 proc main() -> void {
-	!test
+	|  | !test
 }
