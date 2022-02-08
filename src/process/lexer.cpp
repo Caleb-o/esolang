@@ -170,6 +170,7 @@ namespace Process {
 						return make_single(TokenKind::LESS);
 					}
 				}
+				case '|': return make_single(TokenKind::CAPTURE);
 				case '(': return make_single(TokenKind::LPAREN);
 				case ')': return make_single(TokenKind::RPAREN);
 				case '{': return make_single(TokenKind::LCURLY);

@@ -29,11 +29,13 @@ namespace Process {
 
 		size_t add_literal_to_env(Value value);
 		size_t add_literal();
+		void capture_list();
 
 		void expr();
 		void arithmetic_statement();
 		void comparison_statement();
 		void if_statement();
+		void proc_call_statement();
 		void statement();
 		void statement_list();
 		void code_block();

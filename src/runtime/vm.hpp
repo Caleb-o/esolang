@@ -27,7 +27,7 @@ namespace Runtime {
 		void arithmetic_op();
 		void comparison_op();
 		Value pop_stack();
-		Value peek_stack();
+		Value peek_stack(size_t idx = 0);
 
 	public:
 		VM(Environment *env) { m_env = env; }
@@ -37,6 +37,10 @@ namespace Runtime {
 					if (val.kind == ValueKind::STRING)
 						if (val.data.string)
 							delete[] val.data.string;
+					
+					if (val.kind == ValueKind::CAPTURE)
+						if (val.capture)
+							delete[] val.capture;
 				}
 
 				delete m_env;

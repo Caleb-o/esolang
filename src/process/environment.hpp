@@ -35,7 +35,7 @@ namespace Process {
 		std::vector<ByteCode> code;
 		// Should be unique, if a value already exists, get its index
 		std::vector<Value> literals;
-		// IDs
+		// IDs - these are used for bindings
 		std::vector<std::string> idLiterals;
 		// Definitions are compile-time known structs and procedures
 		Definitions defs;
@@ -102,7 +102,28 @@ namespace Process {
 					break;
 				}
 
+				case ByteCode::BIND: {
+					int bindings = (int)env->code[++i];
+					int count = i + bindings;
+
+					std::cout << get_bytecode_name(env->code[i-1]) << "<" << bindings;
+
+					if (bindings > 0) {
+						std::cout << ": ";
+					}
+					while(i < count) {
+						std::cout << env->code[i++];
+
+						if (i < count - 1) {
+							std::cout << " ";
+						}
+					}
+					std::cout << ">\n";
+					break;
+				}
+
 				case ByteCode::PROCCALL:
+				case ByteCode::CAPTURE:
 				case ByteCode::GOTO:
 				case ByteCode::IF: {
 					int val_idx = (int)env->code[++i];

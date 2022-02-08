@@ -6,10 +6,11 @@ namespace Process {
 		PRINT, PRINTLN,			// PRINT|PRINTLN
 		DROP,					// POP
 		PUSH,					// PUSH IDX
-		BIND, BINDMOVE,			// BIND|BINDMOVE
+		CAPTURE,				// CAPTURE COUNT
+		BIND,					// BIND
 		CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
-		PROCCALL,				// PROCCALL FUNCTION_DEF_ID SUB_ID
-		BINDING,				// BINDING BINDING_ID
+		PROCCALL,				// PROCCALL FUNCTION_DEF_IDX
+		BINDING,				// BINDING BIND_COUNT, BINDING_ID [, ..]
 		GOTO,					// GOTO POS
 		IF,						// IF GOTO_FALSE_POS
 		RETURN,					// RETURN
@@ -24,7 +25,6 @@ namespace Process {
 			case ByteCode::PUSH:		return "PUSH";
 			case ByteCode::DROP:		return "DROP";
 			case ByteCode::BIND:		return "BIND";
-			case ByteCode::BINDMOVE:	return "BIND-MOVE";
 			case ByteCode::BINDING:		return "BINDING";
 
 			case ByteCode::ADD:			return "ADD";
@@ -41,6 +41,7 @@ namespace Process {
 			case ByteCode::IF:			return "IF";
 			
 			case ByteCode::PROCCALL:	return "PROCCALL";
+			case ByteCode::CAPTURE:		return "CAPTURE";
 			case ByteCode::HALT:		return "HALT";
 			case ByteCode::GOTO:		return "GOTO";
 			case ByteCode::RETURN:		return "RETURN";

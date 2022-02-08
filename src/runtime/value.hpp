@@ -2,12 +2,13 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <vector>
 #include "../process/util.hpp"
 
 
 namespace Runtime {
 	enum class ValueKind {
-		VOID, INT, FLOAT, BOOL, STRING, STRUCT
+		VOID, INT, FLOAT, BOOL, STRING, STRUCT, CAPTURE,
 	};
 
 	union ValueData {
@@ -21,6 +22,8 @@ namespace Runtime {
 		ValueKind kind;
 		ValueData data;
 		bool read_only;
+		// std::vector<Value> capture;
+		Value *capture;
 	};
 
 	static Value create_value(int value, bool read_only = true) {
@@ -55,6 +58,22 @@ namespace Runtime {
 		};
 	}
 
+	static Value create_value(std::vector<Value>& capture, bool read_only = true) {
+		Value *values = new Value[capture.size()];
+		size_t i = 0;
+
+		for(auto val : capture) {
+			values[i++] = val;
+		}
+
+		return {
+			ValueKind::CAPTURE,
+			{ 0 },
+			read_only,
+			values,
+		};
+	}
+
 
 	static ValueKind kind_from_str(const char *name) {
 		switch(Util::hash(name, std::strlen(name))) {
@@ -75,6 +94,7 @@ namespace Runtime {
 			case ValueKind::BOOL:		return "bool";
 			case ValueKind::STRING:		return "string";
 			case ValueKind::STRUCT:		return "struct";
+			case ValueKind::CAPTURE:	return "capture";
 		}
 	}
 
@@ -86,6 +106,7 @@ namespace Runtime {
 			case ValueKind::BOOL: 		std::cout << ((value.data.boolean) ? "true" : "false"); break;
 			case ValueKind::STRING: 	std::cout << value.data.string; break;
 			case ValueKind::STRUCT: 	std::cout << "struct"; break;
+			case ValueKind::CAPTURE: 	std::cout << "capture"; break;
 		}
 	}
 }

@@ -123,12 +123,35 @@ namespace Process {
 		}
 	}
 
+	void Parser::capture_list() {
+		consume(TokenKind::CAPTURE);
+		size_t capture_count = 0;
+
+		while(m_current->kind != TokenKind::CAPTURE) {
+			if (m_current->kind == TokenKind::ENDOFFILE) {
+				error("Unterminated capture list");
+			}
+
+			expr();
+			capture_count++;
+		}
+		consume(TokenKind::CAPTURE);
+
+		// Note: This has to come last since we will capture values previous
+		push_bytes(ByteCode::CAPTURE, capture_count);
+	}
+
 	void Parser::expr() {
 		switch(m_current->kind) {
 			case TokenKind::INT_LIT: case TokenKind::FLOAT_LIT:
 			case TokenKind::BOOL_LIT: case TokenKind::STRING_LIT: {
 				push_bytes(ByteCode::PUSH, add_literal());
 				consume(m_current->kind);
+				break;
+			}
+
+			case TokenKind::CAPTURE: {
+				capture_list();
 				break;
 			}
 
@@ -197,6 +220,30 @@ namespace Process {
 		}
 	}
 
+	void Parser::proc_call_statement() {
+		consume(TokenKind::BANG);
+
+		std::string id = copy_lexeme_str(m_current);
+		consume(TokenKind::ID);
+
+		auto proc_it = m_env->defs.procedures.find(id);
+
+		// Trying to use a function that hasn't been defined yet
+		if (proc_it == m_env->defs.procedures.end()) {
+			error(
+				Util::string_format("Trying to call procedure '%s' which has not been defined yet",
+				id.c_str()
+			));
+		}
+
+		
+
+		// Get the current procedure idx and push it to the proc call
+		// Note: We infer which overload to call at run-time
+		size_t proc_idx = std::distance(m_env->defs.procedures.begin(), proc_it);
+		push_bytes(ByteCode::PROCCALL, proc_idx);
+	}
+
 	void Parser::statement() {
 		switch(m_current->kind) {
 			// Arithmetic
@@ -215,6 +262,7 @@ namespace Process {
 			}
 
 			// Keywords
+			case TokenKind::BANG:		proc_call_statement(); break;
 			case TokenKind::IF:			if_statement(); break;
 			case TokenKind::DUP:		consume(m_current->kind); push_byte(ByteCode::DUPLICATE); break;
 			case TokenKind::POP:		consume(m_current->kind); push_byte(ByteCode::DROP); break;
@@ -330,7 +378,6 @@ namespace Process {
 		size_t sub_idx = add_proc_def_tmp(m_env, id.c_str());
 		m_env->defs.procedures[id][sub_idx].startIdx = (m_env->code.size() == 0) ? 0 : m_env->code.size();
 
-		// TODO: Add proc def and get idx
 		parameter_list(id.c_str());
 		consume(TokenKind::ARROW);
 		
@@ -339,6 +386,23 @@ namespace Process {
 		consume(TokenKind::TYPEID);
 		m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
 
+		// Check each parameter and push a bind opcode with each param
+		if (m_env->defs.procedures[id][sub_idx].parameters.size() > 0) {
+			push_bytes(ByteCode::BIND, m_env->defs.procedures[id][sub_idx].parameters.size());
+
+			for(auto param : m_env->defs.procedures[id][sub_idx].parameters) {
+				auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), param.first);
+
+				if (name_it == m_env->idLiterals.end()) {
+					m_env->idLiterals.push_back(param.first);
+					push_byte(m_env->idLiterals.size() - 1);
+				} else {
+					push_byte(std::distance(m_env->idLiterals.begin(), name_it));
+				}
+			}
+		}
+		
+		// Parse statements within code block
 		code_block();
 
 		// Conditional bytes, since main cannot return

@@ -1,3 +1,4 @@
+#include <iterator>
 #include "vm.hpp"
 #include "../process/util.hpp"
 
@@ -57,8 +58,8 @@ Value VM::pop_stack() {
 	return tmp;
 }
 
-Value VM::peek_stack() {
-	return m_top_stack->stack.back();
+Value VM::peek_stack(size_t idx) {
+	return m_top_stack->stack[m_top_stack->stack.size() - (idx + 1)];
 }
 
 
@@ -262,6 +263,74 @@ void VM::run() {
 			case ByteCode::GOTO: {
 				size_t jump_idx = m_env->code[++m_ip];
 				m_ip = jump_idx;
+				break;
+			}
+
+			case ByteCode::BIND: {
+				size_t bind_count = m_env->code[++m_ip];
+				size_t i = 0, bind_idx = 0;
+
+				while(i++ < bind_count) {
+					bind_idx = m_env->code[++m_ip];
+
+					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = pop_stack();
+				}
+				break;
+			}
+
+			case ByteCode::CAPTURE: {
+				size_t capture_count = m_env->code[++m_ip];
+				std::vector<Value> values;
+				values.reserve(capture_count);
+
+				for(int i = capture_count - 1; i >= 0; --i) {
+					values[i] = pop_stack();
+				}
+
+				push_stack(create_value(values));
+				break;
+			}
+
+			case ByteCode::PROCCALL: {
+				if (peek_stack().kind == ValueKind::CAPTURE) {
+					std::cout << "Capture on stack\n";
+				}
+
+				auto proc_it = std::next(m_env->defs.procedures.begin(), m_env->code[++m_ip]);
+				int sub_idx = -1;
+
+				// We must linearly check each overload + each parameter
+				// It is possible to immediately skip
+				for(auto it = proc_it->second.begin(); it != proc_it->second.end(); ++it) {
+					sub_idx++;
+
+					size_t param_idx = 0;
+					bool found = true;
+
+					// Can't compare if stack is not the correct size
+					if (m_top_stack->stack.size() < it->parameters.size()) { 
+						continue;
+					}
+
+					// Check all parameters
+					for(auto param_it = it->parameters.end(); param_it != it->parameters.begin(); --param_it) {
+						// Types don't equal then it's correct
+						if (param_it->second.kind != peek_stack(param_idx++).kind) {
+							found = false;
+							continue;
+						}
+					}
+
+					// Correct type found
+					if (found) break;
+				}
+
+				// Failed to find a valid procedure that matches stack items
+				if (sub_idx == -1) {
+					error(false, "Could not find a procedure that matches stack values");
+				}
+
+				std::cout << "Valid proc found : '" << proc_it->first << "' at " << sub_idx << std::endl;
 				break;
 			}
 

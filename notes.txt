@@ -1,19 +1,15 @@
-Proc Defs:
-HashMap<String, vector<ProcDef>>
+Bindings:
 
-Each function will be mapped in the hashmap with its definition. This will help support overloading.
-We check if arity matches and then proceed to check types of parameters. If we match, an existing proc
-exists and we cause an error. If not, go to next node to check. If we get to the end, we add a new node.
+Instead of storing string literals for bindings within the env, we could look at all the
+types in the proc_def and push a bind opcode for each parameter. This means we don't need
+to store more data at compile-time and it's only during run-time, within a proc call.
 
-ProcCall will require the index of func name and the sub index, which refers to how far across the node list 
-it is. We could possibly use a vector, so we can index immediately instead of a linked list. If a vector is not
-allowed, we will have to use the linked list.
+eg.
 
-ProcNode:
-ProcDef struct
-ProcNode* next
+test():
+# Bind opcodes are automatically inserted in the parser
+bind c, b, a
+# a = 1, b = 2, c = 3
 
-if/else
-
-Inside a true body, an explicit goto must be inserted, so we do not run the false body just after. We could essentially
-chain ifs together so we jump to the next if, instead of using an elif keyword.
+main():
+1 2 3 !test

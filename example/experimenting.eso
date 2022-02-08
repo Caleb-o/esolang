@@ -1,9 +1,6 @@
+proc test(a : int) -> void {}
+
 proc main() -> void { 
-	2 1 > if {
-		1 println drop
-	} else {
-		'b' println drop
-	}
-	
-	'end' printlnd drop
+	'calling test' println drop
+	| 1 2 3 | !test drop
 }

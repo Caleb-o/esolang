@@ -4,7 +4,7 @@
 namespace Process {
 	enum class TokenKind {
 		// Operators
-		PLUS, MINUS, SLASH, STAR, COLON,
+		PLUS, MINUS, SLASH, STAR, COLON, CAPTURE,
 		ARROW, BANG, GREATER, LESS, GREATER_EQ, LESS_EQ, EQUAL,
 		COMMA, DOT, LCURLY, RCURLY, LPAREN, RPAREN,
 		
@@ -37,6 +37,7 @@ namespace Process {
 			case TokenKind::ELSE:		return "else";
 
 			case TokenKind::PROC:		return "proc";
+			case TokenKind::CAPTURE:	return "capture";
 			case TokenKind::ID:			return "ID";
 			case TokenKind::TYPEID:		return "typeid";
 			case TokenKind::LPAREN:		return "lparen";
