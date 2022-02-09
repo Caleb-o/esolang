@@ -144,110 +144,143 @@ void VM::arithmetic_op() {
 }
 
 void VM::comparison_op() {
-		std::shared_ptr<Value> rhs = pop_stack();
-		std::shared_ptr<Value> lhs = pop_stack();
+	std::shared_ptr<Value> rhs = pop_stack();
+	std::shared_ptr<Value> lhs = pop_stack();
 
-		// Type check left and right side kinds
-		if (lhs->kind != rhs->kind) {
-			error(false,
-				Util::string_format("Trying to operate on different value types. Lhs '%s', Rhs '%s'",
-				kind_as_str(lhs->kind), kind_as_str(rhs->kind)
-			));
-		}
-
-		auto op = *m_ip;
-
-		switch(lhs->kind) {
-			case ValueKind::INT: {
-				switch(op) {
-					case ByteCode::GREATER:		push_stack(create_value(lhs->data.integer > rhs->data.integer)); break;
-					case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->data.integer >= rhs->data.integer)); break;
-					case ByteCode::LESS:		push_stack(create_value(lhs->data.integer < rhs->data.integer)); break;
-					case ByteCode::LESS_EQ:		push_stack(create_value(lhs->data.integer <= rhs->data.integer)); break;
-					case ByteCode::EQUAL:		push_stack(create_value(lhs->data.integer == rhs->data.integer)); break;
-
-					default:	error(false,
-									Util::string_format("Unknown operation '%s'",
-									get_bytecode_name(op)
-								)); break;
-				}
-				break;
-			}
-
-			case ValueKind::FLOAT: {
-				switch(op) {
-					case ByteCode::GREATER:		push_stack(create_value(lhs->data.floating > rhs->data.floating)); break;
-					case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->data.floating >- rhs->data.floating)); break;
-					case ByteCode::LESS:		push_stack(create_value(lhs->data.floating < rhs->data.floating)); break;
-					case ByteCode::LESS_EQ:		push_stack(create_value(lhs->data.floating <= rhs->data.floating)); break;
-					case ByteCode::EQUAL:		push_stack(create_value(lhs->data.floating == rhs->data.floating)); break;
-
-					default:	error(false,
-									Util::string_format("Unknown operation '%s'",
-									get_bytecode_name(op)
-								)); break;
-				}
-				break;
-			}
-
-			case ValueKind::CAPTURE: {
-				switch(op) {
-					case ByteCode::GREATER:		push_stack(create_value(lhs->capture_len >  rhs->capture_len)); break;
-					case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->capture_len >- rhs->capture_len)); break;
-					case ByteCode::LESS:		push_stack(create_value(lhs->capture_len <  rhs->capture_len)); break;
-					case ByteCode::LESS_EQ:		push_stack(create_value(lhs->capture_len <= rhs->capture_len)); break;
-					
-					// TODO: Check for equality in length and types
-					// case ByteCode::EQUAL:	push_stack(create_value(lhs->capture_len == rhs->capture_len)); break;
-
-					default:	error(false,
-									Util::string_format("Unknown operation '%s'",
-									get_bytecode_name(op)
-								)); break;
-				}
-				break;
-			}
-
-			case ValueKind::BOOL: {
-				switch(op) {
-					case ByteCode::EQUAL:	push_stack(create_value(lhs->data.boolean == rhs->data.boolean)); break;
-
-					default:	error(false,
-									Util::string_format("Unknown operation '%s'",
-									get_bytecode_name(op)
-								)); break;
-				}
-				break;
-			}
-
-			case ValueKind::STRING: {
-				switch(op) {
-					case ByteCode::GREATER:		push_stack(create_value(lhs->string.size() >  rhs->string.size())); break;
-					case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->string.size() >= rhs->string.size())); break;
-					case ByteCode::LESS:		push_stack(create_value(lhs->string.size() <  rhs->string.size())); break;
-					case ByteCode::LESS_EQ:		push_stack(create_value(lhs->string.size() <= rhs->string.size())); break;
-					case ByteCode::EQUAL:		push_stack(create_value(lhs->string.size() == rhs->string.size())); break;
-
-					default:	error(false,
-									Util::string_format("Unknown operation '%s'",
-									get_bytecode_name(op)
-								)); break;
-				}
-				break;
-			}
-
-			case ValueKind::STRUCT: {
-				error(false,
-					Util::string_format("Cannot use arithmetic operations on type '%s'",
-					kind_as_str(lhs->kind)
-				));
-				break;
-			}
-
-			default: break;
-		}
+	// Type check left and right side kinds
+	if (lhs->kind != rhs->kind) {
+		error(false,
+			Util::string_format("Trying to operate on different value types. Lhs '%s', Rhs '%s'",
+			kind_as_str(lhs->kind), kind_as_str(rhs->kind)
+		));
 	}
 
+	auto op = *m_ip;
+
+	switch(lhs->kind) {
+		case ValueKind::INT: {
+			switch(op) {
+				case ByteCode::GREATER:		push_stack(create_value(lhs->data.integer > rhs->data.integer)); break;
+				case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->data.integer >= rhs->data.integer)); break;
+				case ByteCode::LESS:		push_stack(create_value(lhs->data.integer < rhs->data.integer)); break;
+				case ByteCode::LESS_EQ:		push_stack(create_value(lhs->data.integer <= rhs->data.integer)); break;
+				case ByteCode::EQUAL:		push_stack(create_value(lhs->data.integer == rhs->data.integer)); break;
+
+				default:	error(false,
+								Util::string_format("Unknown operation '%s'",
+								get_bytecode_name(op)
+							)); break;
+			}
+			break;
+		}
+
+		case ValueKind::FLOAT: {
+			switch(op) {
+				case ByteCode::GREATER:		push_stack(create_value(lhs->data.floating > rhs->data.floating)); break;
+				case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->data.floating >- rhs->data.floating)); break;
+				case ByteCode::LESS:		push_stack(create_value(lhs->data.floating < rhs->data.floating)); break;
+				case ByteCode::LESS_EQ:		push_stack(create_value(lhs->data.floating <= rhs->data.floating)); break;
+				case ByteCode::EQUAL:		push_stack(create_value(lhs->data.floating == rhs->data.floating)); break;
+
+				default:	error(false,
+								Util::string_format("Unknown operation '%s'",
+								get_bytecode_name(op)
+							)); break;
+			}
+			break;
+		}
+
+		case ValueKind::CAPTURE: {
+			switch(op) {
+				case ByteCode::GREATER:		push_stack(create_value(lhs->capture_len >  rhs->capture_len)); break;
+				case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->capture_len >- rhs->capture_len)); break;
+				case ByteCode::LESS:		push_stack(create_value(lhs->capture_len <  rhs->capture_len)); break;
+				case ByteCode::LESS_EQ:		push_stack(create_value(lhs->capture_len <= rhs->capture_len)); break;
+				
+				// TODO: Check for equality in length and types
+				// case ByteCode::EQUAL:	push_stack(create_value(lhs->capture_len == rhs->capture_len)); break;
+
+				default:	error(false,
+								Util::string_format("Unknown operation '%s'",
+								get_bytecode_name(op)
+							)); break;
+			}
+			break;
+		}
+
+		case ValueKind::BOOL: {
+			switch(op) {
+				case ByteCode::EQUAL:	push_stack(create_value(lhs->data.boolean == rhs->data.boolean)); break;
+
+				default:	error(false,
+								Util::string_format("Unknown operation '%s'",
+								get_bytecode_name(op)
+							)); break;
+			}
+			break;
+		}
+
+		case ValueKind::STRING: {
+			switch(op) {
+				case ByteCode::GREATER:		push_stack(create_value(lhs->string.size() >  rhs->string.size())); break;
+				case ByteCode::GREATER_EQ:	push_stack(create_value(lhs->string.size() >= rhs->string.size())); break;
+				case ByteCode::LESS:		push_stack(create_value(lhs->string.size() <  rhs->string.size())); break;
+				case ByteCode::LESS_EQ:		push_stack(create_value(lhs->string.size() <= rhs->string.size())); break;
+				case ByteCode::EQUAL:		push_stack(create_value(lhs->string.size() == rhs->string.size())); break;
+
+				default:	error(false,
+								Util::string_format("Unknown operation '%s'",
+								get_bytecode_name(op)
+							)); break;
+			}
+			break;
+		}
+
+		case ValueKind::STRUCT: {
+			error(false,
+				Util::string_format("Cannot use arithmetic operations on type '%s'",
+				kind_as_str(lhs->kind)
+			));
+			break;
+		}
+
+		default: break;
+	}
+}
+
+void VM::bind(bool strict) {
+	size_t bind_count = *(++m_ip);
+	ByteCode *end = m_ip + bind_count;
+	size_t bind_idx = 0;
+
+	if (bind_count > m_stack.size() - m_top_stack->stack_start) {
+		error(false, Util::string_format(
+			"Trying to bind %d value(s), but the stack contains %d value(s)",
+			bind_count, m_stack.size() - m_top_stack->stack_start
+		));
+	}
+
+	while(m_ip < end) {
+		bind_idx = *(++m_ip);
+		auto binding_it = m_top_stack->bindings.find(m_env->idLiterals[bind_idx]);
+		
+		// Check if binding exists
+		if (binding_it == m_top_stack->bindings.end()) {
+			m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
+		} else {
+			if (m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict) {
+				error(false, Util::string_format(
+					"Trying to rebind a parameter/strict binding '%s'",
+					m_env->idLiterals[bind_idx].c_str()
+				));
+			}
+		}
+
+		// Whether we can unbind or not
+		m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = strict;
+		m_top_stack->bindings[m_env->idLiterals[bind_idx]]->value = pop_stack();
+	}
+}
 
 void VM::run() {
 	// Find the main symbol
@@ -307,58 +340,12 @@ void VM::run() {
 			}
 
 			case ByteCode::BIND: {
-				size_t bind_count = *(++m_ip);
-				ByteCode *end = m_ip + bind_count;
-				size_t bind_idx = 0;
-
-				if (bind_count > m_stack.size() - m_top_stack->stack_start) {
-					error(false, Util::string_format(
-						"Trying to bind %d value(s), but the stack contains %d value(s)",
-						bind_count, m_stack.size() - m_top_stack->stack_start
-					));
-				}
-
-				while(m_ip < end) {
-					bind_idx = *(++m_ip);
-					auto binding_it = m_top_stack->bindings.find(m_env->idLiterals[bind_idx]);
-					
-					// Check if binding exists
-					if (binding_it == m_top_stack->bindings.end()) {
-						m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
-					} else {
-						if (m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict) {
-							error(false, Util::string_format(
-								"Trying to rebind a parameter (strict binding) '%s'",
-								m_env->idLiterals[bind_idx].c_str()
-							));
-						}
-					}
-
-					// Whether we can unbind or not
-					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = false;
-					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->value = pop_stack();
-				}
+				bind(false);
 				break;
 			}
 
 			case ByteCode::BIND_MOVE: {
-				size_t bind_count = *(++m_ip);
-				ByteCode *end = m_ip + bind_count;
-				size_t bind_idx = 0;
-
-				while(m_ip < end) {
-					bind_idx = *(++m_ip);
-					auto binding_it = m_top_stack->bindings.find(m_env->idLiterals[bind_idx]);
-					
-					// Check if binding exists
-					if (binding_it == m_top_stack->bindings.end()) {
-						m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
-					}
-
-					// Whether we can unbind or not
-					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = true;
-					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->value = pop_stack();
-				}
+				bind(true);
 				break;
 			}
 

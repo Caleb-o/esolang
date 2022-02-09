@@ -38,6 +38,7 @@ namespace Runtime {
 		void push_stack(std::shared_ptr<Value>);
 		void arithmetic_op();
 		void comparison_op();
+		void bind(bool);
 		std::shared_ptr<Value> pop_stack();
 		std::shared_ptr<Value> peek_stack(size_t idx = 0);
 

@@ -275,10 +275,13 @@ namespace Process {
 		}
 	}
 
-	void Parser::bind_statement() {
-		consume(TokenKind::BIND);
+	void Parser::bind_statement(bool strict) {
+		TokenKind kind = (strict) ? TokenKind::BIND_MOVE : TokenKind::BIND;
+		ByteCode byte = (strict) ? ByteCode::BIND_MOVE : ByteCode::BIND;
 
-		push_bytes(ByteCode::BIND, 0);
+		consume(kind);
+
+		push_bytes(byte, 0);
 		size_t bind_len = m_env->code.size() - 1;
 		size_t bind_count = 0;
 
@@ -329,7 +332,8 @@ namespace Process {
 			}
 
 			// Keywords
-			case TokenKind::BIND:		bind_statement(); break;
+			case TokenKind::BIND:		bind_statement(false); break;
+			case TokenKind::BIND_MOVE:	bind_statement(true); break;
 			case TokenKind::ID:			binding_access_statement(); break;
 			case TokenKind::BANG:		proc_call_statement(); break;
 			case TokenKind::IF:			if_statement(); break;

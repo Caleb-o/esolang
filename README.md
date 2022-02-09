@@ -76,6 +76,7 @@ dup 3 = loop {
 - `print` Prints the top value of the stack
 - `println` Prints the top value of the stack with a newline
 - `bind` Starts a bind statement
+- `strict` Starts a strict bind statement
 - `loop` Starts a loop
 - `void` Void type
 - `int` Integer type
@@ -190,17 +191,24 @@ proc count_down(n : int) -> void {
 ```
 
 ### Bindings
-A binding is a way of lifting a value from the stack and assigning it to a name. This is similar to a variable*. Once a binding is assigned, it can be used throughout the current scope*. Bindings will be removed as soon as a procedure exits. Note that the bindings will be in reverse order. Procedure parameters use bindings that are strict, this means that they cannot be rebound. All standard bindings can be overwritten, so they act somewhat like variables.
+A binding is a way of lifting a value from the stack and assigning it to a name. This is similar to a variable*. Once a binding is assigned, it can be used throughout the current scope*. Bindings will be removed as soon as a procedure exits. Note that the bindings will be in reverse order. Procedure parameters use bindings that are strict, this means that they cannot be rebound. All standard bindings can be overwritten, so they act somewhat like variables. As a user, you can also use strict bindings, which cannot be overwritten. You could imagine this like a constant.
 
 ### Example
 ```
+# Create standard bindings
 1 2
 bind | a, b |
 
+# Create a strict binding
+3
+strict | c |
+
+# Print all values
 a println drop
 b println drop
+c println drop
 
-# 2 1
+# 2 1 3
 ```
 
 **Eso only has immutable values*
