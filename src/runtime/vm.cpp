@@ -37,7 +37,6 @@ void VM::unwind_stack() {
 				for(int stack_idx = m_stack.size(); stack_idx > frame->stack_start; --stack_idx) {
 					int idx = stack_idx-1;
 
-					std::cout << "stack_idx " << idx << std::endl;
 					std::cout << "[" << idx << "] ";
 					write_value(m_stack[idx]);
 					std::cout << " : " << kind_as_str(m_stack[idx]->kind);

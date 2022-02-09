@@ -1,9 +1,5 @@
-# esolang
-Simple esolang written in Python
-
-
 ## What is it?
-This is a bytecode interpreted, stack-based language that I've written in Python. I have been reading about and exploring new languages, so I decided that I would like to develop one of my own. Initially, it was going to be something similar to BrainF*ck but using numbers and words to have a better visualisation. I came across Tsoding's Porth language, which is also a stack-based language written in Python and I've taken a lot of inspiration from it. I don't know much about compilation/assembly, so my version is interpreted.
+This is a bytecode interpreted, stack-based language that I've written in C++. I have been reading about and exploring new languages, so I decided that I would like to develop one of my own. Initially, it was going to be something similar to BrainF*ck but using numbers and words to have a better visualisation. I came across Tsoding's Porth language, which was a stack-based language written in Python (now self-hosted) and I've taken a lot of inspiration from it.
 
 
 ## Influenced By
@@ -26,15 +22,18 @@ This is a bytecode interpreted, stack-based language that I've written in Python
 Coments use the '#' and are single line only.
 ```
 # This is a comment
-1 2 3 4
 ```
 
 ### Types
 Eso has two types currently:
 - `int` : int, int literal
+- `float` : float, float literal
+- `bool` : bool, bool literal
 - `const string` : string literal
+- `capture` : value that contains any number of other values
 
-Only integers can be created from within the code, so there isn't an easy way to construct a string using code*
+**All values are immutable, so you must create a new value in its place if you want to change it.*
+**Only integers, floats and booleans can be created from within the code, so there isn't an easy way to construct a string using code.*
 
 
 ### Example
@@ -43,142 +42,169 @@ Only integers can be created from within the code, so there isn't an easy way to
 'This is a string'
 # Int literal
 1 2 3 4 5 6
+# Float literal
+2.3 4.5 6.7
 ```
-**You could emulate a string using an operator and integers, which will print a character*
 
 ### Operators
 - `+ - * /` Mathmatical operators
-- `= < >` Comparison
-- `.` Print current value on stack / Print string
-- `,` Print current value on stack as a char / Print string as ascii codes
-- `&` Swaps the top two numbers on the stack
-- `[` Start of a loop
-- `]` End of a loop
-- `;` (Optional) end of statement
-- `!` invoke macro
-- `?` Prompt user for input
+- `= < > <= >=` Comparison
+- `!` invoke procedure/dynamic capture 
+- `|` Starts and ends a capture
 
 ### Example
 ```
 1 2 +
-# Create a loop, with an optional semicolon
-[ 1 - . ];
+# Create a loop
+dup 3 = loop {
+    1 -
+    dup 0 >
+}
+
 # Push a two and swap with the last value
-2 &
+2 swap
 ```
 
 ### Keywords
 - `if` Checks if the current value on the stack is `0` or `1`
 - `dup` Duplicates the current value on the stack
-- `pop` Pops the current value from the stack
-- `macro` Starts a macro
+- `drop` Drops the current value from the stack
+- `swap` Swaps top two values on the stack
+- `rot` Rotates top and top-2 value eg. '1 2 3' = '3 2 1'
 - `proc` Starts a procedure
-- `undef` Undefines a proc
-- `end` End of a if/proc/macro block
-- `impl` Import statement
-- `break` exit out of a loop
-- `neg` negate the next value
-- `assert` cause an assertion if value is 0
+- `using` Import statement
+- `print` Prints the top value of the stack
+- `println` Prints the top value of the stack with a newline
+- `bind` Starts a bind statement
+- `loop` Starts a loop
+- `void` Void type
+- `int` Integer type
+- `float` Floating point type
+- `bool` Boolean type
+- `string` String type
 
 ### Example
 ```
 # Check if 1 == 1 and print hello if true
-1 1 = if
-    'Hello!' .
-end
+1 1 = if {
+    'Hello!' println drop
+}
 ```
 
-### Impl
-Impl is used to import other eso scripts. It will import the entire script including macros and procs.
+### Using
+`using` is used to import other eso scripts. It will import the entire script (excluding its main).
 
 ```
-impl 'std.experimental'
+using 'myscript'
 
-# Call a macro from the std experimental script
-# Here the print macro wraps the dot '.' operator
-10 !print
-```
-
-### Macros
-An eso macro is a way to copy-paste code without having to write specific operations everywhere. They are currently used to make some operators into callable tokens in the std library. Since we may want to use the same macro with different code, we can also undefine it.
-
-### Example
-```
-macro one_plus_one;
-    1 1 +
-end
-
-# Call our new macro
-!one_plus_one
-
-# Undefine the macro
-undef one_plus_one;
-
-# We can now create a new one_plus_one macro :^)
+proc main() -> void {
+    # Call a procedure from the script, that takes an integer
+    | 10 | !my_procedure
+}
 ```
 
 ### Procedures
-Similar to macros, we can call blocks of code using a single token. Unlike a macro, we can tell the procedure to accept or return a certain amount of values. These values follow the name and are called the argument count and return count. An error will occur if it cannot be provided with or return the correct amount of values.
+We can call blocks of code using a procedure. In Eso, a procedure can take and give values, but is not required to do either. The nice thing is, that we can also overload procedures. So we are able to use the same name, as long as the parameters are different. In some languages, you cannot return mulitple types or you have to create a tuple. Eso supports any number of return values.
 
 ### Example
 ```
 # Define a procedure that takes one value and returns none
-proc my_print_proc 1 0;
-    .
-end
+proc my_print_proc(x : int) -> int {
+    # We print X but we also return it
+    x println
+}
 
-# Call our proc (It will print 10)
-10 my_print_proc
+proc main() -> void {
+    # Call our proc (It will print 10)
+    | 10 | !my_print_proc
+}
 ```
-*Note: Procedures are currently expected to end with the correct amount of values. So when it returns, it will copy the first N amount of values back to the previous stack, instead of from the end.*
+
+The `| 10 |` syntax is a capture. This tells the virtual machine that we want to use the value `10` as an argument. It will proceed to find a procedure with the given name, that also takes an integer.
+
+Parameters and return values are checked at run-time. With overloaded procedures, the VM will check the capture and its type(s), then choose the correct procedure (if one can be found).
+
+If we could only write captures explicitly, we would not be able to pass our own data into procedures. A dynamic capture is what we need for the job. We will use the same example from before, but using a dynamic capture.
+
+### Example
+```
+# Define a procedure that takes one value and returns none
+proc my_print_proc(x : int) -> int {
+    # We print X but we also return it
+    x println
+}
+
+proc main() -> void {
+    # Call our proc (It will print 10)
+    10 
+    # This denotes that we want 1 value from the stack to be passed in
+    | !1 | !my_print_proc
+}
+```
+
+As many languages, a `main` procedure is required for the entry point. Eso does not currently support CLI arguments, so we cannot take
+any arguments OR return values.
 
 ### Conditionals
-There are currently three conditional operators, which will push a `0` or `1` to the stack depending on the evaluation. When we use that with the `if` keyword, we can execute code based on a condition.
+There are currently 5 conditional operators, which will push a `true` or `false` to the stack depending on the evaluation. When we use that with the `if` keyword, we can execute code based on a condition.
 
 ### Example
 ```
 # Does 1 == 1?
-1 1 = if
-    pop
-    '1 = 1? True' .
-end
+1 1 = if {
+    '1 = 1? True' println drop
+}
 
-# Is 1 > 2?
-1 2 > if
-    pop
+1 2 > if {
     # This will not print
-    '1 > 2? True' .
-end
-```
-
-### Assertions
-As any good language should have, Eso supports assertions. An assertion raises an error if the condition is not met. This allows the programmer to test values before the program proceeds and exit before more errors occur.
-
-### Example
-```
-# Push 10
-10
-
-# Check if 10 is smaller than 20
-# We duplicate here, since we consume both values and may want to use 10 later
-dup 20 < assert '10 is bigger than 20'
-
-# Assert passed, print 10
-. pop
+    '1 > 2? True' println drop
+}
 ```
 
 ### Loops
-A single type of loop exists in Eso, which essentially acts like a while loop. It will evaluate code until the current value on the stack reaches `0`. There is an example macro of a count down within std experimental.
+A single type of loop exists in Eso, which essentially acts like a while loop. It will evaluate code until the top value on the stack is false.
 
 ### Example
 ```
-# Count down from current number on the stack and fill the stack
-# with descending numbers
-macro count-down; 
-    [ dup !swap !print 1 !sub ]
-    pop
-end
+# Count down from current number on the stack and print each value
+proc count_down(n : int) -> void {
+    n
+
+    # We must have a boolean on the stack, since we don't have a conditional
+    # we can just push a true (the loop will consume the value)
+    true loop {
+		# Print the current value
+		println
+		
+		# Remove one from our index
+		1 -
+
+		# Push boolean onto the stack for the loop
+		# to be evaluated
+		dup 0 >
+	}
+
+	# Drop the initial value
+	drop
+}
 ```
+
+### Bindings
+A binding is a way of lifting a value from the stack and assigning it to a name. This is similar to a variable*. Once a binding is assigned, it can be used throughout the current scope*. Bindings will be removed as soon as a procedure exits. Note that the bindings will be in reverse order. Procedure parameters use bindings that are strict, this means that they cannot be rebound. All standard bindings can be overwritten, so they act somewhat like variables.
+
+### Example
+```
+1 2
+bind | a, b |
+
+a println drop
+b println drop
+
+# 2 1
+```
+
+**Eso only has immutable values*
+**There isn't an idea of a scope. However, procedures live in their own space and will have their own bindings available.*
 
 ### Style and Operation
 In Eso operations are parsed and executed linearly, so there is no required syntax. This means no expected space/tab count, or line spacing etc. The next example will show two methods of writing the same code. As long as the order and logic is sound, then it will parse and run. You could technically have an entire program written in one line*.
@@ -187,108 +213,67 @@ In Eso operations are parsed and executed linearly, so there is no required synt
 ### Example
 
 ```
-macro my_macro; 1 1 1 + - end
+proc my_proc(x : int) -> int { x 1 1 + - }
 # vs
-macro my_macro;
-    1 1 1
-    + 
-    -
-end
+proc my_proc(x : int) -> int { 
+    x 1 1 
+    + - 
+}
 ```
-*Note: The std and examples are written in a mixture of both styles, depending on context.*
-
-**The repl currently only works using a single line, entering code will evaluate that single line and will forget previous entries.*
+*Note: The examples are written in a mixture of both styles, depending on context.*
 
 
 ### Naming conventions
-This is totally up to you! Since the only things you can name are procedures and macros, I just recommend using a different scheme so you don't mix them up. This is how the std is written:
+This is totally up to you! Since the only things you can name are procedures and bindings, there isn't really any issue here.
 
 ```
-# A macro convention
-macro my-macro; end
+# A binding convention
+bind | valA, valB |
 
 # A proc convention
-proc my_proc 0 0; end
+proc my_proc() -> void {}
 ```
 
 
 ## How it Works
-Eso is a stack based language, that gives you direct access to stack manipulation. Every operation directly pushes to or pops from the stack. A series of numbers will add that value directly to the stack. This also includes operations like `+ - * /` and comparison with `> < =`.
+Eso is a stack based language, that gives you direct access to stack manipulation. Every operation directly pushes to or pops from the stack. A series of numbers will add that value directly to the stack. This also includes operations like `+ - * /` and comparison with `> < = >= <=`.
 
-*Note: The only value that never touches the stack is a string literal, it is stored in global space.*
 ### Example
 ```
-# stack before []
+# stack before [ ]
 1 2 3 4 5 6
 # stack after [ 1 2 3 4 5 6 ]
 ```
 
 
 ### I/O
-IO in Eso is limited, it can only print or prompt via the console. Three operators control io:
-- `.` Print value or string
-- `,` Print character representation of value or ascii value of string chars
-- `?` Promp the user for input, pushing each value to the stack. Strings will be pushed in ascii form per character.
+IO in Eso is limited, it can only print values on the stack*.
+- `print` Print value or string
 
-### Example
-```
-impl 'std.experimental'
-
-# Prompt user for input
-'Enter values' .
-
-# input 'hello world 10 20'
-? !print-stack-drop
-
-# output 20 10 5 5
-```
+**Input methods and other output methods are planned*
 
 
 ### Scopes and Stacks
-Currently there is only one method of creating scopes (which have their own stack) and that's by using procedures. When a procedure is called, a new scope is created and that comes with its own stack. This is so you can start with a fresh stack and not interfere with other values you may not want to modify. Procedures allow for "arguments" which copy values from the previous stack into the procedures' stack.
+Currently there is only one method of creating scopes and that's by using procedures. When a procedure is called, a new scope is created and that comes with its own stack space*. This is so you can start with a fresh stack and not interfere with other values you may not want to modify. Procedures allow for "arguments" which move values from the previous stack into the procedures' stack.
 
 ### Example
 ```
 # Create a procedure that takes on argument and returns none
-proc my_proc 1 0;
+proc my_proc(a : int) -> void {
     # Print and pop the value
-    . pop
-end
+    println drop
+}
 
 # Push 10 onto the stack and call my_proc
 # 10 will be copied into the procedure
-10 my_proc pop
+| 10 | !my_proc drop
 ```
 
-A procedure can also return values from its stack, which works the same way as arguments. As soon as the procedure ends, it will copy N number of values back into the previous stack.
+A procedure can also return values from its stack, which works the same way as arguments. As soon as the procedure ends, it will move N number of values back into the previous stack.
 
-### Example
-```
-# Create a procedure that takes one argument and returns one
-proc plus_one 1 1;
-    1 +
-end
+A stack is required to be empty, or the size of the return count (if a procedure). This means the interpreter will throw an error if the stack size is incorrect. If a proc requires an argument or set of arguments, the stack must contain that many values. This is the same for return count of procedures.
 
-# Pass 20 to plus_one and print return value
-20 plus_one . pop
-```
-
-A stack is required to be empty, or the size of the return count (if a procedure). This means the interpreter will throw an error if the stack size is incorrect. If a proc requires an argument or set of arguments, the stack must contain that many values. This is the same for return count of procedures. However, Eso supports returning any number of arguments if a return count is not provided. Since procedure declarations don't support expressions or statements within the argument/return count, this gives the programmer a little more control.
-
-*Note: An empty argument count is also being considered, but is not currently implemented*
-
-### Example
-```
-impl 'std.experimental'
-
-proc any_return_proc 0;
-    1 2 3 4 5 6 7 8 9 10
-end
-
-# Call our return proc and print values returned
-# print-stack is a macro from the std experimental
-any_return_proc; !print-stack-drop
-```
+**All procedures use the same stack. Once a procedure is called, the "start" is set to the current space - arguments*
 
 
 ## Limitations / Restrictions / Caveats
@@ -296,9 +281,6 @@ any_return_proc; !print-stack-drop
 - No CLI args passed through
 - No string manipulation/construction
 - No file I/O
-- Procs, like macros, are copied in-place of their call. Meaning the program's final code will be bloated.
-- Only type is an integer (sometimes interpreted as a boolean when using comparison)
-- Imports are relative to the interpreter, so a local import might cause an error because it may not exist relative to the interpreter.
-- No namespacing. Importing a file may cause conflicts with other files. I hope you're good at unique names and/or undefining macros when not in use :^)
-- The conditional if only has a true body, you must evaluate again in another if with the opposite value to get the false body
-- Bad structure doesn't allow for too much expansion on the language, without rewrites.
+- No namespacing. Importing a file may cause conflicts with other files. I hope you're good at unique names, or using C-like naming that acts like namespacing.
+- No circular dependency support or resolution when encountering a possibly valid procedure, when it hasn't been declared yet.
+    - No resolution means that import order will matter. Eso does skip existing imports, if one has been encountered. This doesn't necessarily mean that file has been parsed yet, but it might have been added.
