@@ -7,8 +7,8 @@ namespace Process {
 		DROP,					// POP
 		PUSH,					// PUSH IDX
 		CAPTURE,				// CAPTURE COUNT
-		BIND,					// BIND
-		BIND_MOVE,				// BIND_MOVE
+		BIND,					// BIND COUNT, [ID INDEX, ...]
+		BIND_MOVE,				// BIND_MOVE, [ID INDEX, ...]
 		LOAD_BINDING,			// LOAD_BINDING IDX
 		CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
 		PROCCALL,				// PROCCALL FUNCTION_DEF_IDX

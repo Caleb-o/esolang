@@ -83,7 +83,7 @@ namespace Process {
 		size_t i = 0;
 
 		while(i < env->code.size()) {
-			std::cout << Util::string_format("%04d ", i);
+			std::cout << Util::string_format("%04d  %3d :: ", i, env->code[i]);
 
 			switch(env->code[i]) {
 				case ByteCode::PUSH: {
@@ -105,13 +105,20 @@ namespace Process {
 						std::cout << ": ";
 					}
 					while(i < count) {
-						std::cout << env->code[i++];
+						std::cout << "'" << env->idLiterals[env->code[i++]] << "'";
+						// std::cout << env->code[i++];
 
-						if (i < count - 1) {
+						if ((i-1) < count - 1) {
 							std::cout << " ";
 						}
 					}
 					std::cout << ">\n";
+					break;
+				}
+
+				case ByteCode::LOAD_BINDING: {
+					int bind_idx = (int)env->code[++i];
+					std::cout << get_bytecode_name(env->code[i-1]) << "<" << bind_idx << ", '" << env->idLiterals[bind_idx] << "'>\n";
 					break;
 				}
 
@@ -120,7 +127,6 @@ namespace Process {
 				case ByteCode::BINDING:
 				case ByteCode::CAPTURE:
 				case ByteCode::GOTO:
-				case ByteCode::LOAD_BINDING:
 				case ByteCode::IF:
 				case ByteCode::LOOP: {
 					int val_idx = (int)env->code[++i];

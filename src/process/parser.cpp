@@ -267,9 +267,52 @@ namespace Process {
 		std::string binding = copy_lexeme_str(m_current);
 		consume(TokenKind::ID);
 
-		m_env->idLiterals.push_back(binding);
+		push_byte(ByteCode::LOAD_BINDING);
 
-		push_bytes(ByteCode::LOAD_BINDING, m_env->idLiterals.size()-1);
+		auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), binding);
+
+		if (name_it == m_env->idLiterals.end()) {
+			m_env->idLiterals.push_back(binding);
+			push_byte(m_env->idLiterals.size() - 1);
+		} else {
+			push_byte(std::distance(m_env->idLiterals.begin(), name_it));
+		}
+	}
+
+	void Parser::bind_statement() {
+		consume(TokenKind::BIND);
+
+		push_bytes(ByteCode::BIND, 0);
+		size_t bind_len = m_env->code.size() - 1;
+		size_t bind_count = 0;
+
+		consume(TokenKind::CAPTURE);
+
+		while(m_current->kind != TokenKind::CAPTURE) {
+			std::string id = copy_lexeme_str(m_current);
+			consume(TokenKind::ID);
+
+			auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), id);
+
+			if (name_it == m_env->idLiterals.end()) {
+				m_env->idLiterals.push_back(id);
+				push_byte(m_env->idLiterals.size() - 1);
+			} else {
+				push_byte(std::distance(m_env->idLiterals.begin(), name_it));
+			}
+
+			bind_count++;
+
+			// Multiple binds
+			if (m_current->kind == TokenKind::COMMA) {
+				consume(TokenKind::COMMA);
+			}
+		}
+
+		consume(TokenKind::CAPTURE);
+
+		// Get count of bindings
+		m_env->code[bind_len] = (ByteCode)bind_count;
 	}
 
 	void Parser::statement() {
@@ -290,6 +333,7 @@ namespace Process {
 			}
 
 			// Keywords
+			case TokenKind::BIND:		bind_statement(); break;
 			case TokenKind::ID:			binding_access_statement(); break;
 			case TokenKind::BANG:		proc_call_statement(); break;
 			case TokenKind::IF:			if_statement(); break;
@@ -475,7 +519,7 @@ namespace Process {
 				}
 			}
 		}
-		
+
 		// Parse statements within code block
 		code_block();
 

@@ -43,6 +43,7 @@ namespace Process {
 		void loop_statement();
 		void proc_call_statement();
 		void binding_access_statement();
+		void bind_statement();
 		void statement();
 		void statement_list();
 		void code_block();

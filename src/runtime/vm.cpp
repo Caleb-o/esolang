@@ -309,10 +309,15 @@ void VM::run() {
 
 			case ByteCode::BIND: {
 				size_t bind_count = *(++m_ip);
-				size_t i = 0, bind_idx = 0;
+				ByteCode *end = m_ip + bind_count;
+				size_t bind_idx = 0;
 
-				while(i++ < bind_count) {
+				std::cout << "BIND count : " << bind_count << std::endl;
+
+				while(m_ip < end) {
 					bind_idx = *(++m_ip);
+					std::cout << "binding : " << m_env->idLiterals[bind_idx] << std::endl;
+
 					// Whether we can unbind or not
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = false;
@@ -323,10 +328,15 @@ void VM::run() {
 
 			case ByteCode::BIND_MOVE: {
 				size_t bind_count = *(++m_ip);
-				size_t i = 0, bind_idx = 0;
+				ByteCode *end = m_ip + bind_count;
+				size_t bind_idx = 0;
 
-				while(i++ < bind_count) {
+				std::cout << "BIND_MOVE count : " << bind_count << std::endl;
+
+				while(m_ip < end) {
 					bind_idx = *(++m_ip);
+					std::cout << "move binding : " << m_env->idLiterals[bind_idx] << std::endl;
+					
 					// We cannot unbind parameter bindings
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = true;
@@ -420,6 +430,7 @@ void VM::run() {
 				size_t last_frame = m_call_stack.size() - 2;
 				size_t stack_idx = 0;
 
+				
 				// Handle return data
 				if (proc_def->returnTypes[0] != ValueKind::VOID) {
 					for(int ret_idx = proc_def->returnTypes.size() - 1; ret_idx >= 0; --ret_idx) {

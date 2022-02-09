@@ -5,8 +5,9 @@ proc fib(n : int) -> int {
 		n n 0
 
 		true loop {
-			bind idx
+			bind | idx |
 
+			
 			1 - swap
 			2 - swap
 
@@ -18,5 +19,11 @@ proc fib(n : int) -> int {
 }
 	
 proc main() -> void {
-	| 7 | !fib println drop
+	# 1 2 3
+	# bind | a, b, c |
+	# a println drop
+	# b println drop
+	# c println drop
+	'fib = ' print drop
+	| 3 | !fib println drop
 }
