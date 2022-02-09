@@ -1,29 +1,8 @@
-proc fib(n : int) -> int {
-	n 1 <= if {
-		n
-	} else {
-		0 1 0 2
-
-		bind | idx, c, b, a |
-		
-		true loop {
-			a b +
-			bind | c |
-
-			b c
-			bind | b, a |
-
-			idx 1 +
-			bind | idx |
-			idx n <=
-		}
-
-		b
-	}
+proc test(i : int) -> void {
+	i
+	bind | x |
 }
 
-
 proc main() -> void {
-	'fib = ' print drop
-	| 64 | !fib println drop
+	| 1 | !test
 }

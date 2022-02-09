@@ -32,6 +32,6 @@ proc fib(n : int) -> int {
 # Fibonacci to 64 (Release) = 10ms
 # Fibonacci to 64 (Debug) = 18ms
 proc main() -> void {
-	'fib = ' print drop
+	'Fibonacci = ' print drop
 	| 64 | !fib println drop
 }

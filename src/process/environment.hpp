@@ -105,7 +105,8 @@ namespace Process {
 						std::cout << ": ";
 					}
 					while(i < count) {
-						std::cout << env->code[i++];
+						std::cout << "'" << env->idLiterals[env->code[++i]] << "'";
+						// std::cout << env->code[i++];
 
 						if ((i-1) < count - 1) {
 							std::cout << " ";

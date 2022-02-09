@@ -55,10 +55,10 @@ void VM::unwind_stack() {
 
 void VM::error(bool internal, std::string msg) {
 	if (internal) {
-		std::cout << "Internal: " << msg << std::endl;
+		std::cout << "Internal: " << msg << std::endl << std::endl;
 	} else {
 		m_ip--;
-		std::cout << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl;
+		std::cout << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl << std::endl;
 		unwind_stack();
 	}
 	throw "Runtime exception occured";
@@ -313,10 +313,30 @@ void VM::run() {
 				ByteCode *end = m_ip + bind_count;
 				size_t bind_idx = 0;
 
+				if (bind_count > m_stack.size() - m_top_stack->stack_start) {
+					error(false, Util::string_format(
+						"Trying to bind %d value(s), but the stack contains %d value(s)",
+						bind_count, m_stack.size() - m_top_stack->stack_start
+					));
+				}
+
 				while(m_ip < end) {
 					bind_idx = *(++m_ip);
+					auto binding_it = m_top_stack->bindings.find(m_env->idLiterals[bind_idx]);
+					
+					// Check if binding exists
+					if (binding_it == m_top_stack->bindings.end()) {
+						m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
+					} else {
+						if (m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict) {
+							error(false, Util::string_format(
+								"Trying to rebind a parameter (strict binding) '%s'",
+								m_env->idLiterals[bind_idx].c_str()
+							));
+						}
+					}
+
 					// Whether we can unbind or not
-					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = false;
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->value = pop_stack();
 				}
@@ -330,8 +350,14 @@ void VM::run() {
 
 				while(m_ip < end) {
 					bind_idx = *(++m_ip);
-					// We cannot unbind parameter bindings
-					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
+					auto binding_it = m_top_stack->bindings.find(m_env->idLiterals[bind_idx]);
+					
+					// Check if binding exists
+					if (binding_it == m_top_stack->bindings.end()) {
+						m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
+					}
+
+					// Whether we can unbind or not
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = true;
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->value = pop_stack();
 				}

@@ -12,7 +12,7 @@ proc fib(n : int) -> int {
 # 3.5 seconds on higer-spec
 
 proc main() -> void {
-	8
+	32
 	'Fibonacci to ' print drop
 	print ' = ' print drop
 
