@@ -30,7 +30,7 @@ void VM::unwind_stack() {
 			// TODO: Print each binding here
 			std::cout << "] stack | start: " << frame->stack_start << ":\n";
 
-			if (m_stack.size() < frame->stack_start) {
+			if (m_stack.size() <= frame->stack_start) {
 				std::cout << "-- Empty --\n";
 			} else {
 				// Print all stack items
@@ -57,7 +57,6 @@ void VM::error(bool internal, std::string msg) {
 	if (internal) {
 		std::cout << "Internal: " << msg << std::endl << std::endl;
 	} else {
-		m_ip--;
 		std::cout << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl << std::endl;
 		unwind_stack();
 	}

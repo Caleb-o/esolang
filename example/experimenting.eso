@@ -12,9 +12,14 @@ proc pass() -> int {
 	1 
 }
 
+proc yes() -> void {
+	drop
+}
+
 proc main() -> void {
 	| 1 | !test
 	|| !pass
 
 	println drop
+	|| !yes
 }
