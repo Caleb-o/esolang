@@ -4,8 +4,9 @@ proc fib(n : int) -> int {
 }
 
 # 7 seconds on lower-spec laptop (Release)
+# 5 seconds on higer-spec (Release)
 proc main() -> void {
-	32
+	16
 	'Fibonacci to ' print drop
 	print ' = ' print drop
 

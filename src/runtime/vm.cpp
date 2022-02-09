@@ -53,7 +53,7 @@ void VM::unwind_stack() {
 }
 
 void VM::error(bool internal, std::string msg) {
-	std::cout << msg << " at code " << get_bytecode_name(m_env->code[m_ip]) << " at pos " << m_ip << std::endl;
+	std::cout << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl;
 	if (!internal) unwind_stack();
 	throw "Runtime exception occured";
 }
@@ -88,7 +88,7 @@ void VM::arithmetic_op() {
 		));
 	}
 
-	auto op = m_env->code[m_ip];
+	auto op = *m_ip;
 
 	switch(lhs->kind) {
 		case ValueKind::INT: {
@@ -147,7 +147,7 @@ void VM::comparison_op() {
 			));
 		}
 
-		auto op = m_env->code[m_ip];
+		auto op = *m_ip;
 
 		switch(lhs->kind) {
 			case ValueKind::INT: {
@@ -250,15 +250,15 @@ void VM::run() {
 
 	// Setup a callframe
 	add_call_frame("main", -1);
-	m_ip = m_env->defs.procedures["main"][0].startIdx;
+	m_ip = m_env->code.data() + m_env->defs.procedures["main"][0].startIdx;
 
-	const size_t code_len = m_env->code.size();
+	const ByteCode *code_len = m_env->code.data() + m_env->code.size();
 	bool running = true;
 
 	while(running && m_ip < code_len) {
-		switch(m_env->code[m_ip]) {
+		switch(*m_ip) {
 			case ByteCode::PUSH: {
-				push_stack(m_env->literals[m_env->code[++m_ip]]);
+				push_stack(m_env->literals[*(++m_ip)]);
 				break;
 			}
 
@@ -276,7 +276,7 @@ void VM::run() {
 			}
 
 			case ByteCode::IF: {
-				size_t false_idx = m_env->code[++m_ip];
+				size_t false_idx = *(++m_ip);
 
 				if (m_top_stack->stack.size() == 0 || peek_stack()->kind != ValueKind::BOOL) {
 					error(false, "Cannot evaluate an empty stack or non-boolean value");
@@ -286,23 +286,23 @@ void VM::run() {
 
 				// Jump if false
 				if (!condition->data.boolean) {
-					m_ip = false_idx;
+					m_ip = m_env->code.data() + false_idx;
 				}
 				break;
 			}
 
 			case ByteCode::GOTO: {
-				size_t jump_idx = m_env->code[++m_ip];
-				m_ip = jump_idx;
+				size_t jump_idx = *(++m_ip);
+				m_ip = m_env->code.data() + jump_idx;
 				break;
 			}
 
 			case ByteCode::BIND: {
-				size_t bind_count = m_env->code[++m_ip];
+				size_t bind_count = *(++m_ip);
 				size_t i = 0, bind_idx = 0;
 
 				while(i++ < bind_count) {
-					bind_idx = m_env->code[++m_ip];
+					bind_idx = *(++m_ip);
 					// Whether we can unbind or not
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = false;
@@ -312,11 +312,11 @@ void VM::run() {
 			}
 
 			case ByteCode::BIND_MOVE: {
-				size_t bind_count = m_env->code[++m_ip];
+				size_t bind_count = *(++m_ip);
 				size_t i = 0, bind_idx = 0;
 
 				while(i++ < bind_count) {
-					bind_idx = m_env->code[++m_ip];
+					bind_idx = *(++m_ip);
 					// We cannot unbind parameter bindings
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = true;
@@ -326,7 +326,7 @@ void VM::run() {
 			}
 
 			case ByteCode::CAPTURE: {
-				size_t capture_count = m_env->code[++m_ip];
+				size_t capture_count = *(++m_ip);
 
 				if (capture_count > 0) {
 					std::vector<std::shared_ptr<Value>> values(capture_count);
@@ -341,7 +341,7 @@ void VM::run() {
 			}
 
 			case ByteCode::LOAD_BINDING: {
-				size_t binding_idx = m_env->code[++m_ip];
+				size_t binding_idx = *(++m_ip);
 				std::string binding = m_env->idLiterals[binding_idx];
 
 				// Does not exist
@@ -357,7 +357,7 @@ void VM::run() {
 			}
 
 			case ByteCode::PROCCALL: {
-				auto proc_it = std::next(m_env->defs.procedures.begin(), m_env->code[++m_ip]);
+				auto proc_it = std::next(m_env->defs.procedures.begin(), *(++m_ip));
 				int sub_idx = 0;
 
 				// TODO: Make it so void procs can go without a capture list
@@ -402,7 +402,7 @@ void VM::run() {
 				}
 
 				// Setup a callframe
-				size_t return_idx = m_ip;
+				size_t return_idx = (m_ip - m_env->code.data());
 				add_call_frame(proc_it->first, return_idx);
 
 				// Pass into callee stack (unpack, since we bind)
@@ -410,12 +410,12 @@ void VM::run() {
 					m_top_stack->stack.push_back(capture_list->capture[i]);
 				}
 
-				m_ip = proc_it->second[sub_idx].startIdx - 1;
+				m_ip = m_env->code.data() + proc_it->second[sub_idx].startIdx - 1;
 				break;
 			}
 
 			case ByteCode::RETURN: {
-				size_t sub_idx = m_env->code[++m_ip];
+				size_t sub_idx = *(++m_ip);
 
 				ProcedureDef *proc_def = &m_env->defs.procedures[m_top_stack->proc_id][sub_idx];
 				size_t last_frame = m_call_stack.size() - 2;
@@ -444,7 +444,7 @@ void VM::run() {
 					));
 				}
 
-				m_ip = m_top_stack->return_idx;
+				m_ip = m_env->code.data() + m_top_stack->return_idx;
 				kill_frame();
 				break;
 			}
@@ -487,7 +487,7 @@ void VM::run() {
 
 			default: {
 				error(false,
-					Util::string_format("Unknown opcode %d at pos %d", m_env->code[m_ip], m_ip)
+					Util::string_format("Unknown opcode %d", *m_ip)
 				);
 			}
 		}

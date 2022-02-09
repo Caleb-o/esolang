@@ -16,6 +16,7 @@ namespace Runtime {
 		std::string proc_id;
 		size_t return_idx;
 		std::map<std::string, std::shared_ptr<Binding>> bindings;
+		// Todo: Make this an index cap, so we use a single stack
 		std::vector<std::shared_ptr<Value> > stack;
 
 		~CallFrame() {
@@ -26,9 +27,9 @@ namespace Runtime {
 
 	class VM {
 		std::shared_ptr<Environment> m_env;
-		size_t m_ip = { 0 };
+		ByteCode *m_ip = { 0 };
 		std::shared_ptr<CallFrame> m_top_stack = { 0 };
-		std::vector<std::shared_ptr<CallFrame> > m_call_stack;
+		std::vector<std::shared_ptr<CallFrame>> m_call_stack;
 
 	private:
 		void add_call_frame(std::string, size_t);
