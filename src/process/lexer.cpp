@@ -161,6 +161,7 @@ namespace Process {
 				case ',': return make_single(TokenKind::COMMA);
 				case '.': return make_single(TokenKind::DOT);
 				case '!': return make_single(TokenKind::BANG);
+				case '@': return make_single(TokenKind::AT);
 				case '=': return make_single(TokenKind::EQUAL);
 				case '>': {
 					if (peek(1) == '=') {

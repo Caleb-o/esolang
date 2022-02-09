@@ -5,7 +5,7 @@ namespace Process {
 	enum class TokenKind {
 		// Operators
 		PLUS, MINUS, SLASH, STAR, COLON, CAPTURE,
-		ARROW, BANG, GREATER, LESS, GREATER_EQ, LESS_EQ, EQUAL,
+		ARROW, BANG, AT, GREATER, LESS, GREATER_EQ, LESS_EQ, EQUAL,
 		COMMA, DOT, LCURLY, RCURLY, LPAREN, RPAREN,
 		
 		// Keywords
@@ -32,6 +32,7 @@ namespace Process {
 
 			case TokenKind::ARROW:		return "arrow";
 			case TokenKind::BANG:		return "bang";
+			case TokenKind::AT:			return "at";
 
 			case TokenKind::USING:		return "using";
 

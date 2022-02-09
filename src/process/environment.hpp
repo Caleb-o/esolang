@@ -2,6 +2,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <functional>
 #include "util.hpp"
 #include "../runtime/value.hpp"
 #include "bytecode.hpp"
@@ -10,6 +11,22 @@
 using namespace Runtime;
 
 namespace Process {
+	struct Binding {
+		bool strict; // Whether we can unbind or not
+		std::shared_ptr<Value> value;	
+	};
+
+	struct CallFrame {
+		std::string proc_id;
+		size_t return_idx;
+		std::map<std::string, std::shared_ptr<Binding>> bindings;
+		size_t stack_start;
+
+		~CallFrame() {
+			bindings.clear();
+		}
+	};
+
 	struct StructDef {
 		std::map<std::string, ValueKind> fields;
 	};
@@ -22,6 +39,7 @@ namespace Process {
 
 	struct Definitions {
 		std::map<std::string, std::vector<ProcedureDef>> procedures;
+		std::map<std::string, std::shared_ptr<std::function<void(std::vector<std::shared_ptr<Value>>&)>>> native_procs;
 		// std::map<std::string, StructDef> structs;
 	};
 

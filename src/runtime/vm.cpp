@@ -2,6 +2,22 @@
 #include "vm.hpp"
 #include "../process/util.hpp"
 
+using Func = std::function<void(std::vector<std::shared_ptr<Value>>&)>;
+using FuncPtr = std::shared_ptr<Func>;
+
+static void native_str_len(std::vector<std::shared_ptr<Value>> &stack) {
+	std::cout << "STRLEN" << std::endl;
+}
+
+template <class Functor>
+static FuncPtr create_native(Functor f) {
+    return FuncPtr(new Func(f));
+}
+
+// TODO: Since the bound functions are static we can move them to their own header file
+void VM::def_native_procs() {
+	m_env->defs.native_procs["str_len"] = create_native(native_str_len);
+}
 
 void VM::add_call_frame(std::string proc_name, size_t ret_idx, size_t stack_start) {
 	std::shared_ptr<CallFrame> frame = std::make_shared<CallFrame>();
@@ -293,6 +309,8 @@ void VM::run() {
 	add_call_frame("main", -1, 0);
 	m_ip = m_env->code.data() + m_env->defs.procedures["main"][0].startIdx;
 
+	def_native_procs();
+
 	const ByteCode *code_len = m_env->code.data() + m_env->code.size();
 	bool running = true;
 
@@ -368,6 +386,12 @@ void VM::run() {
 				}
 
 				push_stack(m_top_stack->bindings[binding]->value);
+				break;
+			}
+
+			case ByteCode::NATIVECALL: {
+				FuncPtr native_it = std::next(m_env->defs.native_procs.begin(), *(++m_ip))->second;
+				(*native_it)(m_stack);
 				break;
 			}
 

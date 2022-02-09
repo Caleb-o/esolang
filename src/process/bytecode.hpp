@@ -8,10 +8,11 @@ namespace Process {
 		PUSH,					// PUSH IDX
 		CAPTURE,				// CAPTURE COUNT
 		BIND,					// BIND COUNT, [ID INDEX, ...]
-		BIND_STRICT,				// BIND_STRICT, [ID INDEX, ...]
+		BIND_STRICT,			// BIND_STRICT, [ID INDEX, ...]
 		LOAD_BINDING,			// LOAD_BINDING IDX
 		CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
 		PROCCALL,				// PROCCALL FUNCTION_DEF_IDX
+		NATIVECALL,				// NATIVECALL FUNCTION_DEF_IDX
 		GOTO,					// GOTO POS
 		IF,						// IF GOTO_FALSE_POS
 		LOOP,					// LOOP GOTO_FALSE_POS
@@ -51,6 +52,7 @@ namespace Process {
 			case ByteCode::LOOP:			return "LOOP";
 			
 			case ByteCode::PROCCALL:		return "PROCCALL";
+			case ByteCode::NATIVECALL:		return "NATIVECALL";
 			case ByteCode::CAPTURE:			return "CAPTURE";
 			case ByteCode::HALT:			return "HALT";
 			case ByteCode::GOTO:			return "GOTO";

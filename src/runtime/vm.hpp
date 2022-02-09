@@ -7,22 +7,6 @@
 
 
 namespace Runtime {
-	struct Binding {
-		bool strict; // Whether we can unbind or not
-		std::shared_ptr<Value> value;	
-	};
-
-	struct CallFrame {
-		std::string proc_id;
-		size_t return_idx;
-		std::map<std::string, std::shared_ptr<Binding>> bindings;
-		size_t stack_start;
-
-		~CallFrame() {
-			bindings.clear();
-		}
-	};
-
 	class VM {
 		std::shared_ptr<Environment> m_env;
 		ByteCode *m_ip = { 0 };
@@ -31,6 +15,8 @@ namespace Runtime {
 		std::vector<std::shared_ptr<CallFrame>> m_call_stack;
 
 	private:
+		void def_native_procs();
+
 		void add_call_frame(std::string, size_t, size_t);
 		void kill_frame();
 		void unwind_stack();

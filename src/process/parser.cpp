@@ -10,6 +10,10 @@
 using namespace Runtime;
 
 namespace Process {
+	static void add_native_proc_names(std::shared_ptr<Environment> env) {
+		env->defs.native_procs["str_len"];
+	}
+
 	// Helpers
 	void Parser::error(std::string msg) {
 		throw Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col);
@@ -259,6 +263,24 @@ namespace Process {
 		push_bytes(ByteCode::PROCCALL, proc_idx);
 	}
 
+	void Parser::native_call_statement() {
+		consume(TokenKind::AT);
+
+		std::string id = copy_lexeme_str(m_current);
+		consume(TokenKind::ID);
+
+		auto native_it = m_env->defs.native_procs.find(id);
+
+		if (native_it == m_env->defs.native_procs.end()) {
+			error(Util::string_format(
+				"Unkown native procedure found '%s'",
+				id.c_str()
+			));
+		}
+
+		push_bytes(ByteCode::NATIVECALL, std::distance(m_env->defs.native_procs.begin(), native_it));
+	}
+
 	void Parser::binding_access_statement() {
 		std::string binding = copy_lexeme_str(m_current);
 		consume(TokenKind::ID);
@@ -332,19 +354,20 @@ namespace Process {
 			}
 
 			// Keywords
-			case TokenKind::BIND:		bind_statement(false); break;
+			case TokenKind::BIND:			bind_statement(false); break;
 			case TokenKind::BIND_STRICT:	bind_statement(true); break;
-			case TokenKind::ID:			binding_access_statement(); break;
-			case TokenKind::BANG:		proc_call_statement(); break;
-			case TokenKind::IF:			if_statement(); break;
-			case TokenKind::LOOP:		loop_statement(); break;
-			case TokenKind::DUP:		consume(m_current->kind); push_byte(ByteCode::DUPLICATE); break;
-			case TokenKind::ROT:		consume(m_current->kind); push_byte(ByteCode::ROTATE); break;
-			case TokenKind::POP:		consume(m_current->kind); push_byte(ByteCode::DROP); break;
-			case TokenKind::SWAP:		consume(m_current->kind); push_byte(ByteCode::SWAP); break;
+			case TokenKind::ID:				binding_access_statement(); break;
+			case TokenKind::BANG:			proc_call_statement(); break;
+			case TokenKind::AT:				native_call_statement(); break;
+			case TokenKind::IF:				if_statement(); break;
+			case TokenKind::LOOP:			loop_statement(); break;
+			case TokenKind::DUP:			consume(m_current->kind); push_byte(ByteCode::DUPLICATE); break;
+			case TokenKind::ROT:			consume(m_current->kind); push_byte(ByteCode::ROTATE); break;
+			case TokenKind::POP:			consume(m_current->kind); push_byte(ByteCode::DROP); break;
+			case TokenKind::SWAP:			consume(m_current->kind); push_byte(ByteCode::SWAP); break;
 
-			case TokenKind::PRINT:		consume(m_current->kind); push_byte(ByteCode::PRINT); break;
-			case TokenKind::PRINTLN:	consume(m_current->kind); push_byte(ByteCode::PRINTLN); break;
+			case TokenKind::PRINT:			consume(m_current->kind); push_byte(ByteCode::PRINT); break;
+			case TokenKind::PRINTLN:		consume(m_current->kind); push_byte(ByteCode::PRINTLN); break;
 
 			case TokenKind::CAPTURE: {
 				capture_list();
@@ -598,6 +621,8 @@ namespace Process {
 
 		size_t hash = Util::hash(source.c_str(), source.size());
 		m_file_hashes.insert(hash);
+
+		add_native_proc_names(m_env);
 
 		program();
 		m_completed = true;
