@@ -1,2 +1,4 @@
 # Print Hello World!
-'Hello, World!' .
+proc main() -> void {
+	'Hello, World!' println drop
+}

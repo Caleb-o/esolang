@@ -1,46 +1,73 @@
-impl 'std.experimental'
+# Author    : Caleb
+# Date      : 10th Feb 2022
+# Modified  : 10th Feb 2022
 
-# Create a procedure
-proc my_count_down 1 0;
-    0 !swap
-    [ !print ' ' . 1 !sub ]
-    pop pop
-end
+# Procedure definition - take an integer and return nothing
+proc count_down(n : int) -> void {
+    n
 
-# Print items in the stack
-10 20 30 !print-stack-drop;
+	# We use an initial boolean value, this is not
+	# Evaluated each time
+	true loop {
+        # Print the current index
+		dup println drop
+		
+		# Remove one from our index
+		1 -
 
-# Count down from 5 using a procedure
-5 my_count_down;
+		# Push boolean onto the stack for the loop
+		# to be evaluated
+		dup 0 >
+	}
 
-# String literal and print
-'hello world\n' .
+	# Drop the initial value
+	drop
+}
 
-# If condition within a loop
-'starting loop...\n' .
-30 [ 
-    . ' ' . 1 - 
-    # 25 < value on stack?
-    dup 25 < if
-        pop
-        # Break if condition is true
-        'breaking 1\n' .
-	    break
-    end
+# A hello procedure that just prints hello
+proc hello() -> void {
+    'hello!' println drop
+}
 
-    # 28 < value on stack?
-    dup 28 < if
-        pop
-        # Break if condition is true
-        'breaking 2\n' .
-	    break
-    end
-] 'end of loop\n' .
+# We can use the same procedure name, as long as the
+# parameter types are different
+proc hello(name : string) -> void {
+    'hello ' print drop
+    name print drop
+    '!' println drop
+}
 
-# Simple condition (1 == 1)
-1 1 = if
-    'In the if condition!\n' .
-    5 count_down;
-end
+# Entry point
+proc main() -> void {
+    # Pass 10 to count_down procedure
+    | 10 | !count_down
 
-!drop-stack;
+    # String literal and print
+    'hello world' println drop
+
+    # A loop will consume the top value (boolean) on the stack
+    # and evaluate if it is true
+    true loop {
+        # Open loop and immediately leave
+        # (Push a false value)
+        false
+    }
+
+    # If statement (5 > 2?)
+    5 2 > if {
+        '5 is greater than 2' println drop
+    } else {
+        # We can put an else block here if the condition was false
+        '5 is *NOT* greater than 2' println drop
+    }
+
+    # Procedures can be overloaded, the call is decided at run-time,
+    # So we must pass in the correct arguments
+    || !hello
+    | 'Bob' | !hello
+
+    # We could also use a dynamic capture, that uses the top N items
+    'Dave'
+    # Here we say we want only 1 value
+    | !1 | !hello
+}

@@ -1,0 +1,86 @@
+# Author    : Caleb
+# Date      : 10th Feb 2022
+# Modified  : 10th Feb 2022
+
+# NOTE
+# This is not intended to work in the current language. It is simply an example of how I'd *like*
+# the syntax and flow.
+
+# Import std experimental library
+using 'std.experimental'
+
+
+# This is a struct definition
+struct TestStruct {
+	str: string,
+	len: int,
+}
+
+
+# We could make a constructor for our struct
+proc TestStruct_New(str : string, len : int) -> struct {
+	# Construct a new TestStruct and return (Items must be on the stack)
+	str len conv TestStruct
+	ret
+}
+
+
+# Proc will take items from the stack and bind them with names
+proc test(a, b, c : int, d : string) -> int {
+	# Push a, b and c onto stack
+	a b + c +
+
+	# Get len of string with builtin and multiply
+	d str-len *
+
+	# Return item on stack (will be casted if possible)
+	ret
+}
+
+# Here we reuse the dup keyword in the type, so we copy the values instead of
+# consuming them
+proc copy_values(a, b, c : dup int) -> void {
+	a b + c
+	println
+	pop
+}
+
+
+# Move values to procedure then move them back in the return call
+proc return_multiple(a, b, c : int) -> int, int, int {
+	a b c
+	ret
+}
+
+proc main() {
+	1 2 3
+	'Hello'
+	!test
+
+	# Print result
+	print pop
+
+	# Add values and use builtin conv to convert last values on stack to a 
+	# TestStruct and bind to name my_struct (Consumes values)
+	# This will bind the values to its fields
+
+	# Conv will take a TYPEID, ID and binds the data in-scope to the ID so
+	# we can refer to it.
+	'My Struct' 10 conv TestStruct, my_struct
+	# We have to rebind the struct, since the binding was dropped in constructor
+	# If we don't bind it, then we cannot directly call its fields
+	'My Struct' 10 !TestStruct_new bind str
+
+	# Add values to stack (Copy) and print
+	my_struct.str prints pop
+	my_struct.len print	 pop
+
+	str.str prints pop
+	str.len print  pop
+
+	# Call a procedure within the experimental std lib
+	!std.experimental.drop
+
+	# Remove the struct
+	pop pop
+}
