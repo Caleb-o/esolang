@@ -15,3 +15,12 @@ Store procedures as an id_literal (or proc_id_literal) and take the index from t
 this will require some adjustments to proc_call/procedure_def() because we expect it
 to be added as a definition immediately. We can make proc_id_literal a temporary buffer,
 just so we can resolve definitions.
+
+
+Tests:
+There should be a test flag which allows parsing and running tests. A polymorphic Runner type should be
+available, which can be switched out with the interpreter. All ops should become their own function in
+the base runner (virtual, but not pure virtual), so we can have one definition of the function. The 
+test runner would just be the Runner, with some new functions to run all tests and track success/failures.
+
+Based on the defined virtual functions, the interpreter could just be the runner, with some slight modifications.

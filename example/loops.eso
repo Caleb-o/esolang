@@ -15,7 +15,7 @@ proc main() -> void {
 		1 -
 
 		# Push boolean onto the stack for the loop
-		# to evaluate
+		# to be evaluated
 		dup 0 >
 	}
 

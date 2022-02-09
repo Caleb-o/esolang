@@ -1,19 +1,20 @@
+# Author    : Caleb
+# Date      : 10th Feb 2022
+# Modified  : 10th Feb 2022
+
 proc test(i : int) -> void {
 	i
 	bind | x |
 	x println drop
 }
 
-proc pass() -> int, bool, float, string {
-	1 false 2.3 'hello'
+proc pass() -> int {
+	1 
 }
 
 proc main() -> void {
 	| 1 | !test
 	|| !pass
 
-	println drop
-	println drop
-	println drop
 	println drop
 }
