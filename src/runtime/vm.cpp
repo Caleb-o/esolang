@@ -280,8 +280,9 @@ void VM::run() {
 				comparison_op();
 				break;
 			}
-
-			case ByteCode::IF: {
+			
+			case ByteCode::IF:
+			case ByteCode::LOOP: {
 				size_t false_idx = *(++m_ip);
 
 				if (m_stack.size() < m_top_stack->stack_start || peek_stack()->kind != ValueKind::BOOL) {

@@ -121,7 +121,8 @@ namespace Process {
 				case ByteCode::CAPTURE:
 				case ByteCode::GOTO:
 				case ByteCode::LOAD_BINDING:
-				case ByteCode::IF: {
+				case ByteCode::IF:
+				case ByteCode::LOOP: {
 					int val_idx = (int)env->code[++i];
 					std::cout << get_bytecode_name(env->code[i-1]) << "<" << val_idx << ">\n";
 					break;

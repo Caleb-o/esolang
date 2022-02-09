@@ -67,34 +67,6 @@ namespace Util {
 		return hash;
 	}
 
-	
-	/*
-		Dlang Version
-		"proc":		Kind.PROC,
-		"dup":		Kind.DUP,
-		"swap":		Kind.SWAP,
-		"input":	Kind.INPUT,
-		"drop":		Kind.POP,
-		"conv":		Kind.CONVERT,
-		"bind":		Kind.BIND,
-		"bindmove": Kind.BIND_MOVE,
-		"using":	Kind.USING,
-		"assert":	Kind.ASSERT,
-		"return":	Kind.RETURN,
-		"if":		Kind.IF,
-		"elif":		Kind.ELIF,
-		"else":		Kind.ELSE,
-		"print": 	Kind.PRINT,
-		"println": 	Kind.PRINTLN,
-		"true":		Kind.BOOL,
-		"false":	Kind.BOOL,
-		"void" : 	Kind.TYPEID,
-		"int":		Kind.TYPEID,
-		"float":	Kind.TYPEID,
-		"string":	Kind.TYPEID,
-		"bool": 	Kind.TYPEID,
-		"struct":	Kind.TYPEID,
-	*/
 	static TokenKind get_keyword_kind(std::string str) {
 		switch(hash(str.c_str(), str.size())) {
 			case hash("proc", 4):		return TokenKind::PROC;
@@ -107,6 +79,7 @@ namespace Util {
 			case hash("return", 6):		return TokenKind::RETURN;
 			case hash("if", 2):			return TokenKind::IF;
 			case hash("else", 4):		return TokenKind::ELSE;
+			case hash("loop", 4):		return TokenKind::LOOP;
 			case hash("print", 5):		return TokenKind::PRINT;
 			case hash("println", 7):	return TokenKind::PRINTLN;
 			case hash("true", 4):		return TokenKind::BOOL_LIT;
@@ -116,6 +89,7 @@ namespace Util {
 			case hash("float", 5):		return TokenKind::TYPEID;
 			case hash("bool", 4):		return TokenKind::TYPEID;
 			case hash("string", 6):		return TokenKind::TYPEID;
+			case hash("capture", 7):	return TokenKind::TYPEID;
 
 			default:
 				return TokenKind::ID;

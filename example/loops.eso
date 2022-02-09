@@ -1,0 +1,24 @@
+proc print_idx(idx : int) -> void {
+	idx println drop
+}
+
+proc main() -> void {
+	5
+
+	# We use an initial boolean value, this is not
+	# Evaluated each time
+	true loop {
+		# Pass the current number to the print_idx proc
+		dup |!1| !print_idx
+		
+		# Remove one from our index
+		1 -
+
+		# Push boolean onto the stack for the loop
+		# to evaluate
+		dup 0 >
+	}
+
+	# Drop the initial value
+	drop
+}

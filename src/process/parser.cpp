@@ -229,6 +229,18 @@ namespace Process {
 		}
 	}
 
+	void Parser::loop_statement() {
+		consume(TokenKind::LOOP);
+
+		push_bytes(ByteCode::LOOP, 0);
+		size_t false_idx = m_env->code.size() - 1;
+
+		code_block();
+
+		push_bytes(ByteCode::GOTO, false_idx-2);
+		m_env->code[false_idx] = (ByteCode)(m_env->code.size() - 1);
+	}
+
 	void Parser::proc_call_statement() {
 		consume(TokenKind::BANG);
 
@@ -281,6 +293,7 @@ namespace Process {
 			case TokenKind::ID:			binding_access_statement(); break;
 			case TokenKind::BANG:		proc_call_statement(); break;
 			case TokenKind::IF:			if_statement(); break;
+			case TokenKind::LOOP:		loop_statement(); break;
 			case TokenKind::DUP:		consume(m_current->kind); push_byte(ByteCode::DUPLICATE); break;
 			case TokenKind::POP:		consume(m_current->kind); push_byte(ByteCode::DROP); break;
 			case TokenKind::SWAP:		consume(m_current->kind); push_byte(ByteCode::SWAP); break;
@@ -321,8 +334,7 @@ namespace Process {
 			error("Import expects string literal");
 		}
 
-		// TODO: Store current directory, so we can append to names
-		//		 that way we can do relative imports
+		// TODO: Check if import contains std, to redirect file include
 		std::string source = Util::read_file(
 			Util::string_format("%s/%s.eso",
 				m_base_dir.c_str(),

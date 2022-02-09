@@ -15,6 +15,7 @@ namespace Process {
 		BINDING,				// BINDING BIND_COUNT, BINDING_ID [, ..]
 		GOTO,					// GOTO POS
 		IF,						// IF GOTO_FALSE_POS
+		LOOP,					// LOOP GOTO_FALSE_POS
 		RETURN,					// RETURN SUB_IDX
 		ADD, SUB, MUL, DIV,		// ADD|SUB|MUL|DIV
 		GREATER, LESS, EQUAL,	// GREATER|LESS|EQUAL
@@ -26,6 +27,9 @@ namespace Process {
 		switch(byte) {
 			case ByteCode::PUSH:			return "PUSH";
 			case ByteCode::DROP:			return "DROP";
+			case ByteCode::DUPLICATE:		return "DUPLICATE";
+			case ByteCode::SWAP:			return "SWAP";
+
 			case ByteCode::BIND:			return "BIND";
 			case ByteCode::BINDING:			return "BINDING";
 			case ByteCode::BIND_MOVE:		return "BIND_MOVE";
@@ -44,6 +48,7 @@ namespace Process {
 			case ByteCode::EQUAL:			return "EQUAL";
 
 			case ByteCode::IF:				return "IF";
+			case ByteCode::LOOP:			return "LOOP";
 			
 			case ByteCode::PROCCALL:		return "PROCCALL";
 			case ByteCode::CAPTURE:			return "CAPTURE";
