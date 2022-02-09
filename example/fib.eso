@@ -16,5 +16,6 @@ proc main() -> void {
 	'Fibonacci to ' print drop
 	print ' = ' print drop
 
+	# Dynamic capture 1 item from the stack
 	| !1 | !fib println drop
 }

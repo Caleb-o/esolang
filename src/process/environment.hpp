@@ -14,14 +14,9 @@ namespace Process {
 		std::map<std::string, ValueKind> fields;
 	};
 
-	struct Parameter {
-		ValueKind kind;
-		bool isMoved;
-	};
-
 	struct ProcedureDef {
 		size_t startIdx;
-		std::map<std::string, Parameter> parameters;
+		std::map<std::string, ValueKind> parameters;
 		std::vector<ValueKind> returnTypes;
 	};
 
@@ -68,9 +63,8 @@ namespace Process {
 				}
 				
 				for(auto& param : procDef.parameters) {
-					std::cout << param.first << " : ";
-					std::cout << ((param.second.isMoved) ? "move" : "copy") << " ";
-					std::cout << kind_as_str(param.second.kind) << std::endl;
+					std::cout << param.first << " : move ";
+					std::cout << kind_as_str(param.second) << std::endl;
 				}
 
 				std::cout << "== Return == " << std::endl;

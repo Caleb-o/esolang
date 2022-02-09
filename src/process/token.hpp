@@ -33,6 +33,8 @@ namespace Process {
 			case TokenKind::ARROW:		return "arrow";
 			case TokenKind::BANG:		return "bang";
 
+			case TokenKind::USING:		return "using";
+
 			case TokenKind::IF:			return "if";
 			case TokenKind::ELSE:		return "else";
 			case TokenKind::DUP:		return "dup";

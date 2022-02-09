@@ -17,11 +17,13 @@ namespace Process {
 		std::vector<std::shared_ptr<Lexer>> m_lexers;
 		std::shared_ptr<Token> m_current;
 		std::shared_ptr<Environment> m_env;
+		std::string m_base_dir;
 		bool m_completed = { false };
 		bool m_ignore_main = { false };
 
 	private:
-		void error(std::string msg);
+		void error(std::string);
+		void warning(std::string);
 		
 		void push_byte(ByteCode);
 		void push_byte(size_t);
@@ -51,7 +53,7 @@ namespace Process {
 		void program();
 
 	public:
-		Parser();
+		Parser(std::string);
 
 		std::shared_ptr<Environment> parse(std::string);
 	};

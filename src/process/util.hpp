@@ -11,6 +11,23 @@
 using namespace Process;
 
 namespace Util {
+	// https://stackoverflow.com/questions/8518743/get-directory-from-file-path-c/34740989
+	static std::string get_directory(std::string path) {
+		const size_t pos = path.find_last_of("\\/");
+		return (std::string::npos != pos)
+			? path.substr(0, pos)
+			: "";
+	}
+
+	static std::string get_file_no_ext(std::string path) {
+		const size_t pos = path.find_last_of("\\/");
+		const size_t dot_pos = path.find_last_of('.');
+
+		return (std::string::npos != pos && std::string::npos != dot_pos)
+			? path.substr(pos+1, dot_pos - pos - 1)
+			: "";
+	}
+
 	static std::string read_file(const char *file_name) {
 		std::ifstream file(file_name);
 		std::string str;

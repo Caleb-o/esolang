@@ -54,8 +54,12 @@ void VM::unwind_stack() {
 }
 
 void VM::error(bool internal, std::string msg) {
-	std::cout << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl;
-	if (!internal) unwind_stack();
+	if (internal) {
+		std::cout << "Internal: " << msg << std::endl;
+	} else {
+		std::cout << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl;
+		unwind_stack();
+	}
 	throw "Runtime exception occured";
 }
 
@@ -246,7 +250,7 @@ void VM::comparison_op() {
 void VM::run() {
 	// Find the main symbol
 	size_t main_idx = get_proc_idx(m_env, "main");
-	if (main_idx < 0) {
+	if (m_env->defs.procedures.find("main") == m_env->defs.procedures.end()) {
 		error(true, "Could not find main symbol");
 	}
 
@@ -381,7 +385,7 @@ void VM::run() {
 						// Types don't equal then it's correct
 						auto param = std::next(it->parameters.begin(), param_idx);
 
-						if (param->second.kind != peek_stack(param_idx)->kind) {
+						if (param->second != peek_stack(param_idx)->kind) {
 							found = false;
 							continue;
 						}

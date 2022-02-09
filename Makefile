@@ -23,5 +23,5 @@ debug:
 
 release:
 	@echo Building "$(OUT)" for $(OS_NAME)...
-	g++ -O2 $(OPS) $(DEFS) $(SRC) -o bin/$(OUT)
+	g++ -O3 $(OPS) $(DEFS) $(SRC) -o bin/$(OUT)
 	@echo Done.

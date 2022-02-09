@@ -45,8 +45,8 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	Parser p;
-		
+	Parser p(Util::get_directory(filename));
+
 	try {
 		std::string buffer = Util::read_file(filename);
 

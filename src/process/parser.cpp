@@ -15,6 +15,10 @@ namespace Process {
 		throw Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col);
 	}
 
+	void Parser::warning(std::string msg) {
+		std::cout << "[Warning] " << Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col);
+	}
+
 	static std::string copy_lexeme_str(std::shared_ptr<Token> current) {
 		return std::string(current->lexeme);
 	}
@@ -42,7 +46,7 @@ namespace Process {
 			
 			// Similar parameter count, now we compare types
 			while(params_it != env->defs.procedures[id][defidx].parameters.end()) {
-				if (params_it->second.kind != def_params_it->second.kind) {
+				if (params_it->second != def_params_it->second) {
 					sameParams = false;
 					break;
 				}
@@ -310,12 +314,30 @@ namespace Process {
 		consume(TokenKind::USING);
 
 		std::string import = copy_lexeme_str(m_current);
-		consume(TokenKind::STRING_LIT);
+		
+		// NOTE: This is like consume, but if we consume, it messes with
+		// 		 the order
+		if (m_current->kind != TokenKind::STRING_LIT) {
+			error("Import expects string literal");
+		}
 
-		std::string source = Util::read_file(import.c_str());
+		// TODO: Store current directory, so we can append to names
+		//		 that way we can do relative imports
+		std::string source = Util::read_file(
+			Util::string_format("%s/%s.eso",
+				m_base_dir.c_str(),
+				import.c_str()
+			).c_str()
+		);
 
 		size_t hash = Util::hash(source.c_str(), source.size());
 		if (m_file_hashes.find(hash) != m_file_hashes.end()) {
+			consume(TokenKind::STRING_LIT);
+
+			warning(Util::string_format(
+				"Skipping import '%s'",
+				import.c_str()
+			));
 			return;
 		}
 
@@ -329,16 +351,18 @@ namespace Process {
 
 		program();
 
-		m_ignore_main = false;
-
-		m_lexer = m_lexers.back();
+		m_lexer.swap(m_lexers.back());
 		m_lexers.pop_back();
+		m_current = m_lexer->get_token();
+
+		if (m_lexers.size() == 0) {
+			m_ignore_main = false;
+		}
 	}
 
 	void Parser::type_list(const char *id, bool is_proc) {
 		// FIXME: This will be geared towards a proc, but will be required for structs
 		TokenKind endType = (is_proc) ? TokenKind::RPAREN : TokenKind::RCURLY;
-		bool hasMove = false;
 
 		while(m_current->kind != endType) {
 			std::vector<std::string> ids;
@@ -355,22 +379,6 @@ namespace Process {
 			}
 
 			consume(TokenKind::COLON);
-			bool isMoved = true;
-
-			// Modifier for duplicating data instead of moving
-			// TODO: Find a way to incorporate this with the new capture
-			// if (m_current->kind == TokenKind::DUP) {
-			// 	if (hasMove) {
-			// 		// We cannot move values from within the stack, it must be at the
-			// 		// end. We can duplicate them all however.
-			// 		error("Cannot use dup modifier after move parameters");
-			// 	}
-
-			// 	consume(m_current->kind);
-			// 	isMoved = false;
-			// } else {
-			// 	hasMove = true;
-			// }
 
 			std::string type_id = copy_lexeme_str(m_current);
 			consume(TokenKind::TYPEID);
@@ -385,8 +393,8 @@ namespace Process {
 				if (kind == ValueKind::VOID) {
 					error(Util::string_format("Cannot use type '%s' in parameter list", id));
 				}
-				procDef.parameters[id] = { kind, hasMove };
-				params->parameters[id] = { kind, hasMove };
+				procDef.parameters[id] = { kind };
+				params->parameters[id] = { kind };
 			}
 
 			verify_proc_def(m_env, id, procDef);
@@ -418,6 +426,14 @@ namespace Process {
 		// We must copy here since pointing to the c_str gives us a weird result
 		std::string id = copy_lexeme_str(m_current);
 		consume(TokenKind::ID);
+
+		if (std::strcmp(id.c_str(), "main") == 0 && m_ignore_main) {
+			while(m_current->kind != TokenKind::RCURLY) {
+				consume(m_current->kind);
+			}
+			consume(TokenKind::RCURLY);
+			return;
+		}
 
 		size_t sub_idx = add_proc_def_tmp(m_env, id.c_str());
 		m_env->defs.procedures[id][sub_idx].startIdx = (m_env->code.size() == 0) ? 0 : m_env->code.size();
@@ -496,7 +512,7 @@ namespace Process {
 	}
 
 
-	Parser::Parser() {
+	Parser::Parser(std::string base) :m_base_dir(base) {
 		m_env = std::shared_ptr<Environment>(new Environment());
 	}
 

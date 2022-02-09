@@ -1,15 +1,17 @@
-Bindings:
+Circular dependencies:
 
-Instead of storing string literals for bindings within the env, we could look at all the
-types in the proc_def and push a bind opcode for each parameter. This means we don't need
-to store more data at compile-time and it's only during run-time, within a proc call.
+If we were to allow Circular dependencies, we would have to do a final step after 
+the last parse. Here would would have to patch all proc_calls, since the symbol may
+not exist at the time.
 
-eg.
+The problem:
+If we call a procedure that doesn't exist in the file, but exists within another,
+it will not be capable of resolving the ID. eg. Experimenting imports Fib, Fib imports
+Experimenting. Since we parse Fib first, any call to Experimenting procedures will not
+resolve because we haven't parsed it yet.
 
-test():
-# Bind opcodes are automatically inserted in the parser
-bind c, b, a
-# a = 1, b = 2, c = 3
-
-main():
-1 2 3 !test
+Solution #1:
+Store procedures as an id_literal (or proc_id_literal) and take the index from there,
+this will require some adjustments to proc_call/procedure_def() because we expect it
+to be added as a definition immediately. We can make proc_id_literal a temporary buffer,
+just so we can resolve definitions.
