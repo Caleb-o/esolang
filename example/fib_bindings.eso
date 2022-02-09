@@ -1,0 +1,37 @@
+proc fib(n : int) -> int {
+	n 1 <= if {
+		n
+	} else {
+		0 1 0 2
+
+		# Bindings use reverse order
+		bind | idx, c, b, a |
+
+		# Initial true value, so we can kickstart the loop
+		true loop {
+			# A + B and bind to C
+			a b +
+			bind | c |
+
+			# Bind b->c and a->b
+			b c
+			bind | b, a |
+
+			# Increment the index and push boolean
+			# We rebind idx with an incremented value
+			idx 1 +
+			bind | idx |
+			idx n <=
+		}
+
+		# Return b
+		b
+	}
+}
+
+# Fibonacci to 64 (Release) = 10ms
+# Fibonacci to 64 (Debug) = 18ms
+proc main() -> void {
+	'fib = ' print drop
+	| 64 | !fib println drop
+}

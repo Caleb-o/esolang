@@ -57,6 +57,7 @@ void VM::error(bool internal, std::string msg) {
 	if (internal) {
 		std::cout << "Internal: " << msg << std::endl;
 	} else {
+		m_ip--;
 		std::cout << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl;
 		unwind_stack();
 	}
@@ -102,10 +103,10 @@ void VM::arithmetic_op() {
 	switch(lhs->kind) {
 		case ValueKind::INT: {
 			switch(op) {
-				case ByteCode::ADD:	push_stack(create_value(lhs->data.integer + rhs->data.integer)); break;
-				case ByteCode::SUB:	push_stack(create_value(lhs->data.integer - rhs->data.integer)); break;
-				case ByteCode::MUL:	push_stack(create_value(rhs->data.integer * lhs->data.integer)); break;
-				case ByteCode::DIV:	push_stack(create_value(rhs->data.integer / lhs->data.integer)); break;
+				case ByteCode::ADD:	push_stack(create_value((long long)(lhs->data.integer + rhs->data.integer))); break;
+				case ByteCode::SUB:	push_stack(create_value((long long)(lhs->data.integer - rhs->data.integer))); break;
+				case ByteCode::MUL:	push_stack(create_value((long long)(rhs->data.integer * lhs->data.integer))); break;
+				case ByteCode::DIV:	push_stack(create_value((long long)(rhs->data.integer / lhs->data.integer))); break;
 
 				default:	error(false, 
 								Util::string_format("Unknown operation '%s'",
@@ -312,12 +313,8 @@ void VM::run() {
 				ByteCode *end = m_ip + bind_count;
 				size_t bind_idx = 0;
 
-				std::cout << "BIND count : " << bind_count << std::endl;
-
 				while(m_ip < end) {
 					bind_idx = *(++m_ip);
-					std::cout << "binding : " << m_env->idLiterals[bind_idx] << std::endl;
-
 					// Whether we can unbind or not
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = false;
@@ -331,12 +328,8 @@ void VM::run() {
 				ByteCode *end = m_ip + bind_count;
 				size_t bind_idx = 0;
 
-				std::cout << "BIND_MOVE count : " << bind_count << std::endl;
-
 				while(m_ip < end) {
 					bind_idx = *(++m_ip);
-					std::cout << "move binding : " << m_env->idLiterals[bind_idx] << std::endl;
-					
 					// We cannot unbind parameter bindings
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
 					m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = true;
@@ -349,7 +342,7 @@ void VM::run() {
 				size_t capture_count = *(++m_ip);
 
 				if (capture_count > 0) {
-					push_stack(create_value(capture_count));
+					push_stack(create_value((int)capture_count));
 				}
 				break;
 			}

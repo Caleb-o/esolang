@@ -99,7 +99,7 @@ namespace Process {
 	size_t Parser::add_literal() {
 		switch(m_current->kind) {
 			case TokenKind::INT_LIT: {
-				return add_literal_to_env(create_value(std::stoi(m_current->lexeme)));
+				return add_literal_to_env(create_value(std::stoll(m_current->lexeme)));
 			}
 
 			case TokenKind::FLOAT_LIT: {

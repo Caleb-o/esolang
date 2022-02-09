@@ -13,7 +13,7 @@ namespace Runtime {
 	};
 
 	union ValueData {
-		int integer;
+		size_t integer;
 		float floating;
 		bool boolean;
 	};
@@ -23,11 +23,11 @@ namespace Runtime {
 		ValueData data;
 		bool read_only;
 
-		size_t capture_len;
+		long long capture_len;
 		std::string string;
 	};
 
-	static std::shared_ptr<Value> create_value(int value, bool read_only = true) {
+	static std::shared_ptr<Value> create_value(long long value, bool read_only = true) {
 		std::shared_ptr<Value> val = std::make_shared<Value>();
 		*val = (Value){
 			ValueKind::INT,
@@ -68,7 +68,7 @@ namespace Runtime {
 		return val;
 	}
 
-	static std::shared_ptr<Value> create_value(size_t capture_len, bool read_only = true) {
+	static std::shared_ptr<Value> create_value(int capture_len, bool read_only = true) {
 		std::shared_ptr<Value> val = std::make_shared<Value>();
 		*val = (Value){
 			ValueKind::CAPTURE,

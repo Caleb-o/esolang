@@ -2,28 +2,28 @@ proc fib(n : int) -> int {
 	n 1 <= if {
 		n
 	} else {
-		n n 0
+		0 1 0 2
 
+		bind | idx, c, b, a |
+		
 		true loop {
+			a b +
+			bind | c |
+
+			b c
+			bind | b, a |
+
+			idx 1 +
 			bind | idx |
-
-			
-			1 - swap
-			2 - swap
-
-			idx 1 + n <
-
-			rot drop swap
+			idx n <=
 		}
+
+		b
 	}
 }
-	
+
+
 proc main() -> void {
-	# 1 2 3
-	# bind | a, b, c |
-	# a println drop
-	# b println drop
-	# c println drop
 	'fib = ' print drop
-	| 3 | !fib println drop
+	| 64 | !fib println drop
 }
