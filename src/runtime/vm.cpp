@@ -366,10 +366,7 @@ void VM::run() {
 
 			case ByteCode::CAPTURE: {
 				size_t capture_count = *(++m_ip);
-
-				if (capture_count > 0) {
-					push_stack(create_value((int)capture_count));
-				}
+				push_stack(create_value((int)capture_count));
 				break;
 			}
 
@@ -452,6 +449,15 @@ void VM::run() {
 				
 				// Handle return data
 				if (proc_def->returnTypes[0] != ValueKind::VOID) {
+					// Too few items on the stack
+					if (m_stack.size() < m_top_stack->stack_start + proc_def->returnTypes.size()) {
+						error(false, Util::string_format(
+							"Trying to return with %d value(s) on the stack, but expected %d",
+							m_stack.size() - m_top_stack->stack_start,
+							proc_def->returnTypes.size()
+						));
+					}
+
 					for(int ret_idx = proc_def->returnTypes.size() - 1; ret_idx >= 0; --ret_idx) {
 						if (peek_stack(stack_idx)->kind != proc_def->returnTypes[ret_idx]) {
 							error(false, Util::string_format(
@@ -467,8 +473,9 @@ void VM::run() {
 				// Too many values on the stack
 				if (m_stack.size() - stack_idx > m_top_stack->stack_start) {
 					error(false, Util::string_format(
-						"Trying to return with %d item(s) on the stack",
-						m_stack.size() - m_top_stack->stack_start
+						"Trying to return with %d value(s) on the stack, but expected %d",
+						m_stack.size() - m_top_stack->stack_start,
+						proc_def->returnTypes.size()
 					));
 				}
 

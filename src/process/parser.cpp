@@ -148,11 +148,7 @@ namespace Process {
 		}
 
 		consume(TokenKind::CAPTURE);
-
-		// Note: This has to come last since we will capture values previous
-		if (capture_count > 0) {
-			push_bytes(ByteCode::CAPTURE, capture_count);
-		}
+		push_bytes(ByteCode::CAPTURE, capture_count);
 	}
 
 	void Parser::expr() {
@@ -503,6 +499,25 @@ namespace Process {
 		consume(TokenKind::TYPEID);
 
 		m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
+
+		if (m_current->kind == TokenKind::COMMA) {
+			if (std::strcmp(retid.c_str(), "void") == 0) {
+				error("Cannot use void in a return list");
+			}
+			consume(TokenKind::COMMA);
+
+			while(m_current->kind != TokenKind::LCURLY) {
+				std::string retid = copy_lexeme_str(m_current);
+				consume(TokenKind::TYPEID);
+
+				m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
+
+				if (m_current->kind == TokenKind::COMMA) {
+					consume(TokenKind::COMMA);
+				}
+			}
+		}
+
 
 		// Check each parameter and push a bind opcode with each param
 		if (m_env->defs.procedures[id][sub_idx].parameters.size() > 0) {

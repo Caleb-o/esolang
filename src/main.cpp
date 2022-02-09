@@ -60,9 +60,9 @@ int main(int argc, char **argv) {
 		VM vm(env);
 		vm.run();
 	} catch (const char *msg) {
-		std::cerr << "Runtime: " << msg << "\n";
+		std::cerr << msg << "\n";
 	} catch (std::string& msg) {
-		std::cerr << "Runtime: " << msg << "\n";
+		std::cerr << msg << "\n";
 	} catch (std::exception& e) {
 		std::cerr << "Pre-process: " << e.what() << "\n";
 	}

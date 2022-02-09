@@ -80,7 +80,7 @@ namespace Process {
 		}
 
 		std::cout << "=== ByteCode ===\n";
-		size_t i = 0;
+		size_t i = 0, ops = 0;
 
 		while(i < env->code.size()) {
 			std::cout << Util::string_format("%04d  %3d :: ", i, env->code[i]);
@@ -141,8 +141,10 @@ namespace Process {
 			}
 
 			i++;
+			ops++;
 		}
 
+		std::cout << "-- " << ops << " ops --\n";
 		std::cout << std::endl;
 	}
 }

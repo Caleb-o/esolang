@@ -1,8 +1,19 @@
 proc test(i : int) -> void {
 	i
 	bind | x |
+	x println drop
+}
+
+proc pass() -> int, bool, float, string {
+	1 false 2.3 'hello'
 }
 
 proc main() -> void {
 	| 1 | !test
+	|| !pass
+
+	println drop
+	println drop
+	println drop
+	println drop
 }
