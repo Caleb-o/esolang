@@ -295,6 +295,7 @@ namespace Process {
 			case TokenKind::IF:			if_statement(); break;
 			case TokenKind::LOOP:		loop_statement(); break;
 			case TokenKind::DUP:		consume(m_current->kind); push_byte(ByteCode::DUPLICATE); break;
+			case TokenKind::ROT:		consume(m_current->kind); push_byte(ByteCode::ROTATE); break;
 			case TokenKind::POP:		consume(m_current->kind); push_byte(ByteCode::DROP); break;
 			case TokenKind::SWAP:		consume(m_current->kind); push_byte(ByteCode::SWAP); break;
 

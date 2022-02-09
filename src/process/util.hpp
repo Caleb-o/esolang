@@ -72,6 +72,7 @@ namespace Util {
 			case hash("proc", 4):		return TokenKind::PROC;
 			case hash("dup", 3):		return TokenKind::DUP;
 			case hash("swap", 4):		return TokenKind::SWAP;
+			case hash("rot", 3):		return TokenKind::ROT;
 			case hash("drop", 4):		return TokenKind::POP;
 			case hash("conv", 4):		return TokenKind::CONVERT;
 			case hash("bind", 4):		return TokenKind::BIND;

@@ -68,7 +68,7 @@ void VM::push_stack(std::shared_ptr<Value> value) {
 }
 
 std::shared_ptr<Value> VM::pop_stack() {
-	if (m_stack.size() < m_top_stack->stack_start) {
+	if (m_stack.size() <= 0 || m_stack.size() < m_top_stack->stack_start) {
 		error(false, "Trying to pop an empty stack");
 	}
 
@@ -78,7 +78,10 @@ std::shared_ptr<Value> VM::pop_stack() {
 }
 
 std::shared_ptr<Value> VM::peek_stack(size_t idx) {
-	// TODO: Throw error when peeking into other frame's stack space
+	if (m_stack.size() <= 0 || m_stack.size() < m_top_stack->stack_start) {
+		error(false, "Trying to peek an empty stack");
+	}
+
 	return m_stack[m_stack.size() - (idx + 1)];
 }
 
@@ -446,6 +449,14 @@ void VM::run() {
 
 			case ByteCode::DROP: 		pop_stack(); break;
 			case ByteCode::DUPLICATE:	push_stack(peek_stack()); break;
+			case ByteCode::ROTATE: {
+				auto c = peek_stack(0);
+				auto a = peek_stack(2);
+
+				m_stack[m_stack.size()-1] = a;
+				m_stack[m_stack.size()-3] = c;
+				break;
+			}
 
 			case ByteCode::HALT: {
 				if (m_stack.size() > 0) {

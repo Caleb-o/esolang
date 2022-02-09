@@ -21,6 +21,7 @@ namespace Process {
 		GREATER, LESS, EQUAL,	// GREATER|LESS|EQUAL
 		GREATER_EQ, LESS_EQ,	// GREATER_EQ|LESS_EQ
 		DUPLICATE, SWAP,		// DUPLICATE|SWAP
+		ROTATE,					// ROTATE
 	};
 
 	static const char *get_bytecode_name(ByteCode byte) {
@@ -29,6 +30,7 @@ namespace Process {
 			case ByteCode::DROP:			return "DROP";
 			case ByteCode::DUPLICATE:		return "DUPLICATE";
 			case ByteCode::SWAP:			return "SWAP";
+			case ByteCode::ROTATE:			return "ROTATE";
 
 			case ByteCode::BIND:			return "BIND";
 			case ByteCode::BINDING:			return "BINDING";
