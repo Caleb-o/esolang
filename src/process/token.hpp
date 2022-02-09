@@ -9,7 +9,7 @@ namespace Process {
 		COMMA, DOT, LCURLY, RCURLY, LPAREN, RPAREN,
 		
 		// Keywords
-		PROC, IF, ELSE, POP, CONVERT, BIND, BIND_MOVE, PRINT, PRINTLN,
+		PROC, IF, ELSE, POP, CONVERT, BIND, BIND_STRICT, PRINT, PRINTLN,
 		DUP, SWAP, ROT, INPUT, ASSERT, USING, RETURN, STRUCT, LOOP,
 
 		// Types
@@ -46,7 +46,7 @@ namespace Process {
 
 			case TokenKind::PROC:		return "proc";
 			case TokenKind::BIND:		return "bind";
-			case TokenKind::BIND_MOVE:	return "bind-move";
+			case TokenKind::BIND_STRICT:	return "bind-move";
 			case TokenKind::CAPTURE:	return "capture";
 			case TokenKind::ID:			return "ID";
 			case TokenKind::COMMA:		return "comma";

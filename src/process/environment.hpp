@@ -95,7 +95,7 @@ namespace Process {
 				}
 
 				case ByteCode::BIND:
-				case ByteCode::BIND_MOVE:{
+				case ByteCode::BIND_STRICT: {
 					int bindings = (int)env->code[++i];
 					int count = i + bindings;
 
@@ -124,7 +124,6 @@ namespace Process {
 
 				case ByteCode::RETURN:
 				case ByteCode::PROCCALL:
-				case ByteCode::BINDING:
 				case ByteCode::CAPTURE:
 				case ByteCode::GOTO:
 				case ByteCode::IF:

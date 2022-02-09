@@ -344,7 +344,7 @@ void VM::run() {
 				break;
 			}
 
-			case ByteCode::BIND_MOVE: {
+			case ByteCode::BIND_STRICT: {
 				bind(true);
 				break;
 			}

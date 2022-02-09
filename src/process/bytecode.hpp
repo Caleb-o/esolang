@@ -8,11 +8,10 @@ namespace Process {
 		PUSH,					// PUSH IDX
 		CAPTURE,				// CAPTURE COUNT
 		BIND,					// BIND COUNT, [ID INDEX, ...]
-		BIND_MOVE,				// BIND_MOVE, [ID INDEX, ...]
+		BIND_STRICT,				// BIND_STRICT, [ID INDEX, ...]
 		LOAD_BINDING,			// LOAD_BINDING IDX
 		CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
 		PROCCALL,				// PROCCALL FUNCTION_DEF_IDX
-		BINDING,				// BINDING BIND_COUNT, BINDING_ID [, ..]
 		GOTO,					// GOTO POS
 		IF,						// IF GOTO_FALSE_POS
 		LOOP,					// LOOP GOTO_FALSE_POS
@@ -33,8 +32,7 @@ namespace Process {
 			case ByteCode::ROTATE:			return "ROTATE";
 
 			case ByteCode::BIND:			return "BIND";
-			case ByteCode::BINDING:			return "BINDING";
-			case ByteCode::BIND_MOVE:		return "BIND_MOVE";
+			case ByteCode::BIND_STRICT:		return "BIND_STRICT";
 			case ByteCode::LOAD_BINDING:	return "LOAD_BINDING";
 
 

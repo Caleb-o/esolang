@@ -276,8 +276,8 @@ namespace Process {
 	}
 
 	void Parser::bind_statement(bool strict) {
-		TokenKind kind = (strict) ? TokenKind::BIND_MOVE : TokenKind::BIND;
-		ByteCode byte = (strict) ? ByteCode::BIND_MOVE : ByteCode::BIND;
+		TokenKind kind = (strict) ? TokenKind::BIND_STRICT : TokenKind::BIND;
+		ByteCode byte = (strict) ? ByteCode::BIND_STRICT : ByteCode::BIND;
 
 		consume(kind);
 
@@ -333,7 +333,7 @@ namespace Process {
 
 			// Keywords
 			case TokenKind::BIND:		bind_statement(false); break;
-			case TokenKind::BIND_MOVE:	bind_statement(true); break;
+			case TokenKind::BIND_STRICT:	bind_statement(true); break;
 			case TokenKind::ID:			binding_access_statement(); break;
 			case TokenKind::BANG:		proc_call_statement(); break;
 			case TokenKind::IF:			if_statement(); break;
@@ -525,7 +525,7 @@ namespace Process {
 
 		// Check each parameter and push a bind opcode with each param
 		if (m_env->defs.procedures[id][sub_idx].parameters.size() > 0) {
-			push_bytes(ByteCode::BIND_MOVE, m_env->defs.procedures[id][sub_idx].parameters.size());
+			push_bytes(ByteCode::BIND_STRICT, m_env->defs.procedures[id][sub_idx].parameters.size());
 
 			for(auto param : m_env->defs.procedures[id][sub_idx].parameters) {
 				auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), param.first);
