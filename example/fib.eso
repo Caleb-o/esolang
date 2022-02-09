@@ -3,10 +3,16 @@ proc fib(n : int) -> int {
 	else { n 1 - |!1| !fib n 2 - |!1| !fib + }
 }
 
-# 7 seconds on lower-spec laptop (Release)
-# 5 seconds on higer-spec (Release)
+# Fibonacci to 32 numbers [Release] (Pre-optimisations)
+# 7 seconds on lower-spec laptop
+# 6 seconds on higer-spec
+
+# Fibonacci to 32 numbers [Release] (Optimised)
+# ? seconds on lower-spec laptop
+# 3.5 seconds on higer-spec
+
 proc main() -> void {
-	16
+	32
 	'Fibonacci to ' print drop
 	print ' = ' print drop
 

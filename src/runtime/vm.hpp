@@ -16,23 +16,22 @@ namespace Runtime {
 		std::string proc_id;
 		size_t return_idx;
 		std::map<std::string, std::shared_ptr<Binding>> bindings;
-		// Todo: Make this an index cap, so we use a single stack
-		std::vector<std::shared_ptr<Value> > stack;
+		size_t stack_start;
 
 		~CallFrame() {
 			bindings.clear();
-			stack.clear();
 		}
 	};
 
 	class VM {
 		std::shared_ptr<Environment> m_env;
 		ByteCode *m_ip = { 0 };
+		std::vector<std::shared_ptr<Value>> m_stack;
 		std::shared_ptr<CallFrame> m_top_stack = { 0 };
 		std::vector<std::shared_ptr<CallFrame>> m_call_stack;
 
 	private:
-		void add_call_frame(std::string, size_t);
+		void add_call_frame(std::string, size_t, size_t);
 		void kill_frame();
 		void unwind_stack();
 		void error(bool, std::string);

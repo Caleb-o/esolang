@@ -24,14 +24,12 @@ namespace Runtime {
 		bool read_only;
 
 		size_t capture_len;
-		std::vector<std::shared_ptr<Value>> capture;
-		
 		std::string string;
 	};
 
 	static std::shared_ptr<Value> create_value(int value, bool read_only = true) {
 		std::shared_ptr<Value> val = std::make_shared<Value>();
-		*val = (Value){ 
+		*val = (Value){
 			ValueKind::INT,
 			{ .integer=value },
 			read_only
@@ -70,14 +68,13 @@ namespace Runtime {
 		return val;
 	}
 
-	static std::shared_ptr<Value> create_value(std::vector<std::shared_ptr<Value>> capture, size_t capture_len, bool read_only = true) {
+	static std::shared_ptr<Value> create_value(size_t capture_len, bool read_only = true) {
 		std::shared_ptr<Value> val = std::make_shared<Value>();
 		*val = (Value){
 			ValueKind::CAPTURE,
 			{ 0 },
 			read_only,
 			capture_len,
-			capture,
 		};
 		return val;
 	}
@@ -116,11 +113,7 @@ namespace Runtime {
 			case ValueKind::STRING: 	std::cout << value->string; break;
 			case ValueKind::STRUCT: 	std::cout << "struct"; break;
 			case ValueKind::CAPTURE: {
-				std::cout << "capture: ";
-				for(size_t i = 0; i < value->capture_len; ++i) {
-					write_value(value->capture[i]);
-					std::cout << " ";
-				}
+				std::cout << "capture [" << value->capture_len << "]";
 				break;
 			}
 		}
