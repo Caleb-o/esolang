@@ -27,20 +27,23 @@ int main(int argc, char **argv) {
 	std::vector<std::string> prg_arv;
 
 	for(int i = 1; i < argc; ++i) {
-		switch(Util::hash(argv[i], std::strlen(argv[i]))) {
-			case Util::hash("-d", 2): 		debug = true; break;
-			case Util::hash("--", 2): 		capture_args = true; break;
-			default: {
-				std::string arg(argv[i]);
+		size_t hash = Util::hash(argv[i], std::strlen(argv[i]));
+		std::string arg(argv[i]);
 
-				if (arg.find('.') != std::string::npos ||
-					arg.find('/') != std::string::npos) {
-					filename = argv[i];
-				} else if (capture_args) {
-					prg_arv.push_back(arg);
+		if (!capture_args) {
+			switch(hash) {
+				case Util::hash("-d", 2): 		if (!capture_args) debug = true; break;
+				case Util::hash("--", 2): 		if (!capture_args) capture_args = true; break;
+				default: {
+					if (arg.find('.') != std::string::npos ||
+						arg.find('/') != std::string::npos) {
+						filename = argv[i];
+					}
+					break;
 				}
-				break;
 			}
+		} else {
+			prg_arv.push_back(arg);
 		}
 	}
 

@@ -211,6 +211,8 @@ void VM::comparison_op() {
 		case ValueKind::BOOL: {
 			switch(op) {
 				case ByteCode::EQUAL:	push_stack(create_value(lhs->data.boolean == rhs->data.boolean)); break;
+				case ByteCode::OR:		push_stack(create_value(lhs->data.boolean || rhs->data.boolean)); break;
+				case ByteCode::AND:		push_stack(create_value(lhs->data.boolean && rhs->data.boolean)); break;
 
 				default:	error(false,
 								Util::string_format("Unknown operation '%s'",
@@ -311,7 +313,8 @@ void VM::run() {
 
 			case ByteCode::GREATER: case ByteCode::GREATER_EQ:
 			case ByteCode::LESS: case ByteCode::LESS_EQ: 
-			case ByteCode::EQUAL: {
+			case ByteCode::EQUAL: case ByteCode::OR:
+			case ByteCode::AND: {
 				comparison_op();
 				break;
 			}

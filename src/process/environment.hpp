@@ -61,7 +61,7 @@ namespace Process {
 		std::vector<std::string> idLiterals;
 		// Definitions are compile-time known structs and procedures
 		Definitions defs;
-		size_t argc;
+		std::vector<std::string> argv;
 
 		~Environment() {
 			literals.clear();

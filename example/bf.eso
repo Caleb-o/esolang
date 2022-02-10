@@ -1,0 +1,69 @@
+# Author    : Caleb
+# Date      : 10th Feb 2022
+# Modified  : 10th Feb 2022
+#
+# Note		: This is not a complete Implementation, so it is *very* limited.
+# 			: Since we do not have arrays, we cannot store memory in a tape and loops
+#			: do not seem to work as intended.
+
+
+proc brainflipped() -> void {
+	# Bind the file name
+	@argv strict | fileName |
+
+	'Interpreting : ' print drop 
+	fileName println
+
+	# Load the file
+	@read_file strict | contents |
+	
+	# Setup to interpreter
+	contents @str_len strict | len |
+	0 0 bind | idx, memory |
+
+	# Check if file contents is greater than 0
+	len 0 > if {
+		'Contents :: ' print drop
+		len print drop 
+		' : "' print drop 
+		print '"' println drop
+
+		# Main loop
+		true loop {
+			# Get current character
+			idx @str_index bind | char |
+
+			# Increment
+			char '+' @str_cmp if {
+				memory 1 + bind | memory |
+			} 2 @drop_n
+			
+			# Decrement
+			char '-' @str_cmp if {
+				memory 1 - bind | memory |
+			} 2 @drop_n
+
+			# Print current
+			char '.' @str_cmp if {
+				memory println drop``
+			} 2 @drop_n
+	
+			# Increment and check index
+			idx 1 + bind | idx |
+			idx len <
+		}
+	}
+
+
+	'Done.' println
+	@drop_stack
+}
+
+proc main() -> void {
+	# Check arg count
+	@argc 1 = if {
+		|| !brainflipped
+	} else {
+		'Usage: bf <filename>' println drop
+	}
+}

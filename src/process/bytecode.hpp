@@ -20,6 +20,7 @@ namespace Process {
 		ADD, SUB, MUL, DIV,		// ADD|SUB|MUL|DIV
 		GREATER, LESS, EQUAL,	// GREATER|LESS|EQUAL
 		GREATER_EQ, LESS_EQ,	// GREATER_EQ|LESS_EQ
+		OR, AND,				// OR|AND
 		DUPLICATE, SWAP,		// DUPLICATE|SWAP
 		ROTATE,					// ROTATE
 	};
@@ -47,6 +48,8 @@ namespace Process {
 			case ByteCode::LESS:			return "LESS";
 			case ByteCode::LESS_EQ:			return "LESS_EQ";
 			case ByteCode::EQUAL:			return "EQUAL";
+			case ByteCode::OR:				return "OR";
+			case ByteCode::AND:				return "AND";
 
 			case ByteCode::IF:				return "IF";
 			case ByteCode::LOOP:			return "LOOP";

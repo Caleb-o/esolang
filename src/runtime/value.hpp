@@ -13,7 +13,7 @@ namespace Runtime {
 	};
 
 	union ValueData {
-		size_t integer;
+		long long integer;
 		float floating;
 		bool boolean;
 	};

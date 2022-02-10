@@ -1,3 +1,7 @@
+# Author    : Caleb
+# Date      : 9th Feb 2022
+# Modified  : 9th Feb 2022
+
 proc fib(n : int) -> int {
 	n 1 <= if { n }
 	else { n 1 - |!1| !fib n 2 - |!1| !fib + }

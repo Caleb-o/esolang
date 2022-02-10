@@ -193,6 +193,8 @@ namespace Process {
 			case TokenKind::LESS:			push_byte(ByteCode::LESS); break;
 			case TokenKind::LESS_EQ:		push_byte(ByteCode::LESS_EQ); break;
 			case TokenKind::EQUAL:			push_byte(ByteCode::EQUAL); break;
+			case TokenKind::OR:				push_byte(ByteCode::OR); break;
+			case TokenKind::AND:			push_byte(ByteCode::AND); break;
 		}
 	}
 
@@ -349,7 +351,8 @@ namespace Process {
 			// Comparison operators
 			case TokenKind::GREATER: case TokenKind::GREATER_EQ:
 			case TokenKind::LESS: case TokenKind::LESS_EQ: 
-			case TokenKind::EQUAL: {
+			case TokenKind::EQUAL: case TokenKind::OR:
+			case TokenKind::AND: {
 				comparison_statement();
 				break;
 			}
@@ -626,10 +629,7 @@ namespace Process {
 		def_native_procs(m_env);
 
 		// Import argv and bind argc
-		for(auto str : argv) {
-			push_bytes(ByteCode::PUSH, add_literal_to_env(create_value(str)));
-		}
-		m_env->argc = argv.size();
+		m_env->argv = argv;
 
 		program();
 		m_completed = true;

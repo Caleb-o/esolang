@@ -2,79 +2,10 @@
 # Date      : 10th Feb 2022
 # Modified  : 10th Feb 2022
 
-using 'fib_bindings'
-
-proc test(i : int) -> void {
-	i
-	bind | x |
-	x println drop
-}
-
-proc pass() -> int, int {
-	1 2
-}
-
-proc pass(a : int) -> int, int {
-	a 2
-}
-
-proc pass(a, b : int) -> int, int {
-	a b
-}
-
 proc main() -> void {
-	'Argc: ' print drop
-	@argc println drop
-	@drop_stack
+	'hello' 0 @str_index bind | a, str |
 
-	| 1 | !test
+	a 'h' @str_cmp if {
 
-	|| !pass println drop println drop
-	| 2 | !pass println drop println drop
-	| 2 6 | !pass println drop println drop
-
-	'Fibonacci = ' print drop
-	| 16 | !fib println drop
-
-	'Hello' 'Hello' @str_cmp false = if {
-		'Strings do not match' @error
-	}
-
-	'hello' print @str_len 
-	' is size ' print drop
-	println @drop_stack
-
-	# Split a string and print each value
-	'hello world' ' ' @str_split 0 bind | idx, count |
-
-	true loop {
-		0 @str_index 'h' @str_cmp if {
-			2 @drop_n
-			'h found' println drop
-		} else {
-			2 @drop_n
-		}
-
-		println drop
-
-		idx 1 + bind | idx |
-
-		idx count <
-	}
-
-	# Read this file
-	# './example/experimenting.eso' @read_file println drop
-
-	# Peek values
-	1 2 3
-	2 @peek println
-	4 @drop_n
-	
-	# Compare types
-	'abc' 1 @kind_cmp if {
-		'Same type' println drop
-	} else {
-		'Different type' println drop
-	}
-	2 @drop_n
+	} 2 @drop_n
 }

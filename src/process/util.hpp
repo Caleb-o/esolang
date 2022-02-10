@@ -79,6 +79,8 @@ namespace Util {
 			case hash("strict", 6):		return TokenKind::BIND_STRICT;
 			case hash("using", 5):		return TokenKind::USING;
 			case hash("return", 6):		return TokenKind::RETURN;
+			case hash("or", 2):			return TokenKind::OR;
+			case hash("and", 3):		return TokenKind::AND;
 			case hash("if", 2):			return TokenKind::IF;
 			case hash("else", 4):		return TokenKind::ELSE;
 			case hash("loop", 4):		return TokenKind::LOOP;
