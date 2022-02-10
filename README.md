@@ -146,6 +146,28 @@ proc main() -> void {
 As many languages, a `main` procedure is required for the entry point. Eso does not currently support CLI arguments, so we cannot take
 any arguments OR return values.
 
+### Native Procedures
+Not everything can easily be implemented, when the language doesn't offer much functionality in its raw form. Eg. We cannot write a procedure that handles I/O. This is where native procedures come into play. A native procedure is a C++ function that is wrapped in an Eso call. All native procedures are ready to use in every script, with no need for an import. To tell them apart from procedures, we prefix their call with an `@` operator, instead of a `!`. Note that all native procedures have type checked parameters.
+
+### Example
+```
+# This will peek hello and push 5 to the stack
+'Hello' @str_len
+```
+
+### List of Native Procedures
+* `str_len` (STRING) : Returns the size of a string
+* `str_split` (STRING, STRING) : Consumes a delimeter and splits the previous string, pushing all elements onto the stack
+* `str_index` (STRING, INT) : Gets the character at a certain index
+* `read_file` (STRING) : Reads a file, consuming the previous string as a file path, pushing the buffer
+* `stack_len` (VOID) : Returns the number of items in the stack (locally)
+* `global_stack_len` (VOID) : Returns the number of items in the stack (globally)
+* `error` (STRING) : Throw an error with the previous string
+* `drop_n` (INT) : Consume an int and drop that many values from the stack
+* `drop_stack` (VOID) : Drops all values on the local stack
+
+**Note: Once a std library is developed, it will most likely use several native procedures. Using a mixture of procedures and native calls, we can complete more complex tasks.*
+
 ### Conditionals
 There are currently 5 conditional operators, which will push a `true` or `false` to the stack depending on the evaluation. When we use that with the `if` keyword, we can execute code based on a condition.
 
