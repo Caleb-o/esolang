@@ -83,7 +83,7 @@ namespace Process {
 
 			size_t overload = 0;
 			for(auto& procDef : proc.second) {
-				std::cout << "variation #" << overload << ", starts at pos: " << procDef.startIdx << std::endl;
+				std::cout << "variation #" << overload << ", starts at opcode pos: " << procDef.startIdx << std::endl;
 				std::cout << "== Params == " << std::endl;
 
 				if (procDef.parameters.size() == 0) {
@@ -106,6 +106,28 @@ namespace Process {
 			}
 			idx++;
 		}
+
+		std::cout << "=== ID Literals ===\n";
+		idx = 0;
+
+		if (env->idLiterals.size() == 0) {
+			std::cout << "-- Empty --\n";
+		}
+		for(auto& id : env->idLiterals) {
+			std::cout << "ID '" << id << "' #" << idx++ << std::endl;
+		}
+		std::cout << std::endl;
+
+		std::cout << "=== Literals ===\n";
+		idx = 0;
+
+		if (env->literals.size() == 0) {
+			std::cout << "-- Empty --\n";
+		}
+		for(auto& literal : env->literals) {
+			std::cout << "value '"; write_value(literal); std::cout << "' :: '" << kind_as_str(literal->kind) << "' #" << idx++ << std::endl;
+		}
+		std::cout << std::endl;
 
 		std::cout << "=== ByteCode ===\n";
 		size_t i = 0, ops = 0;
@@ -143,6 +165,20 @@ namespace Process {
 					break;
 				}
 
+				case ByteCode::NATIVECALL: {
+					int native_idx = (int)env->code[++i];
+					auto native_it = std::next(env->defs.native_procs.begin(), native_idx);
+					std::cout << get_bytecode_name(env->code[i-1]) << "<" << native_idx << ", '" << native_it->first << "'>\n";
+					break;
+				}
+
+				case ByteCode::PROCCALL: {
+					int proc_idx = (int)env->code[++i];
+					auto proc_it = std::next(env->defs.procedures.begin(), proc_idx);
+					std::cout << get_bytecode_name(env->code[i-1]) << "<" << proc_idx << ", '" << proc_it->first << "'>\n";
+					break;
+				}
+
 				case ByteCode::LOAD_BINDING: {
 					int bind_idx = (int)env->code[++i];
 					std::cout << get_bytecode_name(env->code[i-1]) << "<" << bind_idx << ", '" << env->idLiterals[bind_idx] << "'>\n";
@@ -150,7 +186,6 @@ namespace Process {
 				}
 
 				case ByteCode::RETURN:
-				case ByteCode::PROCCALL:
 				case ByteCode::CAPTURE:
 				case ByteCode::GOTO:
 				case ByteCode::IF:

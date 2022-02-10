@@ -2,10 +2,10 @@
 # Date      : 10th Feb 2022
 # Modified  : 10th Feb 2022
 
+
 proc main() -> void {
-	'hello' 0 @str_index bind | a, str |
-
-	a 'h' @str_cmp if {
-
-	} 2 @drop_n
+	5 bind | a |
+	5 strict | b |
+	1 2 drop @error	
+	'err'
 }

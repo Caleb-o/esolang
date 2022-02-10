@@ -27,9 +27,17 @@ void VM::unwind_stack() {
 		
 		for(int frame_idx = m_call_stack.size()-1; frame_idx >= 0; --frame_idx) {
 			std::shared_ptr<CallFrame> frame = m_call_stack[frame_idx];
-			std::cout << "depth " << frame_idx << " '" <<  frame->proc_id << "' [";
+			std::cout << "depth " << frame_idx << " '" <<  frame->proc_id << "' bindings [";
 			// TODO: Print each binding here
-			std::cout << "] stack | start: " << frame->stack_start << ":\n";
+			size_t binding_idx = 0;
+			for(auto& binding : frame->bindings) {
+				std::cout << "'" << binding.first << "':'" << ((binding.second->strict) ? "strict" : "plain") << "'";
+
+				if (binding_idx++ < frame->bindings.size() - 1) {
+					std::cout << " ";
+				}
+			}
+			std::cout << "] stack\n";
 
 			if (m_stack.size() <= frame->stack_start) {
 				std::cout << "-- Empty --\n";
@@ -54,12 +62,17 @@ void VM::unwind_stack() {
 }
 
 void VM::error(bool internal, std::string msg) {
+	size_t pos = (m_ip - m_env->code.data()-1 >= 0) ? m_ip - m_env->code.data()-1 : 0;
+
 	if (internal) {
-		std::cout << "Internal: " << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl << std::endl;
+		std::cout << "Internal: ";
 	} else {
-		std::cout << msg << std::endl << std::endl;
-		unwind_stack();
+		std::cout << "Runtime: ";
 	}
+	
+	std::cout << msg << " on code at opcode pos " << pos << std::endl << std::endl;
+	unwind_stack();
+
 	throw "Runtime exception occured";
 }
 
