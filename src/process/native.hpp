@@ -48,13 +48,34 @@ namespace Process {
 		vm->push_stack(create_value(std::string(1, str->string[idx->data.integer])));
 	}
 
+	static void native_kind_cmp(VM *vm) {
+		auto val_b = vm->peek_stack(0);
+		auto val_a = vm->peek_stack(1);
+
+		vm->push_stack(create_value(val_a->kind == val_b->kind));
+	}
+
+	static void native_peek(VM *vm) {
+		auto n = vm->pop_stack()->data.integer;
+
+		// Since we consider 0 the top, we have to minus one
+		if (n >= vm->stack_len()) {
+			vm->error(false, Util::string_format(
+				"Trying to peek %d values down, but it only contains %d",
+				n, vm->stack_len()
+			));
+		}
+
+		vm->push_stack(vm->peek_stack(n));
+	}
+
 	static void native_drop_n(VM *vm) {
 		auto n = vm->pop_stack()->data.integer;
 		size_t i = 0;
 
-		if (vm->stack_len() < n) {
+		if (n-1 > vm->stack_len()) {
 			vm->error(false, Util::string_format(
-				"Trying to drop %d values fron the stack, but int only contains %d",
+				"Trying to drop %d values from the stack, but it only contains %d",
 				n, vm->stack_len()
 			));
 		}
@@ -116,6 +137,8 @@ namespace Process {
 		env->defs.native_procs["str_cmp"] 		= create_native(native_str_cmp, 		{ ValueKind::STRING, ValueKind::STRING });
 		env->defs.native_procs["str_split"] 	= create_native(native_str_split, 		{ ValueKind::STRING, ValueKind::STRING });
 		env->defs.native_procs["str_index"] 	= create_native(native_str_index,		{ ValueKind::INT, ValueKind::STRING });
+		env->defs.native_procs["kind_cmp"]		= create_native(native_kind_cmp,		{ });
+		env->defs.native_procs["peek"] 			= create_native(native_peek, 			{ ValueKind::INT });
 		env->defs.native_procs["drop_n"] 		= create_native(native_drop_n, 			{ ValueKind::INT });
 		env->defs.native_procs["drop_stack"] 	= create_native(native_drop_stack, 		{ });
 		env->defs.native_procs["stack_len"] 	= create_native(native_stack_len, 		{ });

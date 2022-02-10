@@ -60,4 +60,17 @@ proc main() -> void {
 
 	# Read this file
 	'./example/experimenting.eso' @read_file println drop
+
+	# Peek values
+	1 2 3
+	2 @peek println
+	4 @drop_n
+	
+	# Compare types
+	'abc' 1 @kind_cmp if {
+		'Same type' println drop
+	} else {
+		'Different type' println drop
+	}
+	2 @drop_n
 }
