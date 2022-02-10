@@ -23,6 +23,10 @@ proc pass(a, b : int) -> int, int {
 }
 
 proc main() -> void {
+	'Argc: ' print drop
+	@argc println drop
+	@drop_stack
+
 	| 1 | !test
 
 	|| !pass println drop println drop
@@ -59,7 +63,7 @@ proc main() -> void {
 	}
 
 	# Read this file
-	'./example/experimenting.eso' @read_file println drop
+	# './example/experimenting.eso' @read_file println drop
 
 	# Peek values
 	1 2 3

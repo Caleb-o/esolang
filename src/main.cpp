@@ -22,18 +22,22 @@ int main(int argc, char **argv) {
 	}
 	
 	// Simple argument parsing
-	bool debug = false;
+	bool debug = false, capture_args = false;
 	char *filename = nullptr;
+	std::vector<std::string> prg_arv;
 
 	for(int i = 1; i < argc; ++i) {
 		switch(Util::hash(argv[i], std::strlen(argv[i]))) {
 			case Util::hash("-d", 2): 		debug = true; break;
+			case Util::hash("--", 2): 		capture_args = true; break;
 			default: {
 				std::string arg(argv[i]);
 
 				if (arg.find('.') != std::string::npos ||
 					arg.find('/') != std::string::npos) {
 					filename = argv[i];
+				} else if (capture_args) {
+					prg_arv.push_back(arg);
 				}
 				break;
 			}
@@ -54,7 +58,7 @@ int main(int argc, char **argv) {
 			throw "File could not be read or is empty";
 		}
 
-		std::shared_ptr<Environment> env = p.parse(buffer);
+		std::shared_ptr<Environment> env = p.parse(buffer, prg_arv);
 		if (debug) print_env(env);
 
 		VM vm(env);

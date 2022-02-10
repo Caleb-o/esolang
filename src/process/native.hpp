@@ -115,6 +115,10 @@ namespace Process {
 		}
 	}
 
+	static void native_argc(VM *vm) {
+		vm->push_stack(create_value((long long)vm->argc()));
+	}
+
 	static void native_stack_len(VM *vm) {
 		vm->push_stack(create_value((long long)vm->stack_len()));
 	}
@@ -140,6 +144,7 @@ namespace Process {
 		env->defs.native_procs["kind_cmp"]		= create_native(native_kind_cmp,		{ });
 		env->defs.native_procs["peek"] 			= create_native(native_peek, 			{ ValueKind::INT });
 		env->defs.native_procs["drop_n"] 		= create_native(native_drop_n, 			{ ValueKind::INT });
+		env->defs.native_procs["argc"] 			= create_native(native_argc, 			{ });
 		env->defs.native_procs["drop_stack"] 	= create_native(native_drop_stack, 		{ });
 		env->defs.native_procs["stack_len"] 	= create_native(native_stack_len, 		{ });
 		env->defs.native_procs["global_stack_len"] 	= create_native(native_global_stack_len, 		{ });

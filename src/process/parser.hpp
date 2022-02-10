@@ -58,6 +58,6 @@ namespace Process {
 	public:
 		Parser(std::string);
 
-		std::shared_ptr<Environment> parse(std::string);
+		std::shared_ptr<Environment> parse(std::string, std::vector<std::string>);
 	};
 }

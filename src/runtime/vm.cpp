@@ -85,15 +85,6 @@ std::shared_ptr<Value> VM::peek_stack(size_t idx) {
 	return m_stack[m_stack.size() - (idx + 1)];
 }
 
-size_t VM::stack_len() {
-	return m_stack.size() - m_top_stack->stack_start;
-}
-
-size_t VM::global_stack_len() {
-	return m_stack.size();
-}
-
-
 void VM::arithmetic_op() {
 	std::shared_ptr<Value> rhs = pop_stack();
 	std::shared_ptr<Value> lhs = pop_stack();

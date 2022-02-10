@@ -30,8 +30,10 @@ namespace Runtime {
 		void push_stack(std::shared_ptr<Value>);
 		std::shared_ptr<Value> pop_stack();
 		std::shared_ptr<Value> peek_stack(size_t idx = 0);
-		size_t stack_len();
-		size_t global_stack_len();
+
+		size_t argc() { return m_env->argc; }
+		size_t stack_len() { return m_stack.size() - m_top_stack->stack_start; }
+		size_t global_stack_len() { return m_stack.size(); }
 
 
 	public:

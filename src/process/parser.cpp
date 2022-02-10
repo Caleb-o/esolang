@@ -616,7 +616,7 @@ namespace Process {
 		m_env = std::shared_ptr<Environment>(new Environment());
 	}
 
-	std::shared_ptr<Environment> Parser::parse(std::string source) {
+	std::shared_ptr<Environment> Parser::parse(std::string source, std::vector<std::string> argv) {
 		m_lexer = std::make_unique<Lexer>(Lexer(source));
 		m_current = m_lexer->get_token();
 
@@ -624,6 +624,12 @@ namespace Process {
 		m_file_hashes.insert(hash);
 
 		def_native_procs(m_env);
+
+		// Import argv and bind argc
+		for(auto str : argv) {
+			push_bytes(ByteCode::PUSH, add_literal_to_env(create_value(str)));
+		}
+		m_env->argc = argv.size();
 
 		program();
 		m_completed = true;

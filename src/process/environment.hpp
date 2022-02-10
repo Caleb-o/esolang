@@ -61,6 +61,7 @@ namespace Process {
 		std::vector<std::string> idLiterals;
 		// Definitions are compile-time known structs and procedures
 		Definitions defs;
+		size_t argc;
 
 		~Environment() {
 			literals.clear();
@@ -82,7 +83,7 @@ namespace Process {
 
 			size_t overload = 0;
 			for(auto& procDef : proc.second) {
-				std::cout << "overload #" << overload << ", starts at pos: " << procDef.startIdx << std::endl;
+				std::cout << "variation #" << overload << ", starts at pos: " << procDef.startIdx << std::endl;
 				std::cout << "== Params == " << std::endl;
 
 				if (procDef.parameters.size() == 0) {
@@ -133,7 +134,6 @@ namespace Process {
 					}
 					while(i < count) {
 						std::cout << "'" << env->idLiterals[env->code[++i]] << "'";
-						// std::cout << env->code[i++];
 
 						if ((i-1) < count - 1) {
 							std::cout << " ";
