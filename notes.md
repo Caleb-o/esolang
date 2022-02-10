@@ -52,5 +52,8 @@ eg.
 * [x] `drop_n` : Take an int and drop that many values from the stack
 * [x] `drop_stack` : Drops all values on the local stack
 
+* [ ] `to_bytes` : Push a string to the stack, in its byte form
+* [ ] `from_bytes` : Create a string using N amount of integers
+
 Probably:
 - str_to_(X) - Convert a string to int, bool, float etc
