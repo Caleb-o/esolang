@@ -308,9 +308,8 @@ A stack is required to be empty, or the size of the return count (if a procedure
 
 ## Limitations / Restrictions / Caveats
 - This is a toy language and wasn't meant to get as big as it is now. A lot has been hacked on or rewritten to support new features.
-- No CLI args passed through
-- No string manipulation/construction
-- No file I/O
+- Some string manipulation/construction
+- Some file I/O
 - No namespacing. Importing a file may cause conflicts with other files. I hope you're good at unique names, or using C-like naming that acts like namespacing.
 - No circular dependency support or resolution when encountering a possibly valid procedure, when it hasn't been declared yet.
     - No resolution means that import order will matter. Eso does skip existing imports, if one has been encountered. This doesn't necessarily mean that file has been parsed yet, but it might have been added.
