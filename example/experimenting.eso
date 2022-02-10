@@ -57,4 +57,7 @@ proc main() -> void {
 
 		idx count <
 	}
+
+	# Read this file
+	'./example/experimenting.eso' @read_file println drop
 }

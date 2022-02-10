@@ -20,6 +20,15 @@ namespace Process {
 	using Native = std::shared_ptr<NativeDef>;
 
 	// --- Native Functions ---
+	static void native_error(VM *vm) {
+		vm->error(false, vm->pop_stack()->string);
+	}
+
+	static void native_read_file(VM *vm) {
+		auto file_name = vm->pop_stack();
+		vm->push_stack(create_value(Util::read_file(file_name->string.c_str())));
+	}
+
 	static void native_str_len(VM *vm) {
 		auto str = vm->peek_stack();
 		vm->push_stack(create_value((long long)str->string.size()));
@@ -93,10 +102,6 @@ namespace Process {
 		vm->push_stack(create_value((long long)vm->global_stack_len()));
 	}
 
-	static void native_error(VM *vm) {
-		vm->error(false, vm->pop_stack()->string);
-	}
-
 	// Helper function to create a def
 	template <class Functor>
 	static std::shared_ptr<NativeDef> create_native(Functor f, std::vector<ValueKind> values) {
@@ -106,6 +111,7 @@ namespace Process {
 	// Define all native procedures
 	static void def_native_procs(std::shared_ptr<Environment> env) {
 		env->defs.native_procs["error"] 		= create_native(native_error, 			{ ValueKind::STRING });
+		env->defs.native_procs["read_file"]		= create_native(native_read_file,		{ ValueKind::STRING });
 		env->defs.native_procs["str_len"] 		= create_native(native_str_len, 		{ ValueKind::STRING });
 		env->defs.native_procs["str_cmp"] 		= create_native(native_str_cmp, 		{ ValueKind::STRING, ValueKind::STRING });
 		env->defs.native_procs["str_split"] 	= create_native(native_str_split, 		{ ValueKind::STRING, ValueKind::STRING });

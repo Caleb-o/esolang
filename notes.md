@@ -43,7 +43,7 @@ eg.
 * [x] `str_len` : Returns the size of a string
 * [x] `str_split` : Takes a delimeter and splits the previous string, pushing all elements onto the stack
 * [x] `str_index` : Gets the character at a certain index
-* [ ] `read_file` : Reads a file, using the previous string as a file path, pushing the buffer
+* [x] `read_file` : Reads a file, using the previous string as a file path, pushing the buffer
 * [ ] `write_file` : Writes to a file, using the previous string as a file path and the string prior as the buffer
 * [x] `str_cmp` : Compare the previous two strings and push true or false if they are the same
 * [x] `stack_len` : Returns the number of items in the stack (local)
