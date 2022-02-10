@@ -1,23 +1,8 @@
 #include <iterator>
 #include "vm.hpp"
 #include "../process/util.hpp"
+#include "../process/native.hpp"
 
-using Func = std::function<void(std::vector<std::shared_ptr<Value>>&)>;
-using FuncPtr = std::shared_ptr<Func>;
-
-static void native_str_len(std::vector<std::shared_ptr<Value>> &stack) {
-	std::cout << "STRLEN" << std::endl;
-}
-
-template <class Functor>
-static FuncPtr create_native(Functor f) {
-    return FuncPtr(new Func(f));
-}
-
-// TODO: Since the bound functions are static we can move them to their own header file
-void VM::def_native_procs() {
-	m_env->defs.native_procs["str_len"] = create_native(native_str_len);
-}
 
 void VM::add_call_frame(std::string proc_name, size_t ret_idx, size_t stack_start) {
 	std::shared_ptr<CallFrame> frame = std::make_shared<CallFrame>();
@@ -70,9 +55,9 @@ void VM::unwind_stack() {
 
 void VM::error(bool internal, std::string msg) {
 	if (internal) {
-		std::cout << "Internal: " << msg << std::endl << std::endl;
+		std::cout << "Internal: " << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl << std::endl;
 	} else {
-		std::cout << msg << " at code " << get_bytecode_name(*m_ip) << " at pos " << (m_ip - m_env->code.data()) << std::endl << std::endl;
+		std::cout << msg << std::endl << std::endl;
 		unwind_stack();
 	}
 	throw "Runtime exception occured";
@@ -98,6 +83,10 @@ std::shared_ptr<Value> VM::peek_stack(size_t idx) {
 	}
 
 	return m_stack[m_stack.size() - (idx + 1)];
+}
+
+size_t VM::stack_len() {
+	return m_stack.size() - m_top_stack->stack_start;
 }
 
 
@@ -269,10 +258,10 @@ void VM::bind(bool strict) {
 	ByteCode *end = m_ip + bind_count;
 	size_t bind_idx = 0;
 
-	if (bind_count > m_stack.size() - m_top_stack->stack_start) {
+	if (bind_count > stack_len()) {
 		error(false, Util::string_format(
 			"Trying to bind %d value(s), but the stack contains %d value(s)",
-			bind_count, m_stack.size() - m_top_stack->stack_start
+			bind_count, stack_len()
 		));
 	}
 
@@ -308,8 +297,6 @@ void VM::run() {
 	// Setup a callframe
 	add_call_frame("main", -1, 0);
 	m_ip = m_env->code.data() + m_env->defs.procedures["main"][0].startIdx;
-
-	def_native_procs();
 
 	const ByteCode *code_len = m_env->code.data() + m_env->code.size();
 	bool running = true;
@@ -390,8 +377,36 @@ void VM::run() {
 			}
 
 			case ByteCode::NATIVECALL: {
-				FuncPtr native_it = std::next(m_env->defs.native_procs.begin(), *(++m_ip))->second;
-				(*native_it)(m_stack);
+				auto native_it = std::next(m_env->defs.native_procs.begin(), *(++m_ip));
+				
+				// Check arguments
+				if (stack_len() < native_it->second->parameters.size()) {
+					error(false, Util::string_format(
+						"Native function '%s' expected %d value(s), but got %d",
+						native_it->first.c_str(),
+						native_it->second->parameters.size(),
+						stack_len()
+					));
+				}
+
+				// Check all parameter types
+				for(int param_idx = 0; param_idx < native_it->second->parameters.size(); ++param_idx) {
+					// Types don't equal then it's correct
+					auto param = std::next(native_it->second->parameters.begin(), param_idx);
+
+					if (*param != peek_stack(param_idx)->kind) {
+						error(false, Util::string_format(
+							"Native function '%s' expected type %s at pos %d, but got %s",
+							native_it->first.c_str(),
+							kind_as_str(native_it->second->parameters[param_idx]),
+							stack_len(),
+							kind_as_str(peek_stack(param_idx)->kind)
+						));
+					}
+				}
+
+				// Call the native function
+				(*native_it->second->func)(this);
 				break;
 			}
 
@@ -402,7 +417,10 @@ void VM::run() {
 				// TODO: Make it so void procs can go without a capture list
 				// Must be a capture list
 				if (m_stack.size() < m_top_stack->stack_start || peek_stack()->kind != ValueKind::CAPTURE) {
-					error(false, "Procedure call requires a capture list on the stack top");
+					error(false, Util::string_format(
+						"Procedure call '%s' requires a capture list on the stack top",
+						proc_it->first.c_str()
+					));
 				}
 
 				std::shared_ptr<Value> capture_list = pop_stack();
@@ -437,7 +455,10 @@ void VM::run() {
 
 				// Failed to find a valid procedure that matches stack items
 				if (sub_idx >= proc_it->second.size()) {
-					error(false, "Could not find a procedure that matches stack values");
+					error(false, Util::string_format(
+						"Could not find a procedure ('%s') that matches stack values",
+						proc_it->first.c_str()
+					));
 				}
 
 				// Setup a callframe
@@ -459,10 +480,10 @@ void VM::run() {
 				// Handle return data
 				if (proc_def->returnTypes[0] != ValueKind::VOID) {
 					// Too few items on the stack
-					if (m_stack.size() < m_top_stack->stack_start + proc_def->returnTypes.size()) {
+					if (stack_len() < proc_def->returnTypes.size()) {
 						error(false, Util::string_format(
 							"Trying to return with %d value(s) on the stack, but expected %d",
-							m_stack.size() - m_top_stack->stack_start,
+							stack_len(),
 							proc_def->returnTypes.size()
 						));
 					}
@@ -480,10 +501,10 @@ void VM::run() {
 				}
 
 				// Too many values on the stack
-				if (m_stack.size() - stack_idx > m_top_stack->stack_start) {
+				if (stack_len() > proc_def->returnTypes.size()) {
 					error(false, Util::string_format(
 						"Trying to return with %d value(s) on the stack, but expected %d",
-						m_stack.size() - m_top_stack->stack_start,
+						stack_len(),
 						proc_def->returnTypes.size()
 					));
 				}

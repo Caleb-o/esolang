@@ -4,11 +4,15 @@
 #include <vector>
 #include <functional>
 #include "util.hpp"
-#include "../runtime/value.hpp"
 #include "bytecode.hpp"
+#include "../runtime/value.hpp"
 
 
 using namespace Runtime;
+
+namespace Runtime {
+	class VM;
+}
 
 namespace Process {
 	struct Binding {
@@ -37,9 +41,14 @@ namespace Process {
 		std::vector<ValueKind> returnTypes;
 	};
 
+	struct NativeDef {
+		std::shared_ptr<std::function<void(VM *)>> func;
+		std::vector<ValueKind> parameters;
+	};
+
 	struct Definitions {
 		std::map<std::string, std::vector<ProcedureDef>> procedures;
-		std::map<std::string, std::shared_ptr<std::function<void(std::vector<std::shared_ptr<Value>>&)>>> native_procs;
+		std::map<std::string, std::shared_ptr<NativeDef>> native_procs;
 		// std::map<std::string, StructDef> structs;
 	};
 

@@ -2,8 +2,8 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "../process/environment.hpp"
 #include "value.hpp"
+#include "../process/environment.hpp"
 
 
 namespace Runtime {
@@ -16,17 +16,20 @@ namespace Runtime {
 
 	private:
 		void def_native_procs();
-
+		void error(bool, std::string);
+		
 		void add_call_frame(std::string, size_t, size_t);
 		void kill_frame();
 		void unwind_stack();
-		void error(bool, std::string);
 		void push_stack(std::shared_ptr<Value>);
+
+		std::shared_ptr<Value> pop_stack();
+		std::shared_ptr<Value> peek_stack(size_t idx = 0);
+		size_t stack_len();
+
 		void arithmetic_op();
 		void comparison_op();
 		void bind(bool);
-		std::shared_ptr<Value> pop_stack();
-		std::shared_ptr<Value> peek_stack(size_t idx = 0);
 
 	public:
 		VM(std::shared_ptr<Environment> env) { m_env = env; }

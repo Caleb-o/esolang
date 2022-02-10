@@ -32,5 +32,5 @@ proc main() -> void {
 	'Fibonacci = ' print drop
 	| 16 | !fib println drop
 
-	@str_len
+	1 @str_len
 }

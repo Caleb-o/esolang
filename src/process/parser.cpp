@@ -4,6 +4,7 @@
 #include <cstring>
 #include "parser.hpp"
 #include "util.hpp"
+#include "native.hpp"
 #include "../runtime/value.hpp"
 
 
@@ -622,7 +623,7 @@ namespace Process {
 		size_t hash = Util::hash(source.c_str(), source.size());
 		m_file_hashes.insert(hash);
 
-		add_native_proc_names(m_env);
+		def_native_procs(m_env);
 
 		program();
 		m_completed = true;
