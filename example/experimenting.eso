@@ -32,5 +32,9 @@ proc main() -> void {
 	'Fibonacci = ' print drop
 	| 16 | !fib println drop
 
-	1 @str_len
+	'hello' 'hello' @str_cmp println @drop_stack
+
+	'hello' print @str_len 
+	' is size ' print drop
+	println @drop_stack
 }

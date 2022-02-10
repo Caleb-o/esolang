@@ -21,15 +21,18 @@ namespace Runtime {
 		void add_call_frame(std::string, size_t, size_t);
 		void kill_frame();
 		void unwind_stack();
-		void push_stack(std::shared_ptr<Value>);
-
-		std::shared_ptr<Value> pop_stack();
-		std::shared_ptr<Value> peek_stack(size_t idx = 0);
-		size_t stack_len();
 
 		void arithmetic_op();
 		void comparison_op();
 		void bind(bool);
+	
+	public:
+		void push_stack(std::shared_ptr<Value>);
+		std::shared_ptr<Value> pop_stack();
+		std::shared_ptr<Value> peek_stack(size_t idx = 0);
+		size_t stack_len();
+		size_t global_stack_len();
+
 
 	public:
 		VM(std::shared_ptr<Environment> env) { m_env = env; }

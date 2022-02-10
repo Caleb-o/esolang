@@ -40,17 +40,18 @@ eg.
 ```
 
 ### List of Native Procedures:
-- `str_len` : Returns the size of a string
-- `str_split` : Takes a delimeter and splits the previous string, pushing all elements onto the stack
-- `read_file` : Reads a file, using the previous string as a file path, pushing the buffer
-- `write_file` : Writes to a file, using the previous string as a file path and the string prior as the buffer
-- `str_cmp` : Compare the previous two strings and push true or false if they are the same
-- `stack_size` : Returns the number of items in the stack (local)
-- `global_stack_size` : Returns the number of items in the stack (globally)
-- `here` : Returns current opcode
-- `here_name` : Returns the name of the current opcode
-- `error` : Throw a generic error
-- `error_msg` : Throw an error with the previous string
+* [x] `str_len` : Returns the size of a string
+* [ ] `str_split` : Takes a delimeter and splits the previous string, pushing all elements onto the stack
+* [ ] `read_file` : Reads a file, using the previous string as a file path, pushing the buffer
+* [ ] `write_file` : Writes to a file, using the previous string as a file path and the string prior as the buffer
+* [x] `str_cmp` : Compare the previous two strings and push true or false if they are the same
+* [x] `stack_len` : Returns the number of items in the stack (local)
+* [x] `global_stack_len` : Returns the number of items in the stack (globally)
+* [ ] `here` : Returns current opcode
+* [ ] `here_name` : Returns the name of the current opcode
+* [ ] `error` : Throw a generic error
+* [ ] `error_msg` : Throw an error with the previous string
+* [x] `drop_stack` : Drops all values on the local stack
 
 Probably:
 - str_to_(X) - Convert a string to int, bool, float etc

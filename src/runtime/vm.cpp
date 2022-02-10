@@ -89,6 +89,10 @@ size_t VM::stack_len() {
 	return m_stack.size() - m_top_stack->stack_start;
 }
 
+size_t VM::global_stack_len() {
+	return m_stack.size();
+}
+
 
 void VM::arithmetic_op() {
 	std::shared_ptr<Value> rhs = pop_stack();
