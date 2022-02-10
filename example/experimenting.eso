@@ -32,9 +32,29 @@ proc main() -> void {
 	'Fibonacci = ' print drop
 	| 16 | !fib println drop
 
-	'hello' 'hello' @str_cmp println @drop_stack
+	'Hello' 'Hello' @str_cmp false = if {
+		'Strings do not match' @error
+	}
 
 	'hello' print @str_len 
 	' is size ' print drop
 	println @drop_stack
+
+	# Split a string and print each value
+	'hello world' ' ' @str_split 0 bind | idx, count |
+
+	true loop {
+		0 @str_index 'h' @str_cmp if {
+			2 @drop_n
+			'h found' println drop
+		} else {
+			2 @drop_n
+		}
+
+		println drop
+
+		idx 1 + bind | idx |
+
+		idx count <
+	}
 }

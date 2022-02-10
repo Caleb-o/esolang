@@ -16,7 +16,6 @@ namespace Runtime {
 
 	private:
 		void def_native_procs();
-		void error(bool, std::string);
 		
 		void add_call_frame(std::string, size_t, size_t);
 		void kill_frame();
@@ -27,6 +26,7 @@ namespace Runtime {
 		void bind(bool);
 	
 	public:
+		void error(bool, std::string);
 		void push_stack(std::shared_ptr<Value>);
 		std::shared_ptr<Value> pop_stack();
 		std::shared_ptr<Value> peek_stack(size_t idx = 0);
