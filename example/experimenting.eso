@@ -11,5 +11,5 @@ proc main() -> void {
 
 	'Hello' @to_bytes 5 @from_bytes println drop
 
-	'>' @input println drop
+	'Exp >' @input println drop
 }

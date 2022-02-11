@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <fstream>
 #include <memory>
 #include <functional>
 #include <map>
@@ -35,9 +36,22 @@ namespace Process {
 		}
 	}
 
+	static void native_file_exists(VM *vm) {
+		auto file_name = vm->pop_stack();
+		std::ifstream file(file_name->string.c_str());
+
+		vm->push_stack(create_value(file.good()));
+		file.close();
+	}
+
 	static void native_read_file(VM *vm) {
 		auto file_name = vm->pop_stack();
-		vm->push_stack(create_value(Util::read_file(file_name->string.c_str())));
+		std::ifstream file(file_name->string.c_str());
+
+		if (file.good()) {
+			vm->push_stack(create_value(Util::read_file(file_name->string.c_str())));
+			file.close();
+		}
 	}
 
 	static void native_eval(VM *vm) {
@@ -218,6 +232,7 @@ namespace Process {
 	static void def_native_procs(std::shared_ptr<Environment> env) {
 		env->defs.native_procs["error"] 		= create_native(native_error, 			{ ValueKind::STRING });
 		env->defs.native_procs["assert"] 		= create_native(native_assert, 			{ ValueKind::STRING, ValueKind::BOOL });
+		env->defs.native_procs["file_exists"]	= create_native(native_file_exists,		{ ValueKind::STRING });
 		env->defs.native_procs["read_file"]		= create_native(native_read_file,		{ ValueKind::STRING });
 		env->defs.native_procs["eval"]			= create_native(native_eval,			{ ValueKind::STRING });
 		env->defs.native_procs["input"]			= create_native(native_input,			{ ValueKind::STRING });

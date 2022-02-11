@@ -15,25 +15,44 @@ proc main() -> void {
 
 		# Check if we want to quit
 		source 'quit' @str_cmp if {
-			2 @drop_n
+			@drop_stack
 			'quitting' println drop
 			false
 		} else {
-			# Drop the quit and source
-			2 @drop_n
+			# Drop the quit
+			drop
 
-			# We must insert the code into a main block
-			source '}' +
-			bind | source |
+			source 'file' @str_cmp if {
+				2 @drop_n
+				'File path> ' @input
+				bind | fileName |
 
-			'proc main() -> void { ' source +
-			bind | source |
+				# Only present if the file exists
+				fileName @file_exists if {
+					'Running file: ' print drop fileName println
+					@read_file @eval
+					'Exiting: ' print drop fileName println
+				} else {
+					'File does not exist: ' println drop
+				}
 
-			source
-
-			# Evaluate and continue
-			@eval
-			true
+				true
+			} else {
+				2 @drop_n
+				# We must insert the code into a main block, since we don't currently support
+				# top-level code.
+				source '}' +
+				bind | source |
+	
+				'proc main() -> void { ' source +
+				bind | source |
+	
+				source
+	
+				# Evaluate and continue
+				@eval
+				true
+			}
 		}
 	}
 }
