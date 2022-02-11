@@ -1,15 +1,15 @@
 # Author    : Caleb
 # Date      : 10th Feb 2022
 # Modified  : 11th Feb 2022
-
+using 'std:eso'
 
 proc main() -> void {
-	false 'Hello' @assert
+	| 'a' | !std_stoi println drop
 
 	'true' @stob swap drop println drop
 	'false' @stob swap drop println drop
 
 	'Hello' @to_bytes 5 @from_bytes println drop
 
-	'Exp >' @input println drop
+	# 'Exp >' @input println drop
 }

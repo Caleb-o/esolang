@@ -399,6 +399,7 @@ namespace Process {
 		consume(TokenKind::USING);
 
 		std::string import = copy_lexeme_str(m_current);
+		bool is_std = false;
 		
 		// NOTE: This is like consume, but if we consume, it messes with
 		// 		 the order
@@ -406,13 +407,19 @@ namespace Process {
 			error("Import expects string literal");
 		}
 
-		// TODO: Check if import contains std, to redirect file include
-		std::string source = Util::read_file(
-			Util::string_format("%s/%s.eso",
-				m_base_dir.c_str(),
-				import.c_str()
-			).c_str()
+		if (import.size() > 4 && std::strncmp(import.c_str(), "std:", 4) == 0) {
+			is_std = true;
+			import = import.substr(4);
+		}
+
+
+		// TODO: Check if import contains std, to redirect file 
+		std::string final_file = Util::string_format("%s/%s.eso",
+			(is_std) ? "std" : m_base_dir.c_str(),
+			import.c_str()
 		);
+		std::cout << "Import: '" << final_file << "'\n";
+		std::string source = Util::read_file(final_file.c_str());
 
 		size_t hash = Util::hash(source.c_str(), source.size());
 		if (m_file_hashes.find(hash) != m_file_hashes.end()) {

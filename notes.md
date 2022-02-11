@@ -42,9 +42,30 @@ eg.
 ### List of Native Procedures:
 * [ ] `write_file` : Writes to a file, using the previous string as a file path and the string prior as the buffer
 
+### Test
+We can parse tests similarly to a proc. !!This will actually require a seperate runner, since we need to handle errors differently. An error should trigger a failure, instead of immediately cutting execution. As the parser does not know much about native procedures, the assert might have to become a keyword OR the runner will assume it succeeded if no assertion was hit. As a test cannot be returned from, a HALT opcode will be appended.
+```
+test 'Testing numbers' {
+	1 1 1 + +
+	3 = @assert
+}
+```
 
 ### Top-level code
 If we simply ran the VM top to bottom, we would run into procedures and run their code, which is not desired. One solution is, we capture all top-level code and insert it all at the bottom and set the ip to the start of the top-level code.
 
 Issue: If main exists, do we jump to main? That would mean the top-level code is never ran.
 Solution: We always take precedence over top-level code position, and run from top level. We would have to insert a GOTO with the index of main for cases where the top-level code ends (if main exists), this will stop it from running random code from procedures.
+
+
+### STD library / Usings
+The import system in Eso is very basic and does not consider resolutions etc. There also is no redirect if a std path is found (currently).
+
+How should the standard library be written? What should be expected in an interpreted langauge that is concatenative and stack based? My only idea is to write wrappers around some keywords/native procedures that make them less error prone. Eg. if a file_read fails, return an empty string. Did a stoi/stof/stob fail? Return its default value using a "safe" procedure that handles related errors.
+
+
+### Potential Features / Systems
+* Namespacing / Packages instead of imports
+	* This would require a "project" file of sorts or automatically compiling files in a directory, recursively.
+	* Name resolution for procedures
+* % / mod

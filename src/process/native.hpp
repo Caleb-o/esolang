@@ -28,12 +28,20 @@ namespace Process {
 		vm->error(false, vm->pop_stack()->string);
 	}
 
-	static void native_assert(VM *vm) {
+	static void native_assertm(VM *vm) {
 		auto message = vm->pop_stack();
 		auto condition = vm->pop_stack();
 
 		if (condition->data.boolean) {
 			vm->error(false, Util::string_format("Assert: %s", message->string.c_str()));
+		}
+	}
+
+	static void native_assert(VM *vm) {
+		auto condition = vm->pop_stack();
+
+		if (condition->data.boolean) {
+			vm->error(false, "Assertion has been triggered");
 		}
 	}
 
@@ -244,7 +252,8 @@ namespace Process {
 	// Define all native procedures
 	static void def_native_procs(std::shared_ptr<Environment> env) {
 		env->defs.native_procs["error"] 		= create_native(native_error, 			{ ValueKind::STRING });
-		env->defs.native_procs["assert"] 		= create_native(native_assert, 			{ ValueKind::STRING, ValueKind::BOOL });
+		env->defs.native_procs["assertm"] 		= create_native(native_assertm, 			{ ValueKind::STRING, ValueKind::BOOL });
+		env->defs.native_procs["assert"] 		= create_native(native_assert, 			{ ValueKind::BOOL });
 		env->defs.native_procs["file_exists"]	= create_native(native_file_exists,		{ ValueKind::STRING });
 		env->defs.native_procs["read_file"]		= create_native(native_read_file,		{ ValueKind::STRING });
 		env->defs.native_procs["eval"]			= create_native(native_eval,			{ ValueKind::STRING });
