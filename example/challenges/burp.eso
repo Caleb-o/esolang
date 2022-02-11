@@ -1,0 +1,57 @@
+# Author    : Caleb
+# Date      : 12th Feb 2022
+# Modified  : 12th Feb 2022
+#
+# https://edabit.com/challenge/vxpP4nnDhRr2Yc3Lo
+# Create a function that returns the string "Burp" with the amount of
+# "r's" determined by the input parameters of the function.
+
+proc main() -> void {
+	true loop {
+		# Get user input and make a binding
+		'R count> ' @input
+		bind | input |
+
+		# Compare to quit
+		input 'quit' @str_cmp if {
+			# Cleanup and setup for exiting
+			2 @drop_n
+			'quitting' println drop
+			false
+		} else {
+			# Drop 'quit' and get length of input
+			drop @str_len 0 > if {
+				# Bind stoi output to value
+				@stoi bind | value |
+
+				# Check if value is boolean type
+				value true @kind_cmp if {
+					# Cleanup and present a tip
+					2 @drop_n
+					'Please enter a number' println drop
+				} else {
+					# Drop the true from if and bind index and stoi value
+					drop 0 bind | idx, n |
+		
+					# Bind the initial string
+					'bu' bind | burp |
+					
+					# Loop and concatenate an 'r' to the burp until N
+					# This will loop at least once
+					true loop {
+						burp 'r' + bind | burp |
+		
+						idx 1 + bind | idx |
+						idx n <
+					}
+
+					# Append final string and print result
+					burp 'ps' + println drop
+				}
+			} drop # Drop the input
+
+			# Loop again
+			true
+		}
+	}
+}

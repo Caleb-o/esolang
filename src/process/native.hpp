@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <exception>
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "environment.hpp"
@@ -103,17 +104,29 @@ namespace Process {
 
 	static void native_stoi(VM *vm) {
 		auto str = vm->peek_stack();
-		vm->push_stack(create_value(std::stoll(str->string)));
+		try {
+			vm->push_stack(create_value(std::stoll(str->string)));
+		} catch(std::exception&) {
+			vm->push_stack(create_value(false));
+		}
 	}
 
 	static void native_stof(VM *vm) {
 		auto str = vm->peek_stack();
-		vm->push_stack(create_value(std::stof(str->string)));
+		try {
+			vm->push_stack(create_value(std::stof(str->string)));
+		} catch(std::exception&) {
+			vm->push_stack(create_value(false));
+		}
 	}
 
 	static void native_stob(VM *vm) {
 		auto str = vm->peek_stack();
-		vm->push_stack(create_value(str->string == "true" || !(str->string == "false")));
+		try {
+			vm->push_stack(create_value(str->string == "true" || !(str->string == "false")));
+		} catch(std::exception&) {
+			vm->push_stack(create_value(false));
+		}
 	}
 
 	static void native_kind_cmp(VM *vm) {
