@@ -39,6 +39,9 @@ proc main() -> void {
 
 				# Append final string and print result
 				burp 'ps' + println drop
+			} else {
+				# Drop input
+				drop
 			}
 
 			# Loop again
