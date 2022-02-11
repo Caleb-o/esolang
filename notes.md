@@ -72,3 +72,6 @@ How should the standard library be written? What should be expected in an interp
 * continue / break within loops
 	* Requires re-evaluation of a block, to determine where the continue/break goes to
 	* A continue/break can simply be a goto - continue to top, break to bottom
+* More CLI arguments/flags:
+	* -c : lexes + parses files only, checks for errors
+	* -t : runs all tests within a file (Requires Runner system)
