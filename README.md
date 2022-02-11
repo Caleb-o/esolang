@@ -165,6 +165,13 @@ Not everything can easily be implemented, when the language doesn't offer much f
 * `error` (STRING) : Throw an error with the previous string
 * `drop_n` (INT) : Consume an int and drop that many values from the stack
 * `drop_stack` (VOID) : Drops all values on the local stack
+* `input` (STRING) : Get user input (string)
+* `assert` (BOOL, STRING) : Throws an assertion if the condition is false, using the message as output
+* `stoi` (STRING) : String to int
+* `stof` (STRING) : String to float
+* `stob` (STRING) : String to bool
+* `to_bytes` (STRING) : Push a string to the stack, in its byte form
+* `from_bytes` (INT) : Create a string using N amount of integers
 
 **Note: Once a std library is developed, it will most likely use several native procedures. Using a mixture of procedures and native calls, we can complete more complex tasks.*
 

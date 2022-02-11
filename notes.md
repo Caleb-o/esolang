@@ -41,10 +41,3 @@ eg.
 
 ### List of Native Procedures:
 * [ ] `write_file` : Writes to a file, using the previous string as a file path and the string prior as the buffer
-* [x] `input` : Get user input (string)
-* [x] `assert` : Consumes a boolean and string, throws an error if false, using the message
-* [x] `stoi` : String to int
-* [x] `stof` : String to float
-* [x] `stob` : String to bool
-* [x] `to_bytes` : Push a string to the stack, in its byte form
-* [x] `from_bytes` : Create a string using N amount of integers
