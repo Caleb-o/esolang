@@ -24,9 +24,26 @@ namespace Process {
 		vm->error(false, vm->pop_stack()->string);
 	}
 
+	static void native_assert(VM *vm) {
+		auto message = vm->pop_stack();
+		auto condition = vm->pop_stack();
+
+		if (condition->data.boolean) {
+			vm->error(false, Util::string_format("Assert: %s", message->string.c_str()));
+		}
+	}
+
 	static void native_read_file(VM *vm) {
 		auto file_name = vm->pop_stack();
 		vm->push_stack(create_value(Util::read_file(file_name->string.c_str())));
+	}
+
+	static void native_input(VM *vm) {
+		std::cout << vm->pop_stack()->string;
+		std::string in;
+
+		std::getline(std::cin, in);
+		vm->push_stack(create_value(in));
 	}
 
 	static void native_str_len(VM *vm) {
@@ -46,6 +63,21 @@ namespace Process {
 		auto str = vm->peek_stack();
 
 		vm->push_stack(create_value(std::string(1, str->string[idx->data.integer])));
+	}
+
+	static void native_stoi(VM *vm) {
+		auto str = vm->peek_stack();
+		vm->push_stack(create_value(std::stoll(str->string)));
+	}
+
+	static void native_stof(VM *vm) {
+		auto str = vm->peek_stack();
+		vm->push_stack(create_value(std::stof(str->string)));
+	}
+
+	static void native_stob(VM *vm) {
+		auto str = vm->peek_stack();
+		vm->push_stack(create_value(str->string == "true" || !(str->string == "false")));
 	}
 
 	static void native_kind_cmp(VM *vm) {
@@ -109,6 +141,27 @@ namespace Process {
 		vm->push_stack(create_value((long long)tokens.size()));
 	}
 
+	static void native_to_bytes(VM *vm) {
+		auto str = vm->pop_stack();
+
+		for(auto ch : str->string) {
+			vm->push_stack(create_value((long long)ch));
+		}
+	}
+
+	static void native_from_bytes(VM *vm) {
+		auto n = vm->pop_stack()->data.integer + 1;
+		char *bytes = new char[n];
+		bytes[n-1] = '\0';
+
+		for(int i = n-2; i >= 0; --i) {
+			bytes[i] = vm->pop_stack()->data.integer;
+		}
+
+		vm->push_stack(create_value(std::string(reinterpret_cast<char *>(bytes), n-1)));
+		delete[] bytes;
+	}
+
 	static void native_drop_stack(VM *vm) {
 		while(vm->stack_len() > 0) {
 			vm->pop_stack();
@@ -142,10 +195,17 @@ namespace Process {
 	// Define all native procedures
 	static void def_native_procs(std::shared_ptr<Environment> env) {
 		env->defs.native_procs["error"] 		= create_native(native_error, 			{ ValueKind::STRING });
+		env->defs.native_procs["assert"] 		= create_native(native_assert, 			{ ValueKind::STRING, ValueKind::BOOL });
 		env->defs.native_procs["read_file"]		= create_native(native_read_file,		{ ValueKind::STRING });
+		env->defs.native_procs["input"]			= create_native(native_input,			{ ValueKind::STRING });
+		env->defs.native_procs["stoi"]			= create_native(native_stoi,			{ ValueKind::STRING });
+		env->defs.native_procs["stof"]			= create_native(native_stof,			{ ValueKind::STRING });
+		env->defs.native_procs["stob"]			= create_native(native_stob,			{ ValueKind::STRING });
 		env->defs.native_procs["str_len"] 		= create_native(native_str_len, 		{ ValueKind::STRING });
 		env->defs.native_procs["str_cmp"] 		= create_native(native_str_cmp, 		{ ValueKind::STRING, ValueKind::STRING });
 		env->defs.native_procs["str_split"] 	= create_native(native_str_split, 		{ ValueKind::STRING, ValueKind::STRING });
+		env->defs.native_procs["to_bytes"] 		= create_native(native_to_bytes, 		{ ValueKind::STRING });
+		env->defs.native_procs["from_bytes"]	= create_native(native_from_bytes, 		{ ValueKind::INT });
 		env->defs.native_procs["str_index"] 	= create_native(native_str_index,		{ ValueKind::INT, ValueKind::STRING });
 		env->defs.native_procs["kind_cmp"]		= create_native(native_kind_cmp,		{ });
 		env->defs.native_procs["peek"] 			= create_native(native_peek, 			{ ValueKind::INT });

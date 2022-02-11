@@ -1,11 +1,15 @@
 # Author    : Caleb
 # Date      : 10th Feb 2022
-# Modified  : 10th Feb 2022
+# Modified  : 11th Feb 2022
 
 
 proc main() -> void {
-	5 bind | a |
-	5 strict | b |
-	1 2 drop @error	
-	'err'
+	false 'Hello' @assert
+
+	'true' @stob swap drop println drop
+	'false' @stob swap drop println drop
+
+	'Hello' @to_bytes 5 @from_bytes println drop
+
+	'>' @input println drop
 }

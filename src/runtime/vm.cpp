@@ -70,7 +70,7 @@ void VM::error(bool internal, std::string msg) {
 		std::cout << "Runtime: ";
 	}
 	
-	std::cout << msg << " on code at opcode pos " << pos << std::endl << std::endl;
+	std::cout << msg << " at opcode pos " << pos << std::endl << std::endl;
 	unwind_stack();
 
 	throw "Runtime exception occured";

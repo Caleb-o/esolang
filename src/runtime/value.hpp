@@ -21,59 +21,53 @@ namespace Runtime {
 	struct Value {
 		ValueKind kind;
 		ValueData data;
-		bool read_only;
 
 		long long capture_len;
 		std::string string;
 	};
 
-	static std::shared_ptr<Value> create_value(long long value, bool read_only = true) {
+	static std::shared_ptr<Value> create_value(long long value) {
 		std::shared_ptr<Value> val = std::make_shared<Value>();
 		*val = (Value){
 			ValueKind::INT,
 			{ .integer=value },
-			read_only
 		};
 		return val;
 	}
 
-	static std::shared_ptr<Value> create_value(float value, bool read_only = true) {
+	static std::shared_ptr<Value> create_value(float value) {
 		std::shared_ptr<Value> val = std::make_shared<Value>();
 		*val = (Value){ 
 			ValueKind::FLOAT,
 			{ .floating=value },
-			read_only
 		};
 		return val;
 	}
 
-	static std::shared_ptr<Value> create_value(bool value, bool read_only = true) {
+	static std::shared_ptr<Value> create_value(bool value) {
 		std::shared_ptr<Value> val = std::make_shared<Value>();
 		*val = (Value){ 
 			ValueKind::BOOL,
 			{ .boolean=value },
-			read_only
 		};
 		return val;
 	}
 
-	static std::shared_ptr<Value> create_value(std::string value, bool read_only = true) {
+	static std::shared_ptr<Value> create_value(std::string value) {
 		std::shared_ptr<Value> val = std::make_shared<Value>();
 		*val = (Value){
 			ValueKind::STRING,
 			{ 0 },
-			read_only
 		};
 		val->string = value;
 		return val;
 	}
 
-	static std::shared_ptr<Value> create_value(int capture_len, bool read_only = true) {
+	static std::shared_ptr<Value> create_value(int capture_len) {
 		std::shared_ptr<Value> val = std::make_shared<Value>();
 		*val = (Value){
 			ValueKind::CAPTURE,
 			{ 0 },
-			read_only,
 			capture_len,
 		};
 		return val;

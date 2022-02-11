@@ -40,20 +40,11 @@ eg.
 ```
 
 ### List of Native Procedures:
-* [x] `str_len` : Returns the size of a string
-* [x] `str_split` : Takes a delimeter and splits the previous string, pushing all elements onto the stack
-* [x] `str_index` : Gets the character at a certain index
-* [x] `read_file` : Reads a file, using the previous string as a file path, pushing the buffer
 * [ ] `write_file` : Writes to a file, using the previous string as a file path and the string prior as the buffer
-* [x] `str_cmp` : Compare the previous two strings and push true or false if they are the same
-* [x] `stack_len` : Returns the number of items in the stack (local)
-* [x] `global_stack_len` : Returns the number of items in the stack (globally)
-* [x] `error` : Throw an error with the previous string
-* [x] `drop_n` : Take an int and drop that many values from the stack
-* [x] `drop_stack` : Drops all values on the local stack
-
-* [ ] `to_bytes` : Push a string to the stack, in its byte form
-* [ ] `from_bytes` : Create a string using N amount of integers
-
-Probably:
-- str_to_(X) - Convert a string to int, bool, float etc
+* [x] `input` : Get user input (string)
+* [x] `assert` : Consumes a boolean and string, throws an error if false, using the message
+* [x] `stoi` : String to int
+* [x] `stof` : String to float
+* [x] `stob` : String to bool
+* [x] `to_bytes` : Push a string to the stack, in its byte form
+* [x] `from_bytes` : Create a string using N amount of integers
