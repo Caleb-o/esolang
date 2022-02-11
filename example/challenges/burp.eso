@@ -5,6 +5,7 @@
 # https://edabit.com/challenge/vxpP4nnDhRr2Yc3Lo
 # Create a function that returns the string "Burp" with the amount of
 # "r's" determined by the input parameters of the function.
+using 'std:eso'
 
 proc main() -> void {
 	true loop {
@@ -21,34 +22,24 @@ proc main() -> void {
 		} else {
 			# Drop 'quit' and get length of input
 			drop @str_len 0 > if {
-				# Bind stoi output to value
-				@stoi bind | value |
-
-				# Check if value is boolean type
-				value true @kind_cmp if {
-					# Cleanup and present a tip
-					2 @drop_n
-					'Please enter a number' println drop
-				} else {
-					# Drop the true from if and bind index and stoi value
-					drop 0 bind | idx, n |
+				# Bind index and stoi value
+				|!1| !std_stoi 0 bind | idx, n |
 		
-					# Bind the initial string
-					'bu' bind | burp |
-					
-					# Loop and concatenate an 'r' to the burp until N
-					# This will loop at least once
-					true loop {
-						burp 'r' + bind | burp |
-		
-						idx 1 + bind | idx |
-						idx n <
-					}
-
-					# Append final string and print result
-					burp 'ps' + println drop
+				# Bind the initial string
+				'Bu' bind | burp |
+				
+				# Loop and concatenate an 'r' to the burp until N
+				# This will loop at least once
+				true loop {
+					burp 'r' + bind | burp |
+	
+					idx 1 + bind | idx |
+					idx n <
 				}
-			} drop # Drop the input
+
+				# Append final string and print result
+				burp 'ps' + println drop
+			}
 
 			# Loop again
 			true

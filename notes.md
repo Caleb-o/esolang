@@ -69,3 +69,6 @@ How should the standard library be written? What should be expected in an interp
 	* This would require a "project" file of sorts or automatically compiling files in a directory, recursively.
 	* Name resolution for procedures
 * % / mod
+* continue / break within loops
+	* Requires re-evaluation of a block, to determine where the continue/break goes to
+	* A continue/break can simply be a goto - continue to top, break to bottom

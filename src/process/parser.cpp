@@ -418,7 +418,6 @@ namespace Process {
 			(is_std) ? "std" : m_base_dir.c_str(),
 			import.c_str()
 		);
-		std::cout << "Import: '" << final_file << "'\n";
 		std::string source = Util::read_file(final_file.c_str());
 
 		size_t hash = Util::hash(source.c_str(), source.size());
