@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "lexer.hpp"
+#include "parser.hpp"
 #include "environment.hpp"
 #include "../runtime/value.hpp"
 #include "../runtime/vm.hpp"
@@ -36,6 +38,26 @@ namespace Process {
 	static void native_read_file(VM *vm) {
 		auto file_name = vm->pop_stack();
 		vm->push_stack(create_value(Util::read_file(file_name->string.c_str())));
+	}
+
+	static void native_eval(VM *vm) {
+		auto source = vm->pop_stack();
+
+		try {
+			if (source->string.size() > 0) {
+				Parser p("INTERNAL");
+				std::shared_ptr<Environment> env = p.parse(source->string, {});
+
+				VM eval_vm(env);
+				eval_vm.run();
+			}
+		}  catch (const char *msg) {
+			std::cout << msg << "\n";
+		} catch (std::string& msg) {
+			std::cout << msg << "\n";
+		} catch (std::exception& e) {
+			std::cout << "Pre-process: " << e.what() << "\n";
+		}
 	}
 
 	static void native_input(VM *vm) {
@@ -197,6 +219,7 @@ namespace Process {
 		env->defs.native_procs["error"] 		= create_native(native_error, 			{ ValueKind::STRING });
 		env->defs.native_procs["assert"] 		= create_native(native_assert, 			{ ValueKind::STRING, ValueKind::BOOL });
 		env->defs.native_procs["read_file"]		= create_native(native_read_file,		{ ValueKind::STRING });
+		env->defs.native_procs["eval"]			= create_native(native_eval,			{ ValueKind::STRING });
 		env->defs.native_procs["input"]			= create_native(native_input,			{ ValueKind::STRING });
 		env->defs.native_procs["stoi"]			= create_native(native_stoi,			{ ValueKind::STRING });
 		env->defs.native_procs["stof"]			= create_native(native_stof,			{ ValueKind::STRING });

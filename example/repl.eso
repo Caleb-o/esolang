@@ -1,0 +1,39 @@
+# Author    : Caleb
+# Date      : 11th Feb 2022
+# Modified  : 11th Feb 2022
+#
+# Note		: This is a very bare bones style of repl. It has no memory of the previous code.
+#			: Since we append into a main procedure, we cannot create our own procedures. Until
+#			: nested procedures are implemented, this simply will not work. So it is limited to
+#			: basic expressions and statements.
+
+proc main() -> void {
+	true loop {
+		'Repl> ' @input
+
+		bind | source |
+
+		# Check if we want to quit
+		source 'quit' @str_cmp if {
+			2 @drop_n
+			'quitting' println drop
+			false
+		} else {
+			# Drop the quit and source
+			2 @drop_n
+
+			# We must insert the code into a main block
+			source '}' +
+			bind | source |
+
+			'proc main() -> void { ' source +
+			bind | source |
+
+			source
+
+			# Evaluate and continue
+			@eval
+			true
+		}
+	}
+}

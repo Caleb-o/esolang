@@ -142,8 +142,25 @@ void VM::arithmetic_op() {
 			break;
 		}
 
+		case ValueKind::STRING: {
+			switch(op) {
+				case ByteCode::ADD: {
+					std::string str(lhs->string);
+					str.append(rhs->string);
+
+					push_stack(create_value(str));
+					break;
+				}
+
+				default:	error(false, 
+								Util::string_format("Unknown operation '%s'",
+								get_bytecode_name(op)
+							)); break;
+			}
+			break;
+		}
+
 		case ValueKind::BOOL:
-		case ValueKind::STRING:
 		case ValueKind::STRUCT: {
 			error(false, 
 				Util::string_format("Cannot use arithmetic operations on type '%s'",
