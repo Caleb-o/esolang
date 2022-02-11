@@ -41,3 +41,10 @@ eg.
 
 ### List of Native Procedures:
 * [ ] `write_file` : Writes to a file, using the previous string as a file path and the string prior as the buffer
+
+
+### Top-level code
+If we simply ran the VM top to bottom, we would run into procedures and run their code, which is not desired. One solution is, we capture all top-level code and insert it all at the bottom and set the ip to the start of the top-level code.
+
+Issue: If main exists, do we jump to main? That would mean the top-level code is never ran.
+Solution: We always take precedence over top-level code position, and run from top level. We would have to insert a GOTO with the index of main for cases where the top-level code ends (if main exists), this will stop it from running random code from procedures.

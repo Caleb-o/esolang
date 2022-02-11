@@ -160,6 +160,7 @@ Not everything can easily be implemented, when the language doesn't offer much f
 * `str_split` (STRING, STRING) : Consumes a delimeter and splits the previous string, pushing all elements onto the stack
 * `str_index` (STRING, INT) : Gets the character at a certain index
 * `read_file` (STRING) : Reads a file, consuming the previous string as a file path, pushing the buffer
+* `file_exists` (STRING) : Returns if a file exists
 * `stack_len` (VOID) : Returns the number of items in the stack (locally)
 * `global_stack_len` (VOID) : Returns the number of items in the stack (globally)
 * `error` (STRING) : Throw an error with the previous string
