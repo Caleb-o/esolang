@@ -420,7 +420,7 @@ void VM::run() {
 			}
 
 			case ByteCode::NATIVECALL: {
-				auto native_it = std::next(m_env->defs.native_procs.begin(), *(++m_ip));
+				auto native_it = &m_env->defs.native_procs[*(++m_ip)];
 				
 				// Check arguments
 				if (stack_len() < native_it->second->parameters.size()) {

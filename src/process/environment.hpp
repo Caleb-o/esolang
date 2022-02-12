@@ -53,8 +53,8 @@ namespace Process {
 
 	struct Definitions {
 		std::vector<std::pair<std::string, std::vector<ProcedureDef>>> procedures;
-		std::map<std::string, std::shared_ptr<NativeDef>> native_procs;
-		// std::map<std::string, StructDef> structs;
+		std::vector<std::pair<std::string, std::shared_ptr<NativeDef>>> native_procs;
+		// std::vector<std::pair<std::string, StructDef>> structs;
 	};
 
 	struct Environment {
@@ -81,6 +81,17 @@ namespace Process {
 		std::string id(proc_id);
 
 		for(auto& proc : env->defs.procedures) {
+			if (proc.first == id) break;
+			idx++;
+		}
+		return idx;
+	}
+
+	static size_t get_native_idx(std::shared_ptr<Environment> env, const char *proc_id) {
+		size_t idx = 0;
+		std::string id(proc_id);
+
+		for(auto& proc : env->defs.native_procs) {
 			if (proc.first == id) break;
 			idx++;
 		}

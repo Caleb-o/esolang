@@ -11,10 +11,6 @@
 using namespace Runtime;
 
 namespace Process {
-	static void add_native_proc_names(std::shared_ptr<Environment> env) {
-		env->defs.native_procs["str_len"];
-	}
-
 	// Helpers
 	void Parser::error(std::string msg) {
 		throw Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col);
@@ -260,8 +256,6 @@ namespace Process {
 		size_t proc_idx = get_proc_idx(m_env, id.c_str());
 		auto proc_it = &m_env->defs.procedures[proc_idx];
 
-		std::cout << "Calling proc :: " << id << " on line " << m_current->line << std::endl;
-
 		// Trying to use a function that hasn't been defined yet
 		if (proc_it == &m_env->defs.procedures.back()) {
 			error(
@@ -281,16 +275,17 @@ namespace Process {
 		std::string id = copy_lexeme_str(m_current);
 		consume(TokenKind::ID);
 
-		auto native_it = m_env->defs.native_procs.find(id);
+		size_t native_idx = get_native_idx(m_env, id.c_str());
+		auto *native_it = &m_env->defs.native_procs[native_idx];
 
-		if (native_it == m_env->defs.native_procs.end()) {
+		if (native_it == &m_env->defs.native_procs.back()) {
 			error(Util::string_format(
 				"Unkown native procedure found '%s'",
 				id.c_str()
 			));
 		}
 
-		push_bytes(ByteCode::NATIVECALL, std::distance(m_env->defs.native_procs.begin(), native_it));
+		push_bytes(ByteCode::NATIVECALL, native_idx);
 	}
 
 	void Parser::binding_access_statement() {

@@ -250,36 +250,38 @@ namespace Process {
 
 	// Helper function to create a def
 	template <class Functor>
-	static std::shared_ptr<NativeDef> create_native(Functor f, std::vector<ValueKind> values) {
-		return std::make_shared<NativeDef>((NativeDef){ FuncPtr(new Func(f)), values });
+	static std::pair<std::string, std::shared_ptr<NativeDef>> create_native(std::string id, Functor f, std::vector<ValueKind> values) {
+		return std::make_pair(id, std::make_shared<NativeDef>((NativeDef){ FuncPtr(new Func(f)), values }));
 	}
 
 	// Define all native procedures
 	static void def_native_procs(std::shared_ptr<Environment> env) {
-		env->defs.native_procs["error"] 		= create_native(native_error, 			{ ValueKind::STRING });
-		env->defs.native_procs["assertm"] 		= create_native(native_assertm, 		{ ValueKind::STRING, ValueKind::BOOL });
-		env->defs.native_procs["assert"] 		= create_native(native_assert, 			{ ValueKind::BOOL });
-		env->defs.native_procs["file_exists"]	= create_native(native_file_exists,		{ ValueKind::STRING });
-		env->defs.native_procs["read_file"]		= create_native(native_read_file,		{ ValueKind::STRING });
-		env->defs.native_procs["eval"]			= create_native(native_eval,			{ ValueKind::STRING });
-		env->defs.native_procs["input"]			= create_native(native_input,			{ ValueKind::STRING });
-		env->defs.native_procs["stoi"]			= create_native(native_stoi,			{ ValueKind::STRING });
-		env->defs.native_procs["stof"]			= create_native(native_stof,			{ ValueKind::STRING });
-		env->defs.native_procs["stob"]			= create_native(native_stob,			{ ValueKind::STRING });
-		env->defs.native_procs["flip"]			= create_native(native_flip,			{ ValueKind::INT });
-		env->defs.native_procs["str_len"] 		= create_native(native_str_len, 		{ ValueKind::STRING });
-		env->defs.native_procs["str_cmp"] 		= create_native(native_str_cmp, 		{ ValueKind::STRING, ValueKind::STRING });
-		env->defs.native_procs["str_split"] 	= create_native(native_str_split, 		{ ValueKind::STRING, ValueKind::STRING });
-		env->defs.native_procs["to_bytes"] 		= create_native(native_to_bytes, 		{ ValueKind::STRING });
-		env->defs.native_procs["from_bytes"]	= create_native(native_from_bytes, 		{ ValueKind::INT });
-		env->defs.native_procs["str_index"] 	= create_native(native_str_index,		{ ValueKind::INT, ValueKind::STRING });
-		env->defs.native_procs["kind_cmp"]		= create_native(native_kind_cmp,		{ });
-		env->defs.native_procs["peek"] 			= create_native(native_peek, 			{ ValueKind::INT });
-		env->defs.native_procs["drop_n"] 		= create_native(native_drop_n, 			{ ValueKind::INT });
-		env->defs.native_procs["argv"] 			= create_native(native_argv, 			{ });
-		env->defs.native_procs["argc"] 			= create_native(native_argc, 			{ });
-		env->defs.native_procs["drop_stack"] 	= create_native(native_drop_stack, 		{ });
-		env->defs.native_procs["stack_len"] 	= create_native(native_stack_len, 		{ });
-		env->defs.native_procs["global_stack_len"] 	= create_native(native_global_stack_len, 		{ });
+		auto np = &env->defs.native_procs;
+
+		np->push_back(create_native("error", native_error, 									{ ValueKind::STRING }));
+		np->push_back(create_native("native_assertm", native_assertm, 						{ ValueKind::STRING, ValueKind::BOOL }));
+		np->push_back(create_native("native_assert", native_assert,							{ ValueKind::BOOL }));
+		np->push_back(create_native("file_exists", native_file_exists,						{ ValueKind::STRING }));
+		np->push_back(create_native("read_file", native_read_file,							{ ValueKind::STRING }));
+		np->push_back(create_native("eval", native_eval,									{ ValueKind::STRING }));
+		np->push_back(create_native("input", native_input,									{ ValueKind::STRING }));
+		np->push_back(create_native("stoi", native_stoi,									{ ValueKind::STRING }));
+		np->push_back(create_native("stof", native_stof, 									{ ValueKind::STRING }));
+		np->push_back(create_native("stob", native_stob,									{ ValueKind::STRING }));
+		np->push_back(create_native("flip", native_flip,									{ ValueKind::INT }));
+		np->push_back(create_native("str_len", native_str_len,								{ ValueKind::STRING }));
+		np->push_back(create_native("str_cmp", native_str_cmp,								{ ValueKind::STRING, ValueKind::STRING }));
+		np->push_back(create_native("split", native_str_split,								{ ValueKind::STRING, ValueKind::STRING }));
+		np->push_back(create_native("to_bytes", native_to_bytes,							{ ValueKind::STRING }));
+		np->push_back(create_native("from_bytes", native_from_bytes,						{ ValueKind::INT }));
+		np->push_back(create_native("str_index", native_str_index,							{ ValueKind::INT, ValueKind::STRING }));
+		np->push_back(create_native("kind_cmp", native_kind_cmp,							{ }));
+		np->push_back(create_native("peek", native_peek,									{ ValueKind::INT }));
+		np->push_back(create_native("drop_n", native_drop_n,								{ ValueKind::INT }));
+		np->push_back(create_native("argv", native_argv,									{ }));
+		np->push_back(create_native("argc", native_argc,									{ }));
+		np->push_back(create_native("drop_stack", native_drop_stack,						{ }));
+		np->push_back(create_native("stack_len", native_stack_len,							{ }));
+		np->push_back(create_native("global_stack_len", native_global_stack_len, 			{ }));
 	}
 }
