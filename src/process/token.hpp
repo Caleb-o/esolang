@@ -5,7 +5,7 @@ namespace Process {
 	enum class TokenKind {
 		// Operators
 		PLUS, MINUS, SLASH, STAR, MOD, COLON, CAPTURE,
-		ARROW, BANG, AT, GREATER, LESS, GREATER_EQ, LESS_EQ, EQUAL, OR, AND,
+		ARROW, BANG, AT, NOT, GREATER, LESS, GREATER_EQ, LESS_EQ, EQUAL, OR, AND,
 		COMMA, DOT, LCURLY, RCURLY, LPAREN, RPAREN,
 		
 		// Keywords

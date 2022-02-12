@@ -1,0 +1,44 @@
+# Author    : Caleb
+# Date      : 12th Feb 2022
+# Modified  : 12th Feb 2022
+#
+# https://edabit.com/challenge/s695FkhRd3J65tmdQ
+# Write a function to replace all instances of character c1 
+# with character c2 and vice versa.
+
+proc replace_all(b, a, str : string) -> string {
+	str @str_len 0 '' bind | result, idx, len |
+	
+	true loop {
+		idx @str_index bind | char |
+		false bind | has_value |
+		
+		char a @str_cmp if {
+			true bind | has_value |
+			result b + bind | result |
+		} 2 @drop_n
+		
+		char b @str_cmp if {
+			true bind | has_value |
+			result a + bind | result |
+		} 2 @drop_n
+		
+		has_value not if {
+			result char + bind | result |
+		}
+		
+		idx 1 + bind | idx |
+		idx len <
+	} drop
+	
+	result
+}
+
+proc main() -> void {
+	'Enter a string> ' @input
+	'Enter char 1> ' @input
+	'Enter char 2> ' @input
+	
+	# Push all 3 to replace and print the result
+	|!3| !replace_all println drop
+}

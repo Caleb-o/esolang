@@ -187,8 +187,10 @@ namespace Process {
 				case '}': return make_single(TokenKind::RCURLY);
 				case '\'': return make_string();
 				default: {
-					// FIXME: Use Exceptions here instead of straight up aborting
-					throw "Unknown token";
+					error(Util::string_format(
+						"Unknown token '%c'",
+						m_source[m_ip]
+					));
 					break;
 				}
 			}

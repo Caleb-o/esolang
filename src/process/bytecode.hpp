@@ -18,7 +18,7 @@ namespace Process {
 		LOOP,						// LOOP GOTO_FALSE_POS
 		RETURN,						// RETURN SUB_IDX
 		ADD, SUB, MUL, DIV, MOD,	// ADD|SUB|MUL|DIV
-		GREATER, LESS, EQUAL,		// GREATER|LESS|EQUAL
+		NOT, GREATER, LESS, EQUAL,	// GREATER|LESS|EQUAL
 		GREATER_EQ, LESS_EQ,		// GREATER_EQ|LESS_EQ
 		OR, AND,					// OR|AND
 		DUPLICATE, SWAP,			// DUPLICATE|SWAP
@@ -51,6 +51,7 @@ namespace Process {
 			case ByteCode::EQUAL:			return "EQUAL";
 			case ByteCode::OR:				return "OR";
 			case ByteCode::AND:				return "AND";
+			case ByteCode::NOT:				return "NOT";
 
 			case ByteCode::IF:				return "IF";
 			case ByteCode::LOOP:			return "LOOP";

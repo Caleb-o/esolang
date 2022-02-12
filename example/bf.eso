@@ -28,24 +28,85 @@ proc brainflipped() -> void {
 		' : "' print drop 
 		print '"' println drop
 
+		
 		# Main loop
 		true loop {
+			false bind | looping |
+
 			# Get current character
 			idx @str_index bind | char |
 
 			# Increment
-			char '+' @str_cmp if {
+			char '+' @str_cmp looping not and if {
 				memory 1 + bind | memory |
 			} 2 @drop_n
 			
 			# Decrement
-			char '-' @str_cmp if {
+			char '-' @str_cmp looping not and if {
 				memory 1 - bind | memory |
 			} 2 @drop_n
 
 			# Print current
-			char '.' @str_cmp if {
-				memory println drop``
+			char '.' @str_cmp looping not and if {
+				memory println drop
+			} 2 @drop_n
+
+			char '[' @str_cmp looping not and if {
+				memory 0 = if {
+					true bind | looping |
+
+					contents idx @str_index bind | char | drop
+					idx 1 + bind | idx |
+					
+					true bind | looping |
+					0 bind | env |
+	
+					true loop {
+						char '[' @str_cmp if {
+							env 1 + bind | env |
+						} 2 @drop_n
+	
+						char ']' @str_cmp if {
+							env 1 - bind | env |
+						} 2 @drop_n
+	
+						idx 1 + bind | idx |
+						contents idx @str_index bind | char | drop
+	
+						idx len < env 0 > and
+					}
+
+					idx 1 - bind | idx |
+				}
+			} 2 @drop_n
+
+			char ']' @str_cmp looping not and if {
+				memory 0 > if {
+					true bind | looping |
+
+					contents idx @str_index bind | char | drop
+					idx 1 + bind | idx |
+					
+					true bind | looping |
+					0 bind | env |
+	
+					true loop {
+						char ']' @str_cmp if {
+							env 1 + bind | env |
+						} 2 @drop_n
+	
+						char '[' @str_cmp if {
+							env 1 - bind | env |
+						} 2 @drop_n
+	
+						idx 1 + bind | idx |
+						contents idx @str_index bind | char | drop
+	
+						idx 0 > env 0 > and
+					}
+
+					idx 1 - bind | idx |
+				}
 			} 2 @drop_n
 	
 			# Increment and check index

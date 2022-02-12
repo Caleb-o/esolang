@@ -317,11 +317,9 @@ namespace Process {
 
 			if (name_it == m_env->idLiterals.end()) {
 				m_env->idLiterals.push_back(id);
-				std::cout << "'" << id << "' :: " << m_env->idLiterals.size() - 1 << std::endl;
 				push_byte(m_env->idLiterals.size() - 1);
 			} else {
 				size_t idx = std::distance(m_env->idLiterals.begin(), name_it);
-				std::cout << "'" << id << "' :: " << m_env->idLiterals.size() - 1 << std::endl;
 				push_byte(idx);
 			}
 
@@ -369,6 +367,7 @@ namespace Process {
 			case TokenKind::ROT:			consume(m_current->kind); push_byte(ByteCode::ROTATE); break;
 			case TokenKind::POP:			consume(m_current->kind); push_byte(ByteCode::DROP); break;
 			case TokenKind::SWAP:			consume(m_current->kind); push_byte(ByteCode::SWAP); break;
+			case TokenKind::NOT: 			consume(m_current->kind); push_byte(ByteCode::NOT); break;
 
 			case TokenKind::PRINT:			consume(m_current->kind); push_byte(ByteCode::PRINT); break;
 			case TokenKind::PRINTLN:		consume(m_current->kind); push_byte(ByteCode::PRINTLN); break;

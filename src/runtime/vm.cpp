@@ -405,6 +405,20 @@ void VM::run() {
 				break;
 			}
 
+			case ByteCode::NOT: {
+				auto value = pop_stack();
+
+				if (value->kind != ValueKind::BOOL) {
+					error(false, Util::string_format(
+						"Cannot use a not on value kind '%s'",
+						kind_as_str(value->kind)
+					));
+				}
+
+				push_stack(create_value(!value->data.boolean));
+				break;
+			}
+
 			case ByteCode::NATIVECALL: {
 				auto native_it = std::next(m_env->defs.native_procs.begin(), *(++m_ip));
 				
