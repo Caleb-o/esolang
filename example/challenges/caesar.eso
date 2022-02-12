@@ -1,4 +1,11 @@
-proc cipher(str : string, places : int, flip : bool) -> string {
+# Author    : Caleb
+# Date      : 12th Feb 2022
+# Modified  : 12th Feb 2022
+#
+# Very simple implementation of caesar cipher. It can encode/decode in the same procedure.
+# It does not handle wrapping around.
+
+proc cipher(str : string, places : int, decode : bool) -> string {
 	str @str_len 0 '' bind | result, idx, len |
 	
 	true loop {
@@ -6,7 +13,7 @@ proc cipher(str : string, places : int, flip : bool) -> string {
 		str
 		idx @str_index @to_bytes places
 		
-		flip if { - } else { + }
+		decode if { - } else { + }
 
 		1 @from_bytes
 		swap drop

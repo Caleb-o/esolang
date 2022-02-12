@@ -2,10 +2,55 @@
 # Date      : 12th Feb 2022
 # Modified  : 12th Feb 2022
 
-## TODO:
-## std_to_lower : Convert uppercase characters to lowercase
-## std_to_higher : Convert lowercase characters to uppercase
+# Return a lowercase version of the input string
+# Parameters 	: STRING - value
+# Return		: STRING - result
+proc std_to_lower(str : string) -> string {
+	str @str_len 0 '' bind | result, idx, len | drop
+	32 strict | diff |
 
+	true loop {
+		str idx @str_index @to_bytes bind | byte |
+
+		byte 65 >= byte 90 <= and if {
+			result byte diff + 1 @from_bytes + bind | result |
+		} drop
+
+		byte 97 >= byte 122 <= and if {
+			result byte 1 @from_bytes + bind | result |
+		}
+
+		idx 1 + bind | idx |
+		idx len <
+	}
+
+	result
+}
+
+# Return a upper version of the input string
+# Parameters 	: STRING - value
+# Return		: STRING - result
+proc std_to_upper(str : string) -> string {
+	str @str_len 0 '' bind | result, idx, len | drop
+	32 strict | diff |
+
+	true loop {
+		str idx @str_index @to_bytes bind | byte |
+
+		byte 65 >= byte 90 <= and if {
+			result byte 1 @from_bytes + bind | result |
+		} drop
+			
+		byte 97 >= byte 122 <= and if {
+			result byte diff - 1 @from_bytes + bind | result |
+		}
+
+		idx 1 + bind | idx |
+		idx len <
+	}
+
+	result
+}
 
 # Get the square root of a number
 # Parameters 	: INT - value

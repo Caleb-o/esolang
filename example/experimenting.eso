@@ -4,13 +4,6 @@
 using 'std:eso'
 
 proc main() -> void {
-	| 3 9 | 	!std_pow println drop
-	| 3 9.2 | 	!std_pow println drop
-
-	| 1.0 | 	!std_deg_to_rad println drop
-	| 1.0 | 	!std_rad_to_deg println drop
-
-	| 20221 | 	!std_sqrt println drop
-	| 1.0 3.0 |	!std_dist1d println drop
-	| 1.0 3.0 2.4 5.6 |	!std_dist2d println drop
+	| 'AbZC' | !std_to_lower println drop
+	| 'abCz' | !std_to_upper println drop
 }
