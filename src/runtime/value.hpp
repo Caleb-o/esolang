@@ -82,7 +82,7 @@ namespace Runtime {
 			case Util::hash("bool", 4): 		return ValueKind::BOOL;
 			case Util::hash("string", 6): 		return ValueKind::STRING;
 			case Util::hash("struct", 6): 		return ValueKind::STRUCT;
-			case Util::hash("capture", 8): 		return ValueKind::CAPTURE;
+			case Util::hash("capture", 7): 		return ValueKind::CAPTURE;
 		}
 	}
 
@@ -107,7 +107,7 @@ namespace Runtime {
 			case ValueKind::STRING: 	std::cout << value->string; break;
 			case ValueKind::STRUCT: 	std::cout << "struct"; break;
 			case ValueKind::CAPTURE: {
-				std::cout << "capture [" << value->capture_len << "]";
+				std::cout << "capture [len " << value->capture_len << "]";
 				break;
 			}
 		}

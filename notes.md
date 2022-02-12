@@ -51,6 +51,11 @@ test 'Testing numbers' {
 }
 ```
 
+
+### Capture
+Captures should be allowed to be returned, but illegal as a parameter. Since there are no operations valid on a capture, a new keyword "unpack" should be implemented which consumes the capture and pushes all its values to the stack. We can also add arithmetic support for them, which can construct new captures by adding them together.
+
+
 ### Top-level code
 If we simply ran the VM top to bottom, we would run into procedures and run their code, which is not desired. One solution is, we capture all top-level code and insert it all at the bottom and set the ip to the start of the top-level code.
 
@@ -63,6 +68,7 @@ The import system in Eso is very basic and does not consider resolutions etc. Th
 
 How should the standard library be written? What should be expected in an interpreted langauge that is concatenative and stack based? My only idea is to write wrappers around some keywords/native procedures that make them less error prone. Eg. if a file_read fails, return an empty string. Did a stoi/stof/stob fail? Return its default value using a "safe" procedure that handles related errors.
 
+Maths functions - eg. cos, sin, tan, 
 
 ### Potential Features / Systems
 * Namespacing / Packages instead of imports

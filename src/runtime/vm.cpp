@@ -502,7 +502,7 @@ void VM::run() {
 
 				ProcedureDef *proc_def = &m_env->defs.procedures[m_top_stack->proc_id][sub_idx];
 				size_t last_frame = m_call_stack.size() - 2;
-				size_t stack_idx = 0;
+				size_t stack_idx = 0, capture_count = 0;
 
 				
 				// Handle return data
@@ -524,12 +524,23 @@ void VM::run() {
 								kind_as_str(peek_stack(stack_idx)->kind)
 							));
 						}
+
+						// Special case for captures
+						if (peek_stack(stack_idx)->kind == ValueKind::CAPTURE) {
+							capture_count += peek_stack(stack_idx)->capture_len;
+							stack_idx += peek_stack(stack_idx)->capture_len;
+						}
 						stack_idx++;
 					}
 				}
 
+				if (capture_count > 0) {
+					// Remove the capture
+					pop_stack();
+				}
+
 				// Too many values on the stack
-				if (stack_len() > proc_def->returnTypes.size()) {
+				if (stack_len() > proc_def->returnTypes.size() + capture_count - ((capture_count > 0) ? 1 : 0)) {
 					error(false, Util::string_format(
 						"Trying to return with %d value(s) on the stack, but expected %d",
 						stack_len(),

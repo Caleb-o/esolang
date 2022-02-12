@@ -22,7 +22,7 @@ proc std_stoi(str : string) -> int {
 
 # Wraps the native @stof and provides a float
 # Parameters	: STRING
-# Return		: INT (0 default)
+# Return		: FLOAT (0 default)
 proc std_stof(str : string) -> float {
 	str @stof bind | value | drop
 

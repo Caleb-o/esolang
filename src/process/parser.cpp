@@ -126,6 +126,8 @@ namespace Process {
 		consume(TokenKind::CAPTURE);
 		size_t capture_count = 0;
 
+		// TODO: Support '#' which captures *all* items on the stack, might need another opcode "CAPTURE_ALL"
+
 		if (m_current->kind == TokenKind::BANG) {
 			// Bind values from the stack, dynamicall
 			consume(TokenKind::BANG);
@@ -134,12 +136,8 @@ namespace Process {
 				error("Dynamic capture requires an integer literal");
 			}
 
-			// Get the count
-			expr();
-			capture_count = m_env->literals[m_env->code[m_env->code.size()-1]]->data.integer;
-
-			// Remove push
-			m_env->code.pop_back(); m_env->code.pop_back();
+			capture_count = std::stoi(m_current->lexeme);
+			consume(TokenKind::INT_LIT);
 		} else {
 			// We will bind a series of expressions
 			while(m_current->kind != TokenKind::CAPTURE) {
@@ -473,6 +471,11 @@ namespace Process {
 			std::string type_id = copy_lexeme_str(m_current);
 			consume(TokenKind::TYPEID);
 
+			// Cannot use capture as an argument, only return
+			if (type_id == "capture") {
+				error("Cannot use 'capture' as a parameter type. Captures can only be returne");
+			}
+
 			auto *params = &m_env->defs.procedures[id][m_env->defs.procedures[id].size()-1];
 			ProcedureDef procDef = {0};
 
@@ -531,21 +534,35 @@ namespace Process {
 		parameter_list(id.c_str());
 		consume(TokenKind::ARROW);
 		
-		// TODO: Multiple return types
+		// TODO: Allow for capture as a return type
 		std::string retid = copy_lexeme_str(m_current);
 		consume(TokenKind::TYPEID);
 
+		bool using_capture = false;
 		m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
+
+		if (std::strcmp(retid.c_str(), "capture") == 0) {
+			using_capture = true;
+		}
 
 		if (m_current->kind == TokenKind::COMMA) {
 			if (std::strcmp(retid.c_str(), "void") == 0) {
 				error("Cannot use void in a return list");
 			}
+			
 			consume(TokenKind::COMMA);
 
 			while(m_current->kind != TokenKind::LCURLY) {
 				std::string retid = copy_lexeme_str(m_current);
 				consume(TokenKind::TYPEID);
+
+				if (std::strcmp(retid.c_str(), "capture") == 0) {
+					using_capture = true;
+				}
+
+				if (using_capture) {
+					error("Captures can only be used as a single return type");
+				}
 
 				m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
 

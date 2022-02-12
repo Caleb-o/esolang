@@ -1,15 +1,13 @@
 # Author    : Caleb
 # Date      : 10th Feb 2022
 # Modified  : 11th Feb 2022
-using 'std:eso'
+proc test() -> int { 1 }
+
+proc test2() -> capture {
+	| 2 3 4 5 6 |
+}
 
 proc main() -> void {
-	| 'a' | !std_stoi println drop
-
-	'true' @stob swap drop println drop
-	'false' @stob swap drop println drop
-
-	'Hello' @to_bytes 5 @from_bytes println drop
-
-	# 'Exp >' @input println drop
+	|| !test2 println @drop_stack
+	|| !test println drop
 }
