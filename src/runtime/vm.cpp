@@ -102,43 +102,92 @@ void VM::arithmetic_op() {
 	std::shared_ptr<Value> rhs = pop_stack();
 	std::shared_ptr<Value> lhs = pop_stack();
 
-	// Type check left and right side kinds
-	if (lhs->kind != rhs->kind) {
-		error(false, Util::string_format("Trying to operate on different value types. Lhs '%s', Rhs '%s'",
-			kind_as_str(lhs->kind), kind_as_str(rhs->kind)
-		));
-	}
-
 	auto op = *m_ip;
 
 	switch(lhs->kind) {
 		case ValueKind::INT: {
-			switch(op) {
-				case ByteCode::ADD:	push_stack(create_value((long long)(lhs->data.integer + rhs->data.integer))); break;
-				case ByteCode::SUB:	push_stack(create_value((long long)(lhs->data.integer - rhs->data.integer))); break;
-				case ByteCode::MUL:	push_stack(create_value((long long)(rhs->data.integer * lhs->data.integer))); break;
-				case ByteCode::DIV:	push_stack(create_value((long long)(rhs->data.integer / lhs->data.integer))); break;
-				case ByteCode::MOD:	push_stack(create_value((long long)(lhs->data.integer % rhs->data.integer))); break;
+			switch(rhs->kind) {
+				case ValueKind::INT: {
+					switch(op) {
+						case ByteCode::ADD:	push_stack(create_value((long long)(lhs->data.integer + rhs->data.integer))); break;
+						case ByteCode::SUB:	push_stack(create_value((long long)(lhs->data.integer - rhs->data.integer))); break;
+						case ByteCode::MUL:	push_stack(create_value((long long)(lhs->data.integer * rhs->data.integer))); break;
+						case ByteCode::DIV:	push_stack(create_value((long long)(lhs->data.integer / rhs->data.integer))); break;
+						case ByteCode::MOD:	push_stack(create_value((long long)(lhs->data.integer % rhs->data.integer))); break;
 
-				default:	error(false, 
-								Util::string_format("Unknown operation '%s'",
-								get_bytecode_name(op)
-							)); break;
+						default:	error(false, 
+										Util::string_format("Unknown operation '%s'",
+										get_bytecode_name(op)
+									)); break;
+					}
+					break;
+				}
+
+				case ValueKind::FLOAT: {
+					switch(op) {
+						case ByteCode::ADD:	push_stack(create_value((float)(lhs->data.integer + rhs->data.floating))); break;
+						case ByteCode::SUB:	push_stack(create_value((float)(lhs->data.integer - rhs->data.floating))); break;
+						case ByteCode::MUL:	push_stack(create_value((float)(lhs->data.integer * rhs->data.floating))); break;
+						case ByteCode::DIV:	push_stack(create_value((float)(lhs->data.integer / rhs->data.floating))); break;
+
+						default:	error(false, 
+										Util::string_format("Unknown operation '%s'",
+										get_bytecode_name(op)
+									)); break;
+					}
+					break;
+				}
+
+				default: {
+					error(false, Util::string_format("Trying to operate on different value types. Lhs '%s', Rhs '%s'",
+						kind_as_str(lhs->kind),
+						kind_as_str(rhs->kind)
+					));
+					break;
+				}
 			}
 			break;
 		}
 
 		case ValueKind::FLOAT: {
-			switch(op) {
-				case ByteCode::ADD:	push_stack(create_value(lhs->data.floating + rhs->data.floating)); break;
-				case ByteCode::SUB:	push_stack(create_value(lhs->data.floating - rhs->data.floating)); break;
-				case ByteCode::MUL:	push_stack(create_value(rhs->data.floating * lhs->data.floating)); break;
-				case ByteCode::DIV:	push_stack(create_value(rhs->data.floating / lhs->data.floating)); break;
+			switch(rhs->kind) {
+				case ValueKind::FLOAT: {
+					switch(op) {
+						case ByteCode::ADD:	push_stack(create_value(lhs->data.floating + rhs->data.floating)); break;
+						case ByteCode::SUB:	push_stack(create_value(lhs->data.floating - rhs->data.floating)); break;
+						case ByteCode::MUL:	push_stack(create_value(lhs->data.floating * rhs->data.floating)); break;
+						case ByteCode::DIV:	push_stack(create_value(lhs->data.floating / rhs->data.floating)); break;
 
-				default:	error(false, 
-								Util::string_format("Unknown operation '%s'",
-								get_bytecode_name(op)
-							)); break;
+						default:	error(false, 
+										Util::string_format("Unknown operation '%s'",
+										get_bytecode_name(op)
+									)); break;
+					}
+					break;
+				}
+
+				case ValueKind::INT: {
+					switch(op) {
+						case ByteCode::ADD:	push_stack(create_value((float)(lhs->data.floating + rhs->data.integer))); break;
+						case ByteCode::SUB:	push_stack(create_value((float)(lhs->data.floating - rhs->data.integer))); break;
+						case ByteCode::MUL:	push_stack(create_value((float)(lhs->data.floating * rhs->data.integer))); break;
+						case ByteCode::DIV:	push_stack(create_value((float)(lhs->data.floating / rhs->data.integer))); break;
+
+						default:	error(false,
+										Util::string_format("Unknown operation '%s'",
+										get_bytecode_name(op)
+									)); break;
+					}
+					break;
+				}
+
+				default: {
+					error(false, Util::string_format("Trying to operate on different value types. Lhs '%s', Rhs '%s'",
+						kind_as_str(lhs->kind),
+						kind_as_str(rhs->kind)
+					));
+					break;
+				}
 			}
 			break;
 		}

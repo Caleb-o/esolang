@@ -6,5 +6,7 @@ using 'std:eso'
 proc main() -> void {
 	| 3 9 | !std_pow println drop
 	| 3 9.2 | !std_pow println drop
-	| 3 | !std_factorial println drop
+
+	| 1.0 | !std_deg_to_rad println drop
+	| 1.0 | !std_rad_to_deg println drop
 }

@@ -6,6 +6,28 @@
 ## std_to_lower : Convert uppercase characters to lowercase
 ## std_to_higher : Convert lowercase characters to uppercase
 
+# Returns a conversion of degrees into radians
+# Paramters 	: FLOAT - degrees
+# Return		: FLOAT - result
+proc std_deg_to_rad(degrees : float) -> float {
+	3.14159 strict | PI |
+
+	degrees
+	PI 180 /
+	*
+}
+
+# Returns a conversion of radians into degrees
+# Paramters 	: FLOAT - radians
+# Return		: FLOAT - result
+proc std_rad_to_deg(radians : float) -> float {
+	3.14159 strict | PI |
+
+	radians
+	180 PI /
+	*
+}
+
 # The factorial function says to multiply all whole numbers from our chosen number down to 1
 # Paramters 	: INT - factor
 # Return		: INT - result
@@ -54,30 +76,6 @@ proc std_pow(base : float, pow : int) -> float {
 		idx pow 1 - <
 	}
 	# Return the result
-	result
-}
-
-
-proc std_sin(degrees : float, places : int) -> float {
-	# for n in range(decimals):
-	# 	p += Decimal(((-1)**n)*(x**(2*n+1)))/(Decimal(math.factorial(2*n+1)))
-	
-	0.0 0 bind | idx, result |
-
-	idx places < loop {
-		idx 1 @flip |!2| !std_pow
-		idx 1 + 2 *
-		degrees |!2| !std_pow
-		*
-		
-		idx 1 + 2  *|!1| !std_factorial
-		/
-
-		result +
-		bind | result |
-		idx places <
-	}
-
 	result
 }
 
