@@ -4,13 +4,13 @@
 namespace Process {
 	enum class TokenKind {
 		// Operators
-		PLUS, MINUS, SLASH, STAR, COLON, CAPTURE,
+		PLUS, MINUS, SLASH, STAR, MOD, COLON, CAPTURE,
 		ARROW, BANG, AT, GREATER, LESS, GREATER_EQ, LESS_EQ, EQUAL, OR, AND,
 		COMMA, DOT, LCURLY, RCURLY, LPAREN, RPAREN,
 		
 		// Keywords
 		PROC, IF, ELSE, POP, CONVERT, BIND, BIND_STRICT, PRINT, PRINTLN,
-		DUP, SWAP, ROT, USING, UNPACK, RETURN, STRUCT, LOOP,
+		DUP, SWAP, ROT, USING, RETURN, STRUCT, LOOP,
 
 		// Types
 		BOOL_LIT, INT_LIT, FLOAT_LIT, STRING_LIT, ID, TYPEID,
@@ -22,8 +22,9 @@ namespace Process {
 		switch(kind) {
 			case TokenKind::PLUS:		return "plus";
 			case TokenKind::MINUS:		return "minus";
-			case TokenKind::STAR:		return "star";
 			case TokenKind::SLASH:		return "slash";
+			case TokenKind::STAR:		return "star";
+			case TokenKind::MOD:		return "modulus";
 
 			case TokenKind::INT_LIT:	return "int literal";
 			case TokenKind::FLOAT_LIT:	return "float literal";
@@ -51,7 +52,6 @@ namespace Process {
 			case TokenKind::BIND:		return "bind";
 			case TokenKind::BIND_STRICT:	return "bind-strict";
 			case TokenKind::CAPTURE:	return "capture";
-			case TokenKind::UNPACK:		return "unpack";
 			case TokenKind::ID:			return "ID";
 			case TokenKind::COMMA:		return "comma";
 			case TokenKind::TYPEID:		return "typeid";

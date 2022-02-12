@@ -2,27 +2,27 @@
 
 namespace Process {
 	enum ByteCode {
-		HALT,					// HALT
-		PRINT, PRINTLN,			// PRINT|PRINTLN
-		DROP,					// POP
-		PUSH,					// PUSH IDX
-		CAPTURE,				// CAPTURE COUNT
-		BIND,					// BIND COUNT, [ID INDEX, ...]
-		BIND_STRICT,			// BIND_STRICT, [ID INDEX, ...]
-		LOAD_BINDING,			// LOAD_BINDING IDX
-		CONV,					// CONV TYPEID [, ID] (id index + 1, 0 for none)
-		PROCCALL,				// PROCCALL FUNCTION_DEF_IDX
-		NATIVECALL,				// NATIVECALL FUNCTION_DEF_IDX
-		GOTO,					// GOTO POS
-		IF,						// IF GOTO_FALSE_POS
-		LOOP,					// LOOP GOTO_FALSE_POS
-		RETURN,					// RETURN SUB_IDX
-		ADD, SUB, MUL, DIV,		// ADD|SUB|MUL|DIV
-		GREATER, LESS, EQUAL,	// GREATER|LESS|EQUAL
-		GREATER_EQ, LESS_EQ,	// GREATER_EQ|LESS_EQ
-		OR, AND,				// OR|AND
-		DUPLICATE, SWAP,		// DUPLICATE|SWAP
-		ROTATE,					// ROTATE
+		HALT,						// HALT
+		PRINT, PRINTLN,				// PRINT|PRINTLN
+		DROP,						// POP
+		PUSH,						// PUSH IDX
+		CAPTURE,					// CAPTURE COUNT
+		BIND,						// BIND COUNT, [ID INDEX, ...]
+		BIND_STRICT,				// BIND_STRICT, [ID INDEX, ...]
+		LOAD_BINDING,				// LOAD_BINDING IDX
+		CONV,						// CONV TYPEID [, ID] (id index + 1, 0 for none)
+		PROCCALL,					// PROCCALL FUNCTION_DEF_IDX
+		NATIVECALL,					// NATIVECALL FUNCTION_DEF_IDX
+		GOTO,						// GOTO POS
+		IF,							// IF GOTO_FALSE_POS
+		LOOP,						// LOOP GOTO_FALSE_POS
+		RETURN,						// RETURN SUB_IDX
+		ADD, SUB, MUL, DIV, MOD,	// ADD|SUB|MUL|DIV
+		GREATER, LESS, EQUAL,		// GREATER|LESS|EQUAL
+		GREATER_EQ, LESS_EQ,		// GREATER_EQ|LESS_EQ
+		OR, AND,					// OR|AND
+		DUPLICATE, SWAP,			// DUPLICATE|SWAP
+		ROTATE,						// ROTATE
 	};
 
 	static const char *get_bytecode_name(ByteCode byte) {
@@ -42,6 +42,7 @@ namespace Process {
 			case ByteCode::SUB:				return "SUB";
 			case ByteCode::MUL:				return "MUL";
 			case ByteCode::DIV:				return "DIV";
+			case ByteCode::MOD:				return "MOD";
 
 			case ByteCode::GREATER:			return "GREATER";
 			case ByteCode::GREATER_EQ:		return "GREATER_EQ";

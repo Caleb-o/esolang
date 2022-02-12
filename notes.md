@@ -26,21 +26,9 @@ test runner would just be the Runner, with some new functions to run all tests a
 Based on the defined virtual functions, the interpreter could just be the runner, with some slight modifications.
 
 
-## Native Procedures:
-These will be procedures that are automatically added before the parser starts. They are not in bytecode form, they are just
-identifiers that are linked to a function (similar to how the VM works). To distinguish them from the regular procedures,
-there will be a different symbol before the call. They also live in a seperate map, so they do not touch the procedures.
-
-NATIVE_CALL IDX
-
-eg.
-```
-# 5 will be pushed to the stack, this does not consume hello
-'hello' @str_len
-```
-
 ### List of Native Procedures:
 * [ ] `write_file` : Writes to a file, using the previous string as a file path and the string prior as the buffer
+
 
 ### Test
 We can parse tests similarly to a proc. !!This will actually require a seperate runner, since we need to handle errors differently. An error should trigger a failure, instead of immediately cutting execution. As the parser does not know much about native procedures, the assert might have to become a keyword OR the runner will assume it succeeded if no assertion was hit. As a test cannot be returned from, a HALT opcode will be appended.
@@ -50,10 +38,6 @@ test 'Testing numbers' {
 	3 = @assert
 }
 ```
-
-
-### Capture
-Captures should be allowed to be returned, but illegal as a parameter. Since there are no operations valid on a capture, a new keyword "unpack" should be implemented which consumes the capture and pushes all its values to the stack. We can also add arithmetic support for them, which can construct new captures by adding them together.
 
 
 ### Top-level code
@@ -69,6 +53,7 @@ The import system in Eso is very basic and does not consider resolutions etc. Th
 How should the standard library be written? What should be expected in an interpreted langauge that is concatenative and stack based? My only idea is to write wrappers around some keywords/native procedures that make them less error prone. Eg. if a file_read fails, return an empty string. Did a stoi/stof/stob fail? Return its default value using a "safe" procedure that handles related errors.
 
 Maths functions - eg. cos, sin, tan, 
+
 
 ### Potential Features / Systems
 * Namespacing / Packages instead of imports

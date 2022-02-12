@@ -178,6 +178,7 @@ namespace Process {
 			case TokenKind::MINUS:		push_byte(ByteCode::SUB); break;
 			case TokenKind::STAR:		push_byte(ByteCode::MUL); break;
 			case TokenKind::SLASH:		push_byte(ByteCode::DIV); break;
+			case TokenKind::MOD:		push_byte(ByteCode::MOD); break;
 		}
 	}
 

@@ -157,6 +157,7 @@ namespace Process {
 				}
 				case '/': return make_single(TokenKind::SLASH);
 				case '*': return make_single(TokenKind::STAR);
+				case '%': return make_single(TokenKind::MOD);
 				case ':': return make_single(TokenKind::COLON);
 				case ',': return make_single(TokenKind::COMMA);
 				case '.': return make_single(TokenKind::DOT);

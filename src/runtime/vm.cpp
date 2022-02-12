@@ -118,6 +118,7 @@ void VM::arithmetic_op() {
 				case ByteCode::SUB:	push_stack(create_value((long long)(lhs->data.integer - rhs->data.integer))); break;
 				case ByteCode::MUL:	push_stack(create_value((long long)(rhs->data.integer * lhs->data.integer))); break;
 				case ByteCode::DIV:	push_stack(create_value((long long)(rhs->data.integer / lhs->data.integer))); break;
+				case ByteCode::MOD:	push_stack(create_value((long long)(lhs->data.integer % rhs->data.integer))); break;
 
 				default:	error(false, 
 								Util::string_format("Unknown operation '%s'",

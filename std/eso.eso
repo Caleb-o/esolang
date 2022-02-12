@@ -1,6 +1,13 @@
 # Author    : Caleb
 # Date      : 12th Feb 2022
-# Modified  : 12th Feb 2022
+# Modified  : 13th Feb 2022
+
+# Wraps the native @str_cmp and provides a boolean
+# Parameters	: STRING, STRING
+# Return		: BOOL
+proc std_str_cmp(str_a, str_b : string) -> bool {
+	str_a str_b @str_cmp
+}
 
 # Wraps the native @stoi and provides an integer
 # Parameters	: STRING
