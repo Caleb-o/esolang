@@ -142,6 +142,11 @@ namespace Process {
 		vm->push_stack(create_value((long long)integer * -1));
 	}
 
+	static void native_flipf(VM *vm) {
+		auto floating = vm->pop_stack()->data.floating;
+		vm->push_stack(create_value((float)(floating * -1.0)));
+	}
+
 	static void native_kind_cmp(VM *vm) {
 		auto val_b = vm->peek_stack(0);
 		auto val_a = vm->peek_stack(1);
@@ -269,6 +274,7 @@ namespace Process {
 		np->push_back(create_native("stof", native_stof, 									{ ValueKind::STRING }));
 		np->push_back(create_native("stob", native_stob,									{ ValueKind::STRING }));
 		np->push_back(create_native("flip", native_flip,									{ ValueKind::INT }));
+		np->push_back(create_native("flipf", native_flipf,									{ ValueKind::FLOAT }));
 		np->push_back(create_native("str_len", native_str_len,								{ ValueKind::STRING }));
 		np->push_back(create_native("str_cmp", native_str_cmp,								{ ValueKind::STRING, ValueKind::STRING }));
 		np->push_back(create_native("split", native_str_split,								{ ValueKind::STRING, ValueKind::STRING }));

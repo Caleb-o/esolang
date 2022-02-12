@@ -254,10 +254,9 @@ namespace Process {
 		consume(TokenKind::ID);
 		
 		size_t proc_idx = get_proc_idx(m_env, id.c_str());
-		auto proc_it = &m_env->defs.procedures[proc_idx];
 
 		// Trying to use a function that hasn't been defined yet
-		if (proc_it == &m_env->defs.procedures.back()) {
+		if (proc_idx >= m_env->defs.procedures.size()) {
 			error(
 				Util::string_format("Trying to call procedure '%s' which has not been defined yet",
 				id.c_str()
