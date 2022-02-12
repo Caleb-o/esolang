@@ -1,14 +1,10 @@
 # Author    : Caleb
 # Date      : 10th Feb 2022
 # Modified  : 11th Feb 2022
-
-proc test() -> int { 1 }
-
-proc test2() -> capture {
-	| 2 3 4 5 6 |
-}
+using 'std:eso'
 
 proc main() -> void {
-	|| !test2 println @drop_stack
-	|| !test println drop
+	| 3 9 | !std_pow println drop
+	| 3 9.2 | !std_pow println drop
+	| 3 | !std_factorial println drop
 }

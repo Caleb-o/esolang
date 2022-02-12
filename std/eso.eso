@@ -1,21 +1,72 @@
 # Author    : Caleb
 # Date      : 12th Feb 2022
-# Modified  : 13th Feb 2022
+# Modified  : 12th Feb 2022
+
+# The factorial function says to multiply all whole numbers from our chosen number down to 1
+# Paramters 	: INT - factor
+# Return		: INT - result
+proc std_factorial(factor : int) -> int {
+	factor factor factor bind | idx, current, result |
+
+	result 0 = if {
+		1 bind | result |
+	}
+
+	factor 1 > loop {
+		current 1 - bind | current |
+		current result * bind | result |
+		idx 1 - bind | idx |
+		idx 1 >
+	}
+	result
+}
+
+# Math power of
+# Parameters	: INT, INT - base, power
+# Return		: INT - result
+proc std_pow(base, pow : int) -> int {
+	base 0 bind | idx, result |
+
+	# Loop to get the result of the power
+	true loop {
+		result base * bind | result |
+		idx 1 + bind | idx |
+		idx pow 1 - <
+	}
+	# Return the result
+	result
+}
+
+# Math power of
+# Parameters	: FLOAT, INT - base, power
+# Return		: FLOAT - result
+proc std_pow(base : float, pow : int) -> float {
+	base 0 bind | idx, result |
+
+	# Loop to get the result of the power
+	true loop {
+		result base * bind | result |
+		idx 1 + bind | idx |
+		idx pow 1 - <
+	}
+	# Return the result
+	result
+}
 
 proc std_sin(degrees, op, hyp : float) -> float {
-	
+
 }
 
 # Wraps the native @str_cmp and provides a boolean
-# Parameters	: STRING, STRING
-# Return		: BOOL
+# Parameters	: STRING, STRING - src1, src2
+# Return		: BOOL - result
 proc std_str_cmp(str_a, str_b : string) -> bool {
 	str_a str_b @str_cmp
 }
 
 # Wraps the native @stoi and provides an integer
-# Parameters	: STRING
-# Return		: INT (0 default)
+# Parameters	: STRING - src
+# Return		: INT - value (0 default)
 proc std_stoi(str : string) -> int {
 	str @stoi bind | value | drop
 
@@ -32,8 +83,8 @@ proc std_stoi(str : string) -> int {
 }
 
 # Wraps the native @stof and provides a float
-# Parameters	: STRING
-# Return		: FLOAT (0 default)
+# Parameters	: STRING - src
+# Return		: FLOAT - value (0 default)
 proc std_stof(str : string) -> float {
 	str @stof bind | value | drop
 
@@ -47,4 +98,10 @@ proc std_stof(str : string) -> float {
 		# Drop the true
 		drop 
 	}
+}
+
+
+# Dummy main
+proc main() -> void {
+	'This is a library, there is nothing to run :^)' println drop
 }

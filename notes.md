@@ -39,6 +39,9 @@ test 'Testing numbers' {
 }
 ```
 
+### Unique Literals
+At the moment, literals are not unique when they are stored. ID literals are unique to save on space, we need to make the literals do the same. If we have 100 1's, there will currently be 100 copies of the number 1 stored, which is not very efficient.
+
 
 ### Top-level code
 If we simply ran the VM top to bottom, we would run into procedures and run their code, which is not desired. One solution is, we capture all top-level code and insert it all at the bottom and set the ip to the start of the top-level code.
