@@ -17,7 +17,7 @@ namespace Process {
 	}
 
 	void Parser::warning(std::string msg) {
-		std::cout << "[Warning] " << Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col);
+		std::cout << "[Warning] " << Util::string_format("%s on line %d at pos %d", msg.c_str(), m_current->line, m_current->col) << std::endl;
 	}
 
 	static std::string copy_lexeme_str(std::shared_ptr<Token> current) {
