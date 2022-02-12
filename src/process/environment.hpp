@@ -62,6 +62,7 @@ namespace Process {
 		// Definitions are compile-time known structs and procedures
 		Definitions defs;
 		std::vector<std::string> argv;
+		size_t top_level_len = { 0 };
 
 		~Environment() {
 			literals.clear();

@@ -70,21 +70,23 @@ namespace Process {
 	// Parser
 
 	void Parser::push_byte(ByteCode byte) {
-		m_env->code.push_back(byte);
+		if (m_is_top_level) {
+			m_top_level.push_back(byte);
+		} else {
+			m_env->code.push_back(byte);
+		}
 	}
 
 	void Parser::push_byte(size_t byte) {
-		m_env->code.push_back((ByteCode)byte);
+		push_byte((ByteCode)byte);
 	}
 
 	void Parser::push_bytes(ByteCode byte_a, ByteCode byte_b) {
-		m_env->code.push_back(byte_a);
-		m_env->code.push_back(byte_b);
+		push_byte(byte_a); push_byte(byte_b);
 	}
 
 	void Parser::push_bytes(ByteCode byte_a, size_t byte_b) {
-		m_env->code.push_back(byte_a);
-		m_env->code.push_back((ByteCode)byte_b);
+		push_byte(byte_a); push_byte((ByteCode)byte_b);
 	}
 
 	void Parser::consume(TokenKind expected) {
@@ -306,7 +308,7 @@ namespace Process {
 		consume(kind);
 
 		push_bytes(byte, 0);
-		size_t bind_len = m_env->code.size() - 1;
+		size_t bind_len = (m_is_top_level) ? m_top_level.size() - 1 : m_env->code.size() - 1;
 		size_t bind_count = 0;
 
 		consume(TokenKind::CAPTURE);
@@ -335,7 +337,11 @@ namespace Process {
 		consume(TokenKind::CAPTURE);
 
 		// Get count of bindings
-		m_env->code[bind_len] = (ByteCode)bind_count;
+		if (m_is_top_level) {
+			m_top_level[bind_len] = (ByteCode)bind_count;
+		} else {
+			m_env->code[bind_len] = (ByteCode)bind_count;
+		}
 	}
 
 	void Parser::statement() {
@@ -615,6 +621,8 @@ namespace Process {
 
 	void Parser::program() {
 		while(m_current->kind != TokenKind::ENDOFFILE) {
+			m_is_top_level = false;
+
 			switch(m_current->kind) {
 				case TokenKind::USING: {
 					using_statement();
@@ -632,7 +640,15 @@ namespace Process {
 				}
 
 				default: {
-					error(Util::string_format("Unknown token found '%s'\n", get_token_name(m_current->kind)));
+					// TODO: Add top-level code
+					// Assume top-level is a "procedure"? Will have to add resolution between frames when using bindings
+					// m_is_top_level = true;
+					// statement();
+					error(Util::string_format(
+						"Unknown token found '%s'",
+						get_token_name(m_current->kind)
+					));
+					break;
 				}
 			}
 		}
@@ -656,7 +672,13 @@ namespace Process {
 		m_env->argv = argv;
 
 		program();
+		m_is_top_level = false;
 		m_completed = true;
+
+		// Add top level code
+		m_env->code.insert(m_env->code.end(), m_top_level.begin(), m_top_level.end());
+		m_env->top_level_len = m_top_level.size();
+		m_top_level.clear();
 
 		return m_env;
 	}

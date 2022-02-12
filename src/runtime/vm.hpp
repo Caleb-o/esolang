@@ -13,6 +13,7 @@ namespace Runtime {
 		std::vector<std::shared_ptr<Value>> m_stack;
 		std::shared_ptr<CallFrame> m_top_stack = { 0 };
 		std::vector<std::shared_ptr<CallFrame>> m_call_stack;
+		std::map<std::string, std::shared_ptr<Binding>> bindings;
 
 	private:
 		void def_native_procs();

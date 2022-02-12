@@ -2,6 +2,10 @@
 # Date      : 12th Feb 2022
 # Modified  : 13th Feb 2022
 
+proc std_sin(degrees, op, hyp : float) -> float {
+	
+}
+
 # Wraps the native @str_cmp and provides a boolean
 # Parameters	: STRING, STRING
 # Return		: BOOL

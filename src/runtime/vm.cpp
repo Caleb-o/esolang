@@ -323,8 +323,15 @@ void VM::run() {
 	}
 
 	// Setup a callframe
-	add_call_frame("main", -1, 0);
-	m_ip = m_env->code.data() + m_env->defs.procedures["main"][0].startIdx;
+	if (m_env->top_level_len == 0) {
+		add_call_frame("main", -1, 0);
+		m_ip = m_env->code.data() + m_env->defs.procedures["main"][0].startIdx;
+	} else {
+		// Execute from top-level first
+		m_ip = m_env->code.data() + (m_env->code.size() - m_env->top_level_len - 1);
+		m_env->code.push_back(ByteCode::GOTO);
+		m_env->code.push_back((ByteCode)m_env->defs.procedures["main"][0].startIdx);
+	}
 
 	const ByteCode *code_len = m_env->code.data() + m_env->code.size();
 	bool running = true;
