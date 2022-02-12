@@ -1,0 +1,30 @@
+proc cipher(str : string, places : int, flip : bool) -> string {
+	str @str_len 0 '' bind | result, idx, len |
+	
+	true loop {
+		result
+		str
+		idx @str_index @to_bytes places
+		
+		flip if { - } else { + }
+
+		1 @from_bytes
+		swap drop
+		+ bind | result |
+	
+		idx 1 + bind | idx |
+		idx len <
+	} drop
+	
+	result
+}
+
+proc main() -> void {
+	3 'Enter string> ' @input bind | str, places |
+	
+	false places str
+	| !3 | !cipher println bind | str |
+	
+	true places str
+	| !3 | !cipher println drop
+}

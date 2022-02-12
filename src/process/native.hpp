@@ -137,9 +137,9 @@ namespace Process {
 		}
 	}
 
-	static void native_negate(VM *vm) {
+	static void native_flip(VM *vm) {
 		auto integer = vm->pop_stack()->data.integer;
-		vm->push_stack(create_value((long long)integer));
+		vm->push_stack(create_value((long long)integer * -1));
 	}
 
 	static void native_kind_cmp(VM *vm) {
@@ -257,7 +257,7 @@ namespace Process {
 	// Define all native procedures
 	static void def_native_procs(std::shared_ptr<Environment> env) {
 		env->defs.native_procs["error"] 		= create_native(native_error, 			{ ValueKind::STRING });
-		env->defs.native_procs["assertm"] 		= create_native(native_assertm, 			{ ValueKind::STRING, ValueKind::BOOL });
+		env->defs.native_procs["assertm"] 		= create_native(native_assertm, 		{ ValueKind::STRING, ValueKind::BOOL });
 		env->defs.native_procs["assert"] 		= create_native(native_assert, 			{ ValueKind::BOOL });
 		env->defs.native_procs["file_exists"]	= create_native(native_file_exists,		{ ValueKind::STRING });
 		env->defs.native_procs["read_file"]		= create_native(native_read_file,		{ ValueKind::STRING });
@@ -266,7 +266,7 @@ namespace Process {
 		env->defs.native_procs["stoi"]			= create_native(native_stoi,			{ ValueKind::STRING });
 		env->defs.native_procs["stof"]			= create_native(native_stof,			{ ValueKind::STRING });
 		env->defs.native_procs["stob"]			= create_native(native_stob,			{ ValueKind::STRING });
-		env->defs.native_procs["negate"]		= create_native(native_negate,			{ ValueKind::INT });
+		env->defs.native_procs["flip"]			= create_native(native_flip,			{ ValueKind::INT });
 		env->defs.native_procs["str_len"] 		= create_native(native_str_len, 		{ ValueKind::STRING });
 		env->defs.native_procs["str_cmp"] 		= create_native(native_str_cmp, 		{ ValueKind::STRING, ValueKind::STRING });
 		env->defs.native_procs["str_split"] 	= create_native(native_str_split, 		{ ValueKind::STRING, ValueKind::STRING });

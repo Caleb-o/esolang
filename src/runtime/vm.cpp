@@ -318,13 +318,13 @@ void VM::bind(bool strict) {
 void VM::run() {
 	// Find the main symbol
 	size_t main_idx = get_proc_idx(m_env, "main");
-	if (m_env->defs.procedures.find("main") == m_env->defs.procedures.end()) {
+	if (main_idx >= m_env->defs.procedures.size()) {
 		error(true, "Could not find main symbol");
 	}
 
 	// Setup a callframe
 	add_call_frame("main", -1, 0);
-	m_ip = m_env->code.data() + m_env->defs.procedures["main"][0].startIdx;
+	m_ip = m_env->code.data() + m_env->defs.procedures[main_idx].second[0].startIdx;
 
 	const ByteCode *code_len = m_env->code.data() + m_env->code.size();
 	bool running = true;
@@ -514,8 +514,9 @@ void VM::run() {
 
 			case ByteCode::RETURN: {
 				size_t sub_idx = *(++m_ip);
+				size_t proc_idx = get_proc_idx(m_env, m_top_stack->proc_id.c_str());
 
-				ProcedureDef *proc_def = &m_env->defs.procedures[m_top_stack->proc_id][sub_idx];
+				ProcedureDef *proc_def = &m_env->defs.procedures[proc_idx].second[sub_idx];
 				size_t last_frame = m_call_stack.size() - 2;
 				size_t stack_idx = 0, capture_count = 0;
 

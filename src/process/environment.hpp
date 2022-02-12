@@ -52,7 +52,7 @@ namespace Process {
 	};
 
 	struct Definitions {
-		std::map<std::string, std::vector<ProcedureDef>> procedures;
+		std::vector<std::pair<std::string, std::vector<ProcedureDef>>> procedures;
 		std::map<std::string, std::shared_ptr<NativeDef>> native_procs;
 		// std::map<std::string, StructDef> structs;
 	};
@@ -77,7 +77,14 @@ namespace Process {
 
 
 	static size_t get_proc_idx(std::shared_ptr<Environment> env, const char *proc_id) {
-		return std::distance(env->defs.procedures.begin(), env->defs.procedures.find(proc_id));
+		size_t idx = 0;
+		std::string id(proc_id);
+
+		for(auto& proc : env->defs.procedures) {
+			if (proc.first == id) break;
+			idx++;
+		}
+		return idx;
 	}
 
 
@@ -193,7 +200,12 @@ namespace Process {
 					break;
 				}
 
-				case ByteCode::RETURN:
+				case ByteCode::RETURN: {
+					int val_idx = (int)env->code[++i];
+					std::cout << get_bytecode_name(env->code[i-1]) << "<" << val_idx << ">\n\n";
+					break;
+				}
+
 				case ByteCode::CAPTURE:
 				case ByteCode::GOTO:
 				case ByteCode::IF:

@@ -2,6 +2,10 @@
 # Date      : 12th Feb 2022
 # Modified  : 12th Feb 2022
 
+## TODO:
+## std_to_lower : Convert uppercase characters to lowercase
+## std_to_higher : Convert lowercase characters to uppercase
+
 # The factorial function says to multiply all whole numbers from our chosen number down to 1
 # Paramters 	: INT - factor
 # Return		: INT - result
@@ -55,17 +59,22 @@ proc std_pow(base : float, pow : int) -> float {
 
 
 proc std_sin(degrees : float, places : int) -> float {
+	# for n in range(decimals):
+	# 	p += Decimal(((-1)**n)*(x**(2*n+1)))/(Decimal(math.factorial(2*n+1)))
+	
 	0.0 0 bind | idx, result |
 
 	idx places < loop {
-		idx 1 @negate |!2| !std_pow
+		idx 1 @flip |!2| !std_pow
 		idx 1 + 2 *
-		degrees *
-
-		idx 1 + 2 * |!1| !std_factorial
+		degrees |!2| !std_pow
+		*
+		
+		idx 1 + 2  *|!1| !std_factorial
 		/
 
-		result + bind | result |
+		result +
+		bind | result |
 		idx places <
 	}
 

@@ -31,26 +31,36 @@ namespace Process {
 	// Returns the sub index
 	static size_t add_proc_def_tmp(std::shared_ptr<Environment> env, const char *id) {
 		// Does not exist yet, we can just add it
-		env->defs.procedures[id].push_back({});
-		return env->defs.procedures[id].size() - 1;
+		size_t idx = get_proc_idx(env, id);
+
+		if (idx >= env->defs.procedures.size()) {
+			env->defs.procedures.push_back(std::make_pair(std::string(id), std::vector<ProcedureDef>()));
+			env->defs.procedures[env->defs.procedures.size()-1].second.push_back({});
+			return env->defs.procedures[env->defs.procedures.size()-1].second.size() - 1;
+		} else {
+			env->defs.procedures[idx].second.push_back({});
+			return env->defs.procedures[idx].second.size() - 1;
+		}
 	}
 
 	static void verify_proc_def(std::shared_ptr<Environment> env, const char *id, ProcedureDef def) {
 		// We must linearly search for a definition
-		for(size_t defidx = 0; defidx < env->defs.procedures[id].size() - 1; ++defidx) {
+		size_t idx = get_proc_idx(env, id);
+
+		for(size_t defidx = 0; defidx < env->defs.procedures[idx].second.size() - 1; ++defidx) {
 			// Cannot compare different length param count
-			if (env->defs.procedures[id][defidx].parameters.size() !=
+			if (env->defs.procedures[idx].second[defidx].parameters.size() !=
 				def.parameters.size()) {
 				continue;
 			}
 
-			auto params_it = env->defs.procedures[id][defidx].parameters.begin();
+			auto params_it = env->defs.procedures[idx].second[defidx].parameters.begin();
 			auto def_params_it = def.parameters.begin();
 
 			bool sameParams = true;
 			
 			// Similar parameter count, now we compare types
-			while(params_it != env->defs.procedures[id][defidx].parameters.end()) {
+			while(params_it != env->defs.procedures[idx].second[defidx].parameters.end()) {
 				if (params_it->kind != def_params_it->kind) {
 					sameParams = false;
 					break;
@@ -246,11 +256,14 @@ namespace Process {
 
 		std::string id = copy_lexeme_str(m_current);
 		consume(TokenKind::ID);
+		
+		size_t proc_idx = get_proc_idx(m_env, id.c_str());
+		auto proc_it = &m_env->defs.procedures[proc_idx];
 
-		auto proc_it = m_env->defs.procedures.find(id);
+		std::cout << "Calling proc :: " << id << " on line " << m_current->line << std::endl;
 
 		// Trying to use a function that hasn't been defined yet
-		if (proc_it == m_env->defs.procedures.end()) {
+		if (proc_it == &m_env->defs.procedures.back()) {
 			error(
 				Util::string_format("Trying to call procedure '%s' which has not been defined yet",
 				id.c_str()
@@ -259,7 +272,6 @@ namespace Process {
 
 		// Get the current procedure idx and push it to the proc call
 		// Note: We infer which overload to call at run-time
-		size_t proc_idx = std::distance(m_env->defs.procedures.begin(), proc_it);
 		push_bytes(ByteCode::PROCCALL, proc_idx);
 	}
 
@@ -453,6 +465,7 @@ namespace Process {
 		// FIXME: This will be geared towards a proc, but will be required for structs
 		TokenKind endType = (is_proc) ? TokenKind::RPAREN : TokenKind::RCURLY;
 		ProcedureDef procDef = {0};
+		size_t proc_idx = get_proc_idx(m_env, id);
 
 		while(m_current->kind != endType) {
 			std::vector<std::string> ids;
@@ -478,7 +491,7 @@ namespace Process {
 				error("Cannot use 'capture' as a parameter type. Captures can only be returne");
 			}
 
-			auto *params = &m_env->defs.procedures[id][m_env->defs.procedures[id].size()-1];
+			auto *params = &m_env->defs.procedures[proc_idx].second[m_env->defs.procedures[proc_idx].second.size()-1];
 			
 
 			// Create each parameter
@@ -534,7 +547,8 @@ namespace Process {
 		}
 
 		size_t sub_idx = add_proc_def_tmp(m_env, id.c_str());
-		m_env->defs.procedures[id][sub_idx].startIdx = (m_env->code.size() == 0) ? 0 : m_env->code.size();
+		size_t proc_idx = get_proc_idx(m_env, id.c_str());
+		m_env->defs.procedures[proc_idx].second[sub_idx].startIdx = (m_env->code.size() == 0) ? 0 : m_env->code.size();
 
 		parameter_list(id.c_str());
 		consume(TokenKind::ARROW);
@@ -544,7 +558,7 @@ namespace Process {
 		consume(TokenKind::TYPEID);
 
 		bool using_capture = false;
-		m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
+		m_env->defs.procedures[proc_idx].second[sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
 
 		if (std::strcmp(retid.c_str(), "capture") == 0) {
 			using_capture = true;
@@ -569,7 +583,7 @@ namespace Process {
 					error("Captures can only be used as a single return type");
 				}
 
-				m_env->defs.procedures[id][sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
+				m_env->defs.procedures[proc_idx].second[sub_idx].returnTypes.push_back(kind_from_str(retid.c_str()));
 
 				if (m_current->kind == TokenKind::COMMA) {
 					consume(TokenKind::COMMA);
@@ -579,10 +593,10 @@ namespace Process {
 
 
 		// Check each parameter and push a bind opcode with each param
-		if (m_env->defs.procedures[id][sub_idx].parameters.size() > 0) {
-			push_bytes(ByteCode::BIND_STRICT, m_env->defs.procedures[id][sub_idx].parameters.size());
+		if (m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size() > 0) {
+			push_bytes(ByteCode::BIND_STRICT, m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size());
 
-			for(auto param : m_env->defs.procedures[id][sub_idx].parameters) {
+			for(auto param : m_env->defs.procedures[proc_idx].second[sub_idx].parameters) {
 				auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), param.id);
 
 				if (name_it == m_env->idLiterals.end()) {
@@ -602,14 +616,14 @@ namespace Process {
 			push_bytes(ByteCode::RETURN, sub_idx);
 		} else {
 			// Check for main def count
-			if (m_env->defs.procedures[id].size() > 1) {
+			if (m_env->defs.procedures[proc_idx].second.size() > 1) {
 				error("Multiple definitions of main");
 			}
 
 			// Check main arguments and return
-			if (m_env->defs.procedures[id][0].parameters.size() > 0 ||
-				m_env->defs.procedures[id][0].returnTypes.size() > 1 ||
-				m_env->defs.procedures[id][0].returnTypes[0] != ValueKind::VOID) {
+			if (m_env->defs.procedures[proc_idx].second[0].parameters.size() > 0 ||
+				m_env->defs.procedures[proc_idx].second[0].returnTypes.size() > 1 ||
+				m_env->defs.procedures[proc_idx].second[0].returnTypes[0] != ValueKind::VOID) {
 				error("Main must be defined without arguments and return void");
 			}
 
