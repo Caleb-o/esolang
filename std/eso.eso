@@ -53,8 +53,23 @@ proc std_pow(base : float, pow : int) -> float {
 	result
 }
 
-proc std_sin(degrees, op, hyp : float) -> float {
 
+proc std_sin(degrees : float, places : int) -> float {
+	0.0 0 bind | idx, result |
+
+	idx places < loop {
+		idx 1 @negate |!2| !std_pow
+		idx 1 + 2 *
+		degrees *
+
+		idx 1 + 2 * |!1| !std_factorial
+		/
+
+		result + bind | result |
+		idx places <
+	}
+
+	result
 }
 
 # Wraps the native @str_cmp and provides a boolean

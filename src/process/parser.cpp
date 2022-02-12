@@ -51,7 +51,7 @@ namespace Process {
 			
 			// Similar parameter count, now we compare types
 			while(params_it != env->defs.procedures[id][defidx].parameters.end()) {
-				if (params_it->second != def_params_it->second) {
+				if (params_it->kind != def_params_it->kind) {
 					sameParams = false;
 					break;
 				}
@@ -70,11 +70,7 @@ namespace Process {
 	// Parser
 
 	void Parser::push_byte(ByteCode byte) {
-		if (m_is_top_level) {
-			m_top_level.push_back(byte);
-		} else {
-			m_env->code.push_back(byte);
-		}
+		m_env->code.push_back(byte);
 	}
 
 	void Parser::push_byte(size_t byte) {
@@ -321,9 +317,12 @@ namespace Process {
 
 			if (name_it == m_env->idLiterals.end()) {
 				m_env->idLiterals.push_back(id);
+				std::cout << "'" << id << "' :: " << m_env->idLiterals.size() - 1 << std::endl;
 				push_byte(m_env->idLiterals.size() - 1);
 			} else {
-				push_byte(std::distance(m_env->idLiterals.begin(), name_it));
+				size_t idx = std::distance(m_env->idLiterals.begin(), name_it);
+				std::cout << "'" << id << "' :: " << m_env->idLiterals.size() - 1 << std::endl;
+				push_byte(idx);
 			}
 
 			bind_count++;
@@ -337,11 +336,7 @@ namespace Process {
 		consume(TokenKind::CAPTURE);
 
 		// Get count of bindings
-		if (m_is_top_level) {
-			m_top_level[bind_len] = (ByteCode)bind_count;
-		} else {
-			m_env->code[bind_len] = (ByteCode)bind_count;
-		}
+		m_env->code[bind_len] = (ByteCode)bind_count;
 	}
 
 	void Parser::statement() {
@@ -458,6 +453,7 @@ namespace Process {
 	void Parser::type_list(const char *id, bool is_proc) {
 		// FIXME: This will be geared towards a proc, but will be required for structs
 		TokenKind endType = (is_proc) ? TokenKind::RPAREN : TokenKind::RCURLY;
+		ProcedureDef procDef = {0};
 
 		while(m_current->kind != endType) {
 			std::vector<std::string> ids;
@@ -484,7 +480,7 @@ namespace Process {
 			}
 
 			auto *params = &m_env->defs.procedures[id][m_env->defs.procedures[id].size()-1];
-			ProcedureDef procDef = {0};
+			
 
 			// Create each parameter
 			for(auto& id : ids) {
@@ -493,11 +489,13 @@ namespace Process {
 				if (kind == ValueKind::VOID) {
 					error(Util::string_format("Cannot use type '%s' in parameter list", id));
 				}
-				procDef.parameters[id] = { kind };
-				params->parameters[id] = { kind };
-			}
+				procDef.parameters.push_back({ id, kind });
+				params->parameters.push_back({ id, kind });
 
-			verify_proc_def(m_env, id, procDef);
+				if (std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), id) == m_env->idLiterals.end()) {
+					m_env->idLiterals.push_back(id);
+				}
+			}
 
 			// Multiple parameters
 			if (m_current->kind == TokenKind::COMMA) {
@@ -508,6 +506,7 @@ namespace Process {
 				}
 			}
 		}
+		verify_proc_def(m_env, id, procDef);
 	}
 
 	void Parser::parameter_list(const char *id) {
@@ -585,10 +584,10 @@ namespace Process {
 			push_bytes(ByteCode::BIND_STRICT, m_env->defs.procedures[id][sub_idx].parameters.size());
 
 			for(auto param : m_env->defs.procedures[id][sub_idx].parameters) {
-				auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), param.first);
+				auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), param.id);
 
 				if (name_it == m_env->idLiterals.end()) {
-					m_env->idLiterals.push_back(param.first);
+					m_env->idLiterals.push_back(param.id);
 					push_byte(m_env->idLiterals.size() - 1);
 				} else {
 					push_byte(std::distance(m_env->idLiterals.begin(), name_it));
@@ -674,11 +673,6 @@ namespace Process {
 		program();
 		m_is_top_level = false;
 		m_completed = true;
-
-		// Add top level code
-		m_env->code.insert(m_env->code.end(), m_top_level.begin(), m_top_level.end());
-		m_env->top_level_len = m_top_level.size();
-		m_top_level.clear();
 
 		return m_env;
 	}

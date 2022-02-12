@@ -1,3 +1,19 @@
+## Bugs
+Calling a procedure within a procedure can sometimes cause hangs or not call the correct procedures. This example causes a hang. Xyz calls to abc, but actually calls itself.
+```
+proc abc(a : int) -> void { 
+	'kek' @error
+}
+
+proc xyz() -> void { 
+	1 | 1 | !abc
+}
+
+proc main() -> void {
+	|| !xyz
+}
+```
+
 ## Circular dependencies:
 
 If we were to allow Circular dependencies, we would have to do a final step after 

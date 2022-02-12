@@ -137,6 +137,11 @@ namespace Process {
 		}
 	}
 
+	static void native_negate(VM *vm) {
+		auto integer = vm->pop_stack()->data.integer;
+		vm->push_stack(create_value((long long)integer));
+	}
+
 	static void native_kind_cmp(VM *vm) {
 		auto val_b = vm->peek_stack(0);
 		auto val_a = vm->peek_stack(1);
@@ -261,6 +266,7 @@ namespace Process {
 		env->defs.native_procs["stoi"]			= create_native(native_stoi,			{ ValueKind::STRING });
 		env->defs.native_procs["stof"]			= create_native(native_stof,			{ ValueKind::STRING });
 		env->defs.native_procs["stob"]			= create_native(native_stob,			{ ValueKind::STRING });
+		env->defs.native_procs["negate"]		= create_native(native_negate,			{ ValueKind::INT });
 		env->defs.native_procs["str_len"] 		= create_native(native_str_len, 		{ ValueKind::STRING });
 		env->defs.native_procs["str_cmp"] 		= create_native(native_str_cmp, 		{ ValueKind::STRING, ValueKind::STRING });
 		env->defs.native_procs["str_split"] 	= create_native(native_str_split, 		{ ValueKind::STRING, ValueKind::STRING });

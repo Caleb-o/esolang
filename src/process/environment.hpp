@@ -35,9 +35,14 @@ namespace Process {
 		std::map<std::string, ValueKind> fields;
 	};
 
+	struct ParameterDef {
+		std::string id;
+		ValueKind kind;
+	};
+
 	struct ProcedureDef {
 		size_t startIdx;
-		std::map<std::string, ValueKind> parameters;
+		std::vector<ParameterDef> parameters;
 		std::vector<ValueKind> returnTypes;
 	};
 
@@ -92,8 +97,8 @@ namespace Process {
 				}
 				
 				for(auto& param : procDef.parameters) {
-					std::cout << param.first << " : move ";
-					std::cout << kind_as_str(param.second) << std::endl;
+					std::cout << param.id << " : move ";
+					std::cout << kind_as_str(param.kind) << std::endl;
 				}
 
 				std::cout << "== Return == " << std::endl;
@@ -156,7 +161,9 @@ namespace Process {
 						std::cout << ": ";
 					}
 					while(i < count) {
-						std::cout << "'" << env->idLiterals[env->code[++i]] << "'";
+						++i;
+
+						std::cout << env->code[i] << ":'" << env->idLiterals[env->code[i]] << "'";
 
 						if ((i-1) < count - 1) {
 							std::cout << " ";

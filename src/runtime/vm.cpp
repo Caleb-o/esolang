@@ -323,15 +323,8 @@ void VM::run() {
 	}
 
 	// Setup a callframe
-	if (m_env->top_level_len == 0) {
-		add_call_frame("main", -1, 0);
-		m_ip = m_env->code.data() + m_env->defs.procedures["main"][0].startIdx;
-	} else {
-		// Execute from top-level first
-		m_ip = m_env->code.data() + (m_env->code.size() - m_env->top_level_len - 1);
-		m_env->code.push_back(ByteCode::GOTO);
-		m_env->code.push_back((ByteCode)m_env->defs.procedures["main"][0].startIdx);
-	}
+	add_call_frame("main", -1, 0);
+	m_ip = m_env->code.data() + m_env->defs.procedures["main"][0].startIdx;
 
 	const ByteCode *code_len = m_env->code.data() + m_env->code.size();
 	bool running = true;
@@ -478,7 +471,7 @@ void VM::run() {
 						// Types don't equal then it's correct
 						auto param = std::next(it->parameters.begin(), param_idx);
 
-						if (param->second != peek_stack(param_idx)->kind) {
+						if (param->kind != peek_stack(param_idx)->kind) {
 							found = false;
 							continue;
 						}
