@@ -4,6 +4,6 @@
 using 'std:strings'
 
 proc main() -> void {
-	| 'AbZC' | !std_to_lower println drop
+	| 'AbCZ' | !std_to_lower println drop
 	| 'abCz' | !std_to_upper println drop
 }
