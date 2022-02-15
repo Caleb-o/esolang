@@ -1,6 +1,38 @@
 ## Bugs
 Nothing notable found yet :^)
 
+
+## Unique Literals
+At the moment, literals are not unique when they are stored. ID literals are unique to save on space, we need to make the literals do the same. If we have 100 1's, there will currently be 100 copies of the number 1 stored, which is not very efficient.
+
+
+## Bit Operations
+Allow for bit operations
+- left shift << 
+- right shift >>
+- and &&
+- or ||
+
+
+## Scoped Bindings
+Bindings could have an optional scope after them, with an implicit unbind operation at the end of the block. This makes bindings easier to overwrite if we can unbind them after a block. We must expose the unbind op so we can unbind values. Follows the same syntax of `unbind id [, id]`
+
+
+## Type Checking at Compile-time
+Tsoding's video: https://www.youtube.com/watch?v=CYp99h-faa0
+Check WASM Stack-Based type checking: https://binji.github.io/posts/webassembly-type-checking/
+- Can probably type check based on the tokens, during the parsing phase.
+- Could use bit flags to check which types are available and which are allowed
+	eg. INT, INT, PLUS ( INT, FLOAT, STRING )
+	- Two integers and Plus accepts: int, float and string
+	- Ops could index a map with Values, where is has bit flags of what it allows
+	eg. INT -> INT, FLOAT
+	- Int can only be added onto integers or floats
+- Type checker should be a class that the parser contains, so allow for some abstraction to move some code away from the parser.
+	- Remember to remove run-time typechecking when done
+	- Type check bindings, so we don't override bindings with different types
+
+
 ## Better logging and Tracking
 A single method of logging should be implemented, rather than having an error log
 as apart of each process. Logging should have levels (INFO, WARN, ERROR) with overloaded
@@ -32,18 +64,6 @@ test 'Testing numbers' {
 ```
 
 
-## Unique Literals
-At the moment, literals are not unique when they are stored. ID literals are unique to save on space, we need to make the literals do the same. If we have 100 1's, there will currently be 100 copies of the number 1 stored, which is not very efficient.
-
-
-## Bit Operations
-Allow for bit operations
-- left shift << 
-- right shift >>
-- and &&
-- or ||
-
-
 ## Circular dependencies:
 If we were to allow Circular dependencies, we would have to do a final step after 
 the last parse. Here would would have to patch all proc_calls, since the symbol may
@@ -69,9 +89,7 @@ just so we can resolve definitions.
 ## Top-level code
 If we simply ran the VM top to bottom, we would run into procedures and run their code, which is not desired. One solution is, we capture all top-level code and insert it all at the bottom and set the ip to the start of the top-level code.
 
-Issue: If main exists, do we jump to main? That would mean the top-level code is never ran.
-Solution: We always take precedence over top-level code position, and run from top level. We would have to insert a GOTO with the index of main for cases where the top-level code ends (if main exists), this will stop it from running random code from procedures.
-
+**Solution:** Capture all top-level code and create a procedure called "boottop" that is inserted before main. Insert a procedure call to "boottop" before its body. We will have to fetch its starting index to know where to insert and the insert of booting code will have to be done last.
 
 ## STD library / Usings
 The import system in Eso is very basic and does not consider resolutions etc. There also is no redirect if a std path is found (currently).
