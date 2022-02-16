@@ -510,33 +510,6 @@ void VM::run() {
 
 			case ByteCode::NATIVECALL: {
 				auto native_it = &m_env->defs.native_procs[*(++m_ip)];
-				
-				// Check arguments
-				if (stack_len() < native_it->second->parameters.size()) {
-					error(false, Util::string_format(
-						"Native function '%s' expected %d value(s), but got %d",
-						native_it->first.c_str(),
-						native_it->second->parameters.size(),
-						stack_len()
-					));
-				}
-
-				// Check all parameter types
-				for(int param_idx = 0; param_idx < native_it->second->parameters.size(); ++param_idx) {
-					// Types don't equal then it's correct
-					auto param = std::next(native_it->second->parameters.begin(), param_idx);
-
-					if (*param != peek_stack(param_idx)->kind) {
-						error(false, Util::string_format(
-							"Native function '%s' expected type %s at pos %d, but got %s",
-							native_it->first.c_str(),
-							kind_as_str(native_it->second->parameters[param_idx]),
-							stack_len(),
-							kind_as_str(peek_stack(param_idx)->kind)
-						));
-					}
-				}
-
 				// Call the native function
 				(*native_it->second->func)(this);
 				break;

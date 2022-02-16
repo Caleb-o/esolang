@@ -327,6 +327,8 @@ namespace Process {
 			));
 		}
 
+		// TODO: Add analysis for native calls, we may need to add return types for native procs
+
 		push_bytes(ByteCode::NATIVECALL, native_idx);
 	}
 
