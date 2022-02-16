@@ -337,6 +337,7 @@ namespace Process {
 		push_bytes(byte, 0);
 		size_t bind_len = (m_is_top_level) ? m_top_level.size() - 1 : m_env->code.size() - 1;
 		size_t bind_count = 0;
+		std::vector<size_t> bindidx;
 
 		consume(TokenKind::CAPTURE);
 
@@ -348,9 +349,12 @@ namespace Process {
 
 			if (name_it == m_env->idLiterals.end()) {
 				m_env->idLiterals.push_back(id);
-				push_byte(m_env->idLiterals.size() - 1);
+				size_t idx = m_env->idLiterals.size() - 1;
+				bindidx.push_back(idx);
+				push_byte(idx);
 			} else {
 				size_t idx = std::distance(m_env->idLiterals.begin(), name_it);
+				bindidx.push_back(idx);
 				push_byte(idx);
 			}
 
@@ -366,6 +370,16 @@ namespace Process {
 
 		// Get count of bindings
 		m_env->code[bind_len] = (ByteCode)bind_count;
+
+		// "Scope" bound bindings
+		if (m_current->kind == TokenKind::LCURLY) {
+			code_block();
+
+			push_bytes(ByteCode::UNBIND, bind_count);
+			for(auto idx : bindidx) {
+				push_byte(idx);
+			}
+		}
 	}
 
 	void Parser::statement() {
