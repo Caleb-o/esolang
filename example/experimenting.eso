@@ -4,7 +4,7 @@
 
 proc main() -> void {
 	2 bind | b |
-	1 3 bind | a, c | {
+	1 3 strict | a, c | {
 		a println drop
 	}
 }

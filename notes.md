@@ -14,10 +14,6 @@ Allow for bit operations
 - or ||
 
 
-## Scoped Bindings
-Bindings could have an optional scope after them, with an implicit unbind operation at the end of the block. This makes bindings easier to overwrite if we can unbind them after a block. We must expose the unbind op so we can unbind values. Follows the same syntax of `unbind id [, id]`
-
-
 ## Type Checking at Compile-time
 Tsoding's video: https://www.youtube.com/watch?v=CYp99h-faa0
 Check WASM Stack-Based type checking: https://binji.github.io/posts/webassembly-type-checking/
