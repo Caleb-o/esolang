@@ -463,6 +463,17 @@ namespace Process {
 			(is_std) ? "std" : m_base_dir.c_str(),
 			import.c_str()
 		);
+
+		std::ifstream file(final_file.c_str());
+
+		if (!file.good()) {
+			error(Util::string_format(
+				"File does not exist '%s'",
+				import.c_str()
+			));
+		}
+		file.close();
+
 		std::string source = Util::read_file(final_file.c_str());
 
 		size_t hash = Util::hash(source.c_str(), source.size());
