@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include "token.hpp"
+#include "environment.hpp"
 #include "../runtime/value.hpp"
 
 
@@ -26,11 +27,10 @@ namespace Process {
 		std::map<std::string, std::vector<TypeFlag>> m_proc_rets;
 		std::shared_ptr<Token> m_current;
 
-	private:
+	public:
 		void error(std::string);
 		void unwind();
-	
-	public:
+
 		Analyser();
 
 
@@ -41,6 +41,7 @@ namespace Process {
 
 		void op(std::shared_ptr<Token>);
 		void capture(size_t);
+		size_t eval_return(std::shared_ptr<Environment>, size_t, std::vector<Runtime::ValueKind>&);
 		size_t capture_size() { return m_capture_count; }
 		void add_proc_ret(std::string id, TypeFlag flag) { m_proc_rets[id].push_back(flag); }
 		std::vector<TypeFlag>& get_proc_ret(std::string id) { return m_proc_rets[id]; }

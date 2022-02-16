@@ -91,9 +91,9 @@ namespace Process {
 		push_byte(byte_a); push_byte((ByteCode)byte_b);
 	}
 
-	void Parser::consume(TokenKind expected) {
+	void Parser::consume(TokenKind expected, bool skip_analysis_op=false) {
 		if (m_current->kind == expected) {
-			m_analyser.op(m_current);
+			if (!skip_analysis_op) m_analyser.op(m_current);
 			m_current = m_lexer->get_token();
 		} else {
 			// TODO: Throw exception
@@ -142,7 +142,7 @@ namespace Process {
 			}
 
 			capture_count = std::stoi(m_current->lexeme);
-			consume(TokenKind::INT_LIT);
+			consume(TokenKind::INT_LIT, true);
 		} else {
 			// We will bind a series of expressions
 			while(m_current->kind != TokenKind::CAPTURE) {
@@ -245,6 +245,8 @@ namespace Process {
 		size_t false_idx = m_env->code.size() - 1;
 
 		code_block();
+
+		m_analyser.pop();
 
 		push_bytes(ByteCode::GOTO, false_idx-2);
 		m_env->code[false_idx] = (ByteCode)(m_env->code.size() - 1);
@@ -416,8 +418,6 @@ namespace Process {
 		}
 
 		consume(TokenKind::CAPTURE);
-
-		m_analyser.capture(bindidx.size());
 
 		// Get count of bindings
 		m_env->code[bind_len] = (ByteCode)bindidx.size();
@@ -712,44 +712,19 @@ namespace Process {
 		// Parse statements within code block
 		code_block();
 
-		auto return_values = &m_env->defs.procedures[proc_idx].second[sub_idx].returnTypes;
+		auto& return_values = m_env->defs.procedures[proc_idx].second[sub_idx].returnTypes;
 
 		// Check return values
-		if (m_analyser.stack_size() > return_values->size()) {
-			error(Util::string_format(
+		if (m_analyser.stack_size() > return_values.size()) {
+			m_analyser.error(Util::string_format(
 				"Trying to return %d values, but expected %d in '%s'",
 				m_analyser.stack_size(),
-				return_values->size(),
+				return_values.size(),
 				m_env->defs.procedures[proc_idx].first.c_str()
 			));
 		}
 
-		size_t param_idx = 0;
-		for(auto param : *return_values) {
-			if (param == ValueKind::VOID) {
-				if (m_analyser.stack_size() > 0) {
-					error(Util::string_format(
-						"Trying to return '%s' when '%s' expects void",
-						get_type_name(m_analyser.peek(0)),
-						m_env->defs.procedures[proc_idx].first.c_str()
-					));
-				} else {
-					break;
-				}
-			}
-
-			if (param != flag_to_valuekind(m_analyser.peek(param_idx))) {
-				error(Util::string_format(
-					"Expected return type '%s' but got '%s'",
-					kind_as_str(param),
-					kind_as_str(flag_to_valuekind(m_analyser.peek(param_idx)))
-				));
-			}
-			m_analyser.add_proc_ret(id, m_analyser.peek(0));
-			m_analyser.pop();
-
-			param_idx++;
-		}
+		m_analyser.eval_return(m_env, proc_idx, return_values);
 
 		// Unbind all parameters
 		if (m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size() > 0) {

@@ -10,6 +10,6 @@ proc foo(a : int, str : string) -> string {
 proc bar() -> int { 1 }
 
 proc main() -> void {
-	| 'str' 1 | !foo println drop
+	'str' 1 | !2 | !foo println drop
 	|| !bar println drop
 }

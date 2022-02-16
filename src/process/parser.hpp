@@ -33,7 +33,7 @@ namespace Process {
 		void push_bytes(ByteCode, ByteCode);
 		void push_bytes(ByteCode, size_t);
 
-		void consume(TokenKind);
+		void consume(TokenKind, bool);
 
 		size_t add_literal_to_env(std::shared_ptr<Value> value);
 		size_t add_literal();

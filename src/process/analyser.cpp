@@ -2,6 +2,7 @@
 #include "analyser.hpp"
 #include "util.hpp"
 
+
 namespace Process {
 	void Analyser::error(std::string err) {
 		unwind();
@@ -35,7 +36,7 @@ namespace Process {
 	}
 
 	void Analyser::merge() {
-		if (m_type_stack.size() > m_stack.back()) {
+		if (stack_size() > m_stack.back()) {
 			error(Util::string_format(
 				"%d unhandled item(s) on the stack",
 				m_type_stack.size() - m_stack.back()
@@ -53,18 +54,31 @@ namespace Process {
 		m_current = current;
 		TokenKind kind = current->kind;
 
+		// std::cout << "Token: " << get_token_name(kind) << " | " << stack_size() << std::endl;
+
 		switch(kind) {
 			case TokenKind::INT_LIT: 		m_type_stack.push_back(TypeFlag::INT); break;
 			case TokenKind::FLOAT_LIT:		m_type_stack.push_back(TypeFlag::FLOAT); break;
 			case TokenKind::BOOL_LIT:		m_type_stack.push_back(TypeFlag::BOOL); break;
 			case TokenKind::STRING_LIT:		m_type_stack.push_back(TypeFlag::STRING); break;
 
+			case TokenKind::IF: case TokenKind::ELSE:
+			case TokenKind::LOOP: {
+				if (m_type_stack.size() < m_stack.back() + 1) {
+					error("Not enough items on the stack");
+				}
+				m_type_stack.pop_back();
+				break;
+			}
 
 			case TokenKind::PLUS: case TokenKind::MINUS:
 			case TokenKind::STAR: case TokenKind::SLASH:
 			case TokenKind::MOD: {
 				if (m_type_stack.size() < m_stack.back() + 2) {
-					error("Not enough items on the stack");
+					error(Util::string_format(
+						"Not enough items on the stack (%d)",
+						stack_size()
+					));
 				}
 				
 				TypeFlag flag_rhs = m_type_stack.back(); m_type_stack.pop_back();
@@ -90,8 +104,8 @@ namespace Process {
 					error("Not enough items on the stack");
 				}
 
-				TypeFlag flag_rhs = m_type_stack.back();
-				TypeFlag flag_lhs = *(m_type_stack.end() - 2);
+				TypeFlag flag_rhs = m_type_stack.back(); m_type_stack.pop_back();
+				TypeFlag flag_lhs = m_type_stack.back(); m_type_stack.pop_back();
 				
 				if (!is_allowed(flag_lhs, flag_rhs)) {
 					error(Util::string_format(
@@ -100,6 +114,8 @@ namespace Process {
 						get_type_name(flag_rhs)
 					));
 				}
+
+				m_type_stack.push_back(TypeFlag::BOOL);
 				break;
 			}
 
@@ -136,6 +152,38 @@ namespace Process {
 	void Analyser::capture(size_t count) {
 		m_type_stack.push_back(TypeFlag::CAPTURED_VALUES);
 		m_capture_count = count;
+	}
+
+	size_t Analyser::eval_return(std::shared_ptr<Environment> env, size_t proc_idx, std::vector<Runtime::ValueKind>& values) {
+		size_t param_idx = 0;
+
+		for(auto param : values) {
+			if (param == Runtime::ValueKind::VOID) {
+				if (stack_size() > 0) {
+					error(Util::string_format(
+						"Trying to return '%s' when '%s' expects void",
+						get_type_name(peek(0)),
+						env->defs.procedures[proc_idx].first.c_str()
+					));
+				} else {
+					break;
+				}
+			}
+
+			if (param != flag_to_valuekind(peek(0))) {
+				error(Util::string_format(
+					"Expected return type '%s' but got '%s'",
+					kind_as_str(param),
+					kind_as_str(flag_to_valuekind(peek(0)))
+				));
+			}
+			add_proc_ret(env->defs.procedures[proc_idx].first, peek(0));
+			pop();
+
+			param_idx++;
+		}
+
+		return param_idx;
 	}
 
 	void Analyser::bind(std::string id) {
