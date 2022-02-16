@@ -2,6 +2,22 @@
 # Date      : 13th Feb 2022
 # Modified  : 13th Feb 2022
 
+# Return a reverse version of the input string
+# Parameters 	: STRING - value
+# Return		: STRING - result
+proc std_str_reverse(str : string) -> string {
+	str @str_len bind | len |
+	'' len 1 - bind | idx, result |
+
+	idx 0 >= loop {
+		idx @str_index result swap + bind | result |
+		idx 1 - bind | idx |
+		idx 0 >=
+	} drop
+
+	result
+}
+
 # Return a lowercase version of the input string
 # Parameters 	: STRING - value
 # Return		: STRING - result

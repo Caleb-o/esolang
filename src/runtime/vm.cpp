@@ -415,7 +415,8 @@ void VM::run() {
 			}
 
 			case ByteCode::ADD: case ByteCode::SUB:
-			case ByteCode::MUL: case ByteCode::DIV: {
+			case ByteCode::MUL: case ByteCode::DIV:
+			case ByteCode::MOD: {
 				arithmetic_op();
 				break;
 			}

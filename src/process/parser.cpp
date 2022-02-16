@@ -168,7 +168,7 @@ namespace Process {
 			}
 
 			default: {
-				error(Util::string_format("Unknown token found '%s'", m_current->lexeme.c_str()));
+				error(Util::string_format("Unknown expr token found '%s'", m_current->lexeme.c_str()));
 			}
 		}
 	}
@@ -386,7 +386,8 @@ namespace Process {
 		switch(m_current->kind) {
 			// Arithmetic
 			case TokenKind::PLUS: case TokenKind::MINUS:
-			case TokenKind::STAR: case TokenKind::SLASH: {
+			case TokenKind::STAR: case TokenKind::SLASH:
+			case TokenKind::MOD: {
 				arithmetic_statement();
 				break;
 			}
