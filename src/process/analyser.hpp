@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
 #include "token.hpp"
 
 namespace Process {
@@ -14,8 +15,10 @@ namespace Process {
 
 	class Analyser {
 	private:
-		std::vector<std::vector<TypeFlag>> m_type_stack;
+		size_t m_stack_start = { 0 };
+		std::vector<TypeFlag> m_type_stack;
 		std::map<TypeFlag, int> m_allowed_types;
+		std::shared_ptr<Token> m_current;
 
 	private:
 		void error(std::string);
@@ -25,9 +28,19 @@ namespace Process {
 
 		void branch(); // Used when we enter a new procedure
 		void merge(); // Removes the last branch
+		size_t stack_size() { return m_type_stack.size() - m_stack_start; }
 		bool is_allowed(TypeFlag, TypeFlag);
 
-		void op(TokenKind);
+		void op(std::shared_ptr<Token>);
 		void push(TypeFlag);
 	};
+
+	static const char *get_type_name(TypeFlag flag) {
+		switch (flag) {
+			case TypeFlag::INT:			return "int";
+			case TypeFlag::FLOAT:		return "float";
+			case TypeFlag::BOOL:		return "bool";
+			case TypeFlag::STRING:		return "string";
+		}
+	}
 }

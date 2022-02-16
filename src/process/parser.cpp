@@ -94,6 +94,7 @@ namespace Process {
 	void Parser::consume(TokenKind expected) {
 		if (m_current->kind == expected) {
 			m_current = m_lexer->get_token();
+			m_analyser.op(m_current);
 		} else {
 			// TODO: Throw exception
 			error(Util::string_format("Expected token '%s' but got '%s' (%s) on line %d at pos %d\n", get_token_name(expected), get_token_name(m_current->kind), m_current->lexeme.c_str(), m_current->line, m_current->col));
@@ -720,6 +721,7 @@ namespace Process {
 	std::shared_ptr<Environment> Parser::parse(std::string source, std::vector<std::string> argv) {
 		m_lexer = std::make_unique<Lexer>(Lexer(source));
 		m_current = m_lexer->get_token();
+		m_analyser.op(m_current);
 
 		size_t hash = Util::hash(source.c_str(), source.size());
 		m_file_hashes.insert(hash);
@@ -732,6 +734,9 @@ namespace Process {
 		program();
 		m_is_top_level = false;
 		m_completed = true;
+
+		// Finish the analysis - this should check for unhandled data in main
+		m_analyser.merge();
 
 		return m_env;
 	}

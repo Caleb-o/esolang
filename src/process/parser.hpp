@@ -6,7 +6,7 @@
 #include "bytecode.hpp"
 #include "environment.hpp"
 #include "lexer.hpp"
-
+#include "analyser.hpp"
 
 namespace Process {
 	class Parser {
@@ -19,6 +19,7 @@ namespace Process {
 		std::vector<std::shared_ptr<Lexer>> m_lexers;
 		std::shared_ptr<Token> m_current;
 		std::shared_ptr<Environment> m_env;
+		Analyser m_analyser;
 		std::string m_base_dir;
 		bool m_completed = { false };
 		bool m_ignore_main = { false };
