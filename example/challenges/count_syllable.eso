@@ -1,0 +1,32 @@
+# Author    : Caleb
+# Date      : 16th Feb 2022
+# Modified  : 16th Feb 2022
+#
+# https://edabit.com/challenge/zRe5fx3MbiBxcrvXH
+# Create a function that counts the number of syllables a word has. 
+# Each syllable is separated with a dash -.
+using 'std:strings'
+
+
+proc count_syllabel(word : string) -> int {
+	0 0 bind | idx, count |
+	word @str_len bind | len |
+
+	true loop {
+		idx @str_index '-' |!2| !std_str_cmp if {
+			count 1 + bind | count |
+		}
+
+		idx 1 + bind | idx |
+		idx len <
+	}
+	drop
+	count 1 +
+}
+
+proc main() -> void {
+	| 'buf-fet' | !count_syllabel println drop
+	| 'beau-ti-ful' | !count_syllabel println drop
+	| 'mon-u-men-tal' | !count_syllabel println drop
+	| 'on-o-mat-o-poe-ia' | !count_syllabel println drop
+}

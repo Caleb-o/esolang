@@ -1,0 +1,46 @@
+# Author    : Caleb
+# Date      : 16th Feb 2022
+# Modified  : 16th Feb 2022
+#
+# https://edabit.com/challenge/4gzDuDkompAqujpRi
+# Create a function that takes a number as an argument. Add up all the numbers 
+# from 1 to the number you passed to the function. For example, if the input is 4 
+# then your function should return 10 because 1 + 2 + 3 + 4 = 10.
+using 'std:strings'
+
+
+proc add_to(n : int) -> int {
+	n 0 <= if {
+		n
+	} else {
+		0 1 bind | idx, accum |
+
+		# Loop until we add all the numbers
+		true loop {
+			accum idx + bind | accum |
+
+			idx 1 + bind | idx |
+			idx n <=
+		}
+
+		# Return the accumulated value
+		accum
+	}
+}
+
+proc main() -> void {
+	true loop {
+		'Enter a number> ' @input bind | input |
+
+		input 'quit' |!2| !std_str_cmp if {
+			false
+		} else {
+			input @stoi bind | value | drop
+
+			value false @kind_cmp not if {
+				value |!1| !add_to println drop
+			} 2 @drop_n
+			true
+		}
+	}
+}

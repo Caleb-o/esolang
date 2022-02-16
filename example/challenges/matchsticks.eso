@@ -1,0 +1,29 @@
+# Author    : Caleb
+# Date      : 16th Feb 2022
+# Modified  : 16th Feb 2022
+#
+# https://edabit.com/challenge/tYHkTdFrEmWfxpPKF
+# Create a function that takes a number (step) as an argument and returns the 
+# number of matchsticks in that step. See step 1, 2 and 3 in the image above.
+
+proc matchsticks(n : int) -> int {
+	0 bind | value |
+
+	n 0 > if {
+		n 1 > if {
+			n 1 - 5 * 6 + bind | value |
+		}
+		n 1 = if {
+			6 bind | value |
+		}
+	}
+
+	value
+}
+
+proc main() -> void {
+	10 @flip |!1| !matchsticks println drop
+	| 1 | !matchsticks println drop
+	| 4 | !matchsticks println drop
+	| 87 | !matchsticks println drop
+}
