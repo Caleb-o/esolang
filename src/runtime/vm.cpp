@@ -558,56 +558,6 @@ void VM::run() {
 
 			case ByteCode::RETURN: {
 				size_t sub_idx = *(++m_ip);
-				size_t proc_idx = get_proc_idx(m_env, m_top_stack->proc_id.c_str());
-
-				ProcedureDef *proc_def = &m_env->defs.procedures[proc_idx].second[sub_idx];
-				size_t last_frame = m_call_stack.size() - 2;
-				size_t stack_idx = 0, capture_count = 0;
-
-				
-				// Handle return data
-				if (proc_def->returnTypes[0] != ValueKind::VOID) {
-					// Too few items on the stack
-					if (stack_len() < proc_def->returnTypes.size()) {
-						error(false, Util::string_format(
-							"Trying to return with %d value(s) on the stack, but expected %d",
-							stack_len(),
-							proc_def->returnTypes.size()
-						));
-					}
-
-					for(int ret_idx = proc_def->returnTypes.size() - 1; ret_idx >= 0; --ret_idx) {
-						if (peek_stack(stack_idx)->kind != proc_def->returnTypes[ret_idx]) {
-							error(false, Util::string_format(
-								"Expected type '%s' but got '%s'",
-								kind_as_str(proc_def->returnTypes[ret_idx]),
-								kind_as_str(peek_stack(stack_idx)->kind)
-							));
-						}
-
-						// Special case for captures
-						if (peek_stack(stack_idx)->kind == ValueKind::CAPTURE) {
-							capture_count += peek_stack(stack_idx)->capture_len;
-							stack_idx += peek_stack(stack_idx)->capture_len;
-						}
-						stack_idx++;
-					}
-				}
-
-				if (capture_count > 0) {
-					// Remove the capture
-					pop_stack();
-				}
-
-				// Too many values on the stack
-				if (stack_len() > proc_def->returnTypes.size() + capture_count - ((capture_count > 0) ? 1 : 0)) {
-					error(false, Util::string_format(
-						"Trying to return with %d value(s) on the stack, but expected %d",
-						stack_len(),
-						proc_def->returnTypes.size()
-					));
-				}
-
 				m_ip = m_env->code.data() + m_top_stack->return_idx;
 				kill_frame();
 				break;
@@ -625,10 +575,6 @@ void VM::run() {
 			}
 
 			case ByteCode::HALT: {
-				if (m_stack.size() > 0) {
-					error(false, "Program exiting with non-empty stack");
-				}
-
 				kill_frame();
 
 				running = false; 

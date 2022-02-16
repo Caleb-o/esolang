@@ -303,6 +303,10 @@ namespace Process {
 		// Note: We infer which overload to call at run-time
 		push_bytes(ByteCode::PROCCALL, proc_idx);
 		push_byte(sub_idx);
+
+		for(auto flag : m_analyser.get_proc_ret(id)) {
+			m_analyser.push(flag);
+		}
 	}
 
 	void Parser::native_call_statement() {
@@ -646,6 +650,8 @@ namespace Process {
 		size_t proc_idx = get_proc_idx(m_env, id.c_str());
 		m_env->defs.procedures[proc_idx].second[sub_idx].startIdx = (m_env->code.size() == 0) ? 0 : m_env->code.size();
 
+		m_analyser.branch();
+
 		parameter_list(id.c_str());
 		consume(TokenKind::ARROW);
 		
@@ -706,6 +712,46 @@ namespace Process {
 		// Parse statements within code block
 		code_block();
 
+		auto return_values = &m_env->defs.procedures[proc_idx].second[sub_idx].returnTypes;
+
+		// Check return values
+		if (m_analyser.stack_size() > return_values->size()) {
+			error(Util::string_format(
+				"Trying to return %d values, but expected %d in '%s'",
+				m_analyser.stack_size(),
+				return_values->size(),
+				m_env->defs.procedures[proc_idx].first.c_str()
+			));
+		}
+
+		size_t param_idx = 0;
+		for(auto param : *return_values) {
+			if (param == ValueKind::VOID) {
+				if (m_analyser.stack_size() > 0) {
+					error(Util::string_format(
+						"Trying to return '%s' when '%s' expects void",
+						get_type_name(m_analyser.peek(0)),
+						m_env->defs.procedures[proc_idx].first.c_str()
+					));
+				} else {
+					break;
+				}
+			}
+
+			if (param != flag_to_valuekind(m_analyser.peek(param_idx))) {
+				error(Util::string_format(
+					"Expected return type '%s' but got '%s'",
+					kind_as_str(param),
+					kind_as_str(flag_to_valuekind(m_analyser.peek(param_idx)))
+				));
+			}
+			m_analyser.add_proc_ret(id, m_analyser.peek(0));
+			m_analyser.pop();
+
+			param_idx++;
+		}
+
+		// Unbind all parameters
 		if (m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size() > 0) {
 			for(auto param : m_env->defs.procedures[proc_idx].second[sub_idx].parameters) {
 				m_analyser.unbind(param.id);
@@ -730,6 +776,8 @@ namespace Process {
 
 			push_byte(ByteCode::HALT);
 		}
+
+		m_analyser.merge();
 	}
 
 	void Parser::program() {
@@ -783,6 +831,8 @@ namespace Process {
 
 		// Import argv and bind argc
 		m_env->argv = argv;
+
+		m_analyser.branch();
 
 		program();
 

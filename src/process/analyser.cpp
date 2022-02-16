@@ -4,6 +4,8 @@
 
 namespace Process {
 	void Analyser::error(std::string err) {
+		unwind();
+
 		throw Util::string_format(
 			"Analysis: %s with '%s' on line %d at pos %d",
 			err.c_str(),
@@ -11,6 +13,14 @@ namespace Process {
 			m_current->line,
 			m_current->col
 		);
+	}
+
+	void Analyser::unwind() {
+		std::cout << "=== Type Stack ===\n";
+		for(int i = m_type_stack.size()-1; i >= 0; --i) {
+			std::cout << get_type_name(m_type_stack[i]) << std::endl;
+		}
+		std::cout << std::endl;
 	}
 	
 	Analyser::Analyser() {
@@ -21,24 +31,18 @@ namespace Process {
 	}
 	
 	void Analyser::branch() {
-		m_stack_start = m_type_stack.size() - 1;
+		m_stack.push_back(m_type_stack.size());
 	}
 
 	void Analyser::merge() {
-		if (m_type_stack.size() > m_stack_start) {
+		if (m_type_stack.size() > m_stack.back()) {
 			error(Util::string_format(
 				"%d unhandled item(s) on the stack",
-				m_type_stack.size() - m_stack_start
+				m_type_stack.size() - m_stack.back()
 			));
 		}
 
-		// If the start is 0, we can assume we're done when calling merge
-		// Note: We don't check bindings because we don't need to explicitly free them
-		if (m_stack_start == 0) {
-			std::cout << "No errors occured\n";
-		}
-
-		m_stack_start = 0;
+		m_stack.pop_back();
 	}
 
 	bool Analyser::is_allowed(TypeFlag flag_a, TypeFlag flag_b) {
@@ -59,7 +63,7 @@ namespace Process {
 			case TokenKind::PLUS: case TokenKind::MINUS:
 			case TokenKind::STAR: case TokenKind::SLASH:
 			case TokenKind::MOD: {
-				if (m_type_stack.size() < m_stack_start + 2) {
+				if (m_type_stack.size() < m_stack.back() + 2) {
 					error("Not enough items on the stack");
 				}
 				
@@ -82,7 +86,7 @@ namespace Process {
 			case TokenKind::GREATER: case TokenKind::GREATER_EQ: 
 			case TokenKind::LESS: case TokenKind::LESS_EQ: 
 			case TokenKind::EQUAL: {
-				if (m_type_stack.size() < m_stack_start + 2) {
+				if (m_type_stack.size() < m_stack.back() + 2) {
 					error("Not enough items on the stack");
 				}
 
@@ -100,7 +104,7 @@ namespace Process {
 			}
 
 			case TokenKind::SWAP: {
-				if (m_type_stack.size() < m_stack_start + 1) {
+				if (m_type_stack.size() < m_stack.back() + 1) {
 					error("Not enough items on the stack");
 				}
 				TypeFlag flag_rhs = m_type_stack.back(); m_type_stack.pop_back();
@@ -111,7 +115,7 @@ namespace Process {
 			}
 
 			case TokenKind::DUP: {
-				if (m_type_stack.size() < m_stack_start + 1) {
+				if (m_type_stack.size() < m_stack.back() + 1) {
 					error("Not enough items on the stack");
 				}
 
@@ -120,10 +124,9 @@ namespace Process {
 			}
 
 			case TokenKind::POP: {
-				if (m_type_stack.size() < m_stack_start + 1) {
+				if (m_type_stack.size() < m_stack.back() + 1) {
 					error("Not enough items on the stack");
 				}
-
 				m_type_stack.pop_back();
 				break;
 			}
@@ -136,7 +139,7 @@ namespace Process {
 	}
 
 	void Analyser::bind(std::string id) {
-		if (m_type_stack.size() < m_stack_start + 1) {
+		if (m_type_stack.size() < m_stack.back() + 1) {
 			error("Not enough items on the stack");
 		}
 

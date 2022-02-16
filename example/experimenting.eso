@@ -1,11 +1,15 @@
 # Author    : Caleb
 # Date      : 10th Feb 2022
 # Modified  : 16th Feb 2022
-proc foo(a : int, str : string) -> void {
+proc foo(a : int, str : string) -> string {
 	a println drop
 	str println drop
+	str
 }
 
+proc bar() -> int { 1 }
+
 proc main() -> void {
-	| 'str' 1 | !foo
+	| 'str' 1 | !foo println drop
+	|| !bar println drop
 }
