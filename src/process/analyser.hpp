@@ -18,6 +18,7 @@ namespace Process {
 		size_t m_stack_start = { 0 };
 		std::vector<TypeFlag> m_type_stack;
 		std::map<TypeFlag, int> m_allowed_types;
+		std::map<std::string, TypeFlag> m_type_bindings;
 		std::shared_ptr<Token> m_current;
 
 	private:
@@ -32,7 +33,11 @@ namespace Process {
 		bool is_allowed(TypeFlag, TypeFlag);
 
 		void op(std::shared_ptr<Token>);
+		void bind(std::string);
+		void unbind(std::string);
+
 		void push(TypeFlag);
+		void pop();
 	};
 
 	static const char *get_type_name(TypeFlag flag) {

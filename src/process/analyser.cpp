@@ -32,8 +32,10 @@ namespace Process {
 			));
 		}
 
+		// If the start is 0, we can assume we're done when calling merge
+		// Note: We don't check bindings because we don't need to explicitly free them
 		if (m_stack_start == 0) {
-			std::cout << "Finished type checking\n";
+			std::cout << "No errors occured\n";
 		}
 
 		m_stack_start = 0;
@@ -128,7 +130,35 @@ namespace Process {
 		}
 	}
 
+	void Analyser::bind(std::string id) {
+		if (m_type_stack.size() < m_stack_start + 1) {
+			error("Not enough items on the stack");
+		}
+
+		TypeFlag flag = m_type_stack.back(); m_type_stack.pop_back();
+
+		// Incorrect type assigned to binding
+		if (m_type_bindings.find(id) != m_type_bindings.end() && m_type_bindings[id] != flag) {
+			error(Util::string_format(
+				"Cannot assign type '%s' to binding '%s' which is of type '%s'",
+				get_type_name(flag),
+				id.c_str(),
+				get_type_name(m_type_bindings[id])
+			));
+		}
+
+		m_type_bindings[id] = flag;
+	}
+
+	void Analyser::unbind(std::string id) {
+		m_type_bindings.erase(id);
+	}
+
 	void Analyser::push(TypeFlag flag) {
 		m_type_stack.push_back(flag);
+	}
+
+	void Analyser::pop() {
+		m_type_stack.pop_back();
 	}
 }

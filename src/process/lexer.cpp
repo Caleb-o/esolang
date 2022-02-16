@@ -72,7 +72,7 @@ namespace Process {
 	std::shared_ptr<Token> Lexer::make_identifier() {
 		size_t start_ip = m_ip++;
 
-		while(m_ip < m_source.size() && is_alphanum(m_source[m_ip])) m_ip++;
+		while(m_ip < m_source.size() && is_alphanum(m_source[m_ip])) { m_ip++; m_col++; }
 
 		std::string lexeme(m_source.substr(start_ip, m_ip - start_ip));
 		std::shared_ptr<Token> tok = std::make_shared<Token>();
@@ -83,7 +83,7 @@ namespace Process {
 	std::shared_ptr<Token> Lexer::make_string() {
 		size_t start_ip = ++m_ip;
 
-		while(m_ip < m_source.size() && m_source[m_ip] != '\'') m_ip++;
+		while(m_ip < m_source.size() && m_source[m_ip] != '\'') { m_ip++; m_col++; }
 
 		std::string lexeme(m_source.substr(start_ip, m_ip - start_ip));
 
@@ -101,6 +101,7 @@ namespace Process {
 
 		while(m_ip < m_source.size() && is_numeric(m_source[m_ip])) {
 			m_ip++;
+			m_col++;
 
 			if (m_source[m_ip] == '.') {
 				if (isFloat) {
@@ -121,6 +122,7 @@ namespace Process {
 
 	std::shared_ptr<Token> Lexer::make_single(TokenKind kind) {
 		m_ip++;
+		m_col++;
 		std::string lexeme(m_source.substr(m_ip - 1, 1));
 		std::shared_ptr<Token> tok = std::make_shared<Token>();
 		*tok = (Token){ kind, m_line, m_col, lexeme };

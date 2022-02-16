@@ -359,6 +359,13 @@ namespace Process {
 				push_byte(idx);
 			}
 
+			// Clear item from type_stack since we bind it to an id
+			if (unbind) {
+				m_analyser.unbind(id);
+			} else {
+				m_analyser.bind(id);
+			}
+
 			bind_count++;
 
 			// Multiple binds
@@ -379,6 +386,7 @@ namespace Process {
 			push_bytes(ByteCode::UNBIND, bind_count);
 			for(auto idx : bindidx) {
 				push_byte(idx);
+				m_analyser.unbind(*(m_env->idLiterals.begin() + idx));
 			}
 		}
 	}
