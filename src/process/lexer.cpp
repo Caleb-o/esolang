@@ -186,14 +186,13 @@ namespace Process {
 				case '{': return make_single(TokenKind::LCURLY);
 				case '}': return make_single(TokenKind::RCURLY);
 				case '\'': return make_string();
-				default: {
-					error(Util::string_format(
-						"Unknown token '%c'",
-						m_source[m_ip]
-					));
-					break;
-				}
 			}
+
+			// Unknown
+			error(Util::string_format(
+				"Unknown token '%c'",
+				m_source[m_ip]
+			));
 		}
 
 		std::shared_ptr<Token> tok = std::make_shared<Token>();

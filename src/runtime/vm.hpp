@@ -24,7 +24,7 @@ namespace Runtime {
 
 		void arithmetic_op();
 		void comparison_op();
-		void bind(bool);
+		void bind(BindFlag, bool);
 	
 	public:
 		void error(bool, std::string);

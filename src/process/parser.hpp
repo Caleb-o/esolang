@@ -46,7 +46,7 @@ namespace Process {
 		void proc_call_statement();
 		void native_call_statement();
 		void binding_access_statement();
-		void bind_statement(bool);
+		void bind_statement(BindFlag, bool);
 		void statement();
 		void statement_list();
 		void code_block();

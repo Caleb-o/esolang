@@ -77,6 +77,7 @@ namespace Util {
 			case hash("conv", 4):		return TokenKind::CONVERT;
 			case hash("bind", 4):		return TokenKind::BIND;
 			case hash("strict", 6):		return TokenKind::BIND_STRICT;
+			case hash("unbind", 6):		return TokenKind::UNBIND;
 			case hash("using", 5):		return TokenKind::USING;
 			case hash("return", 6):		return TokenKind::RETURN;
 			case hash("or", 2):			return TokenKind::OR;

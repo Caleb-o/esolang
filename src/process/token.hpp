@@ -9,7 +9,7 @@ namespace Process {
 		COMMA, DOT, LCURLY, RCURLY, LPAREN, RPAREN,
 		
 		// Keywords
-		PROC, IF, ELSE, POP, CONVERT, BIND, BIND_STRICT, PRINT, PRINTLN,
+		PROC, IF, ELSE, POP, CONVERT, BIND, BIND_STRICT, BIND_PARAM, UNBIND, PRINT, PRINTLN,
 		DUP, SWAP, ROT, USING, RETURN, STRUCT, LOOP,
 
 		// Types
@@ -20,47 +20,49 @@ namespace Process {
 
 	static const char *get_token_name(TokenKind kind) {
 		switch(kind) {
-			case TokenKind::PLUS:		return "plus";
-			case TokenKind::MINUS:		return "minus";
-			case TokenKind::SLASH:		return "slash";
-			case TokenKind::STAR:		return "star";
-			case TokenKind::MOD:		return "modulus";
+			case TokenKind::PLUS:			return "plus";
+			case TokenKind::MINUS:			return "minus";
+			case TokenKind::SLASH:			return "slash";
+			case TokenKind::STAR:			return "star";
+			case TokenKind::MOD:			return "modulus";
 
-			case TokenKind::INT_LIT:	return "int literal";
-			case TokenKind::FLOAT_LIT:	return "float literal";
-			case TokenKind::BOOL_LIT:	return "bool literal";
-			case TokenKind::STRING_LIT:	return "string literal";
+			case TokenKind::INT_LIT:		return "int literal";
+			case TokenKind::FLOAT_LIT:		return "float literal";
+			case TokenKind::BOOL_LIT:		return "bool literal";
+			case TokenKind::STRING_LIT:		return "string literal";
 
-			case TokenKind::ARROW:		return "arrow";
-			case TokenKind::BANG:		return "bang";
-			case TokenKind::AT:			return "at";
+			case TokenKind::ARROW:			return "arrow";
+			case TokenKind::BANG:			return "bang";
+			case TokenKind::AT:				return "at";
 
-			case TokenKind::USING:		return "using";
+			case TokenKind::USING:			return "using";
 
-			case TokenKind::IF:			return "if";
-			case TokenKind::ELSE:		return "else";
-			case TokenKind::OR:			return "or";
-			case TokenKind::AND:		return "and";
-			case TokenKind::LOOP:		return "loop";
-			case TokenKind::DUP:		return "dup";
-			case TokenKind::POP:		return "drop";
-			case TokenKind::ROT:		return "rot";
-			case TokenKind::PRINT:		return "print";
-			case TokenKind::PRINTLN:	return "println";
+			case TokenKind::IF:				return "if";
+			case TokenKind::ELSE:			return "else";
+			case TokenKind::OR:				return "or";
+			case TokenKind::AND:			return "and";
+			case TokenKind::LOOP:			return "loop";
+			case TokenKind::DUP:			return "dup";
+			case TokenKind::POP:			return "drop";
+			case TokenKind::ROT:			return "rot";
+			case TokenKind::PRINT:			return "print";
+			case TokenKind::PRINTLN:		return "println";
 
-			case TokenKind::PROC:		return "proc";
-			case TokenKind::BIND:		return "bind";
+			case TokenKind::PROC:			return "proc";
+			case TokenKind::BIND:			return "bind";
 			case TokenKind::BIND_STRICT:	return "bind-strict";
-			case TokenKind::CAPTURE:	return "capture";
-			case TokenKind::ID:			return "ID";
-			case TokenKind::COMMA:		return "comma";
-			case TokenKind::TYPEID:		return "typeid";
-			case TokenKind::LPAREN:		return "lparen";
-			case TokenKind::RPAREN:		return "rparen";
-			case TokenKind::LCURLY:		return "lcurly";
-			case TokenKind::RCURLY:		return "rcurly";
+			case TokenKind::BIND_PARAM:		return "bind-param";
+			case TokenKind::UNBIND:			return "unbind";
+			case TokenKind::CAPTURE:		return "capture";
+			case TokenKind::ID:				return "ID";
+			case TokenKind::COMMA:			return "comma";
+			case TokenKind::TYPEID:			return "typeid";
+			case TokenKind::LPAREN:			return "lparen";
+			case TokenKind::RPAREN:			return "rparen";
+			case TokenKind::LCURLY:			return "lcurly";
+			case TokenKind::RCURLY:			return "rcurly";
 
-			case TokenKind::ENDOFFILE: 	return "EOF";
+			case TokenKind::ENDOFFILE: 		return "EOF";
 
 			default: return "Unknown";
 		}

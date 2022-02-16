@@ -8,7 +8,9 @@ namespace Process {
 		PUSH,						// PUSH IDX
 		CAPTURE,					// CAPTURE COUNT
 		BIND,						// BIND COUNT, [ID INDEX, ...]
+		UNBIND,						// UNBIND COUNT, [ID INDEX, ...]
 		BIND_STRICT,				// BIND_STRICT, [ID INDEX, ...]
+		BIND_PARAM,					// BIND_PARAM, [ID INDEX, ...]
 		LOAD_BINDING,				// LOAD_BINDING IDX
 		CONV,						// CONV TYPEID [, ID] (id index + 1, 0 for none)
 		PROCCALL,					// PROCCALL FUNCTION_DEF_IDX
@@ -35,6 +37,8 @@ namespace Process {
 
 			case ByteCode::BIND:			return "BIND";
 			case ByteCode::BIND_STRICT:		return "BIND_STRICT";
+			case ByteCode::BIND_PARAM:		return "BIND_PARAM";
+			case ByteCode::UNBIND:			return "UNBIND";
 			case ByteCode::LOAD_BINDING:	return "LOAD_BINDING";
 
 

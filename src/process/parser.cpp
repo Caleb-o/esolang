@@ -303,9 +303,34 @@ namespace Process {
 		}
 	}
 
-	void Parser::bind_statement(bool strict) {
-		TokenKind kind = (strict) ? TokenKind::BIND_STRICT : TokenKind::BIND;
-		ByteCode byte = (strict) ? ByteCode::BIND_STRICT : ByteCode::BIND;
+	void Parser::bind_statement(BindFlag flag, bool unbind) {
+		TokenKind kind;
+		ByteCode byte;
+
+		if (!unbind) {
+			switch(flag) {
+				case BindFlag::PLAIN: {
+					kind = TokenKind::BIND;
+					byte = ByteCode::BIND;
+					break;
+				}
+
+				case BindFlag::STRICT: {
+					kind = TokenKind::BIND_STRICT;
+					byte = ByteCode::BIND_STRICT;
+					break;
+				}
+
+				case BindFlag::PARAM: {
+					kind = TokenKind::BIND_PARAM;
+					byte = ByteCode::BIND_PARAM;
+					break;
+				}
+			}
+		} else {
+			kind = TokenKind::UNBIND;
+			byte = ByteCode::UNBIND;
+		}
 
 		consume(kind);
 
@@ -362,8 +387,9 @@ namespace Process {
 			}
 
 			// Keywords
-			case TokenKind::BIND:			bind_statement(false); break;
-			case TokenKind::BIND_STRICT:	bind_statement(true); break;
+			case TokenKind::BIND:			bind_statement(BindFlag::PLAIN, false); break;
+			case TokenKind::BIND_STRICT:	bind_statement(BindFlag::STRICT, false); break;
+			case TokenKind::UNBIND:			bind_statement(BindFlag::PLAIN, true); break;
 			case TokenKind::ID:				binding_access_statement(); break;
 			case TokenKind::BANG:			proc_call_statement(); break;
 			case TokenKind::AT:				native_call_statement(); break;
@@ -588,7 +614,7 @@ namespace Process {
 
 		// Check each parameter and push a bind opcode with each param
 		if (m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size() > 0) {
-			push_bytes(ByteCode::BIND_STRICT, m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size());
+			push_bytes(ByteCode::BIND_PARAM, m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size());
 
 			for(auto param : m_env->defs.procedures[proc_idx].second[sub_idx].parameters) {
 				auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), param.id);

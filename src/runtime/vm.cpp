@@ -28,10 +28,16 @@ void VM::unwind_stack() {
 		for(int frame_idx = m_call_stack.size()-1; frame_idx >= 0; --frame_idx) {
 			std::shared_ptr<CallFrame> frame = m_call_stack[frame_idx];
 			std::cout << "depth " << frame_idx << " '" <<  frame->proc_id << "' bindings [";
-			// TODO: Print each binding here
+
 			size_t binding_idx = 0;
 			for(auto& binding : frame->bindings) {
-				std::cout << "'" << binding.first << "':'" << ((binding.second->strict) ? "strict" : "plain") << "'";
+				std::cout << "'" << binding.first << "':";
+
+				switch(binding.second->flag) {
+					case BindFlag::PLAIN: std::cout << "'plain'"; break;
+					case BindFlag::STRICT: std::cout << "'strict'"; break;
+					case BindFlag::PARAM: std::cout << "'param'"; break;
+				}
 
 				if (binding_idx++ < frame->bindings.size() - 1) {
 					std::cout << " ";
@@ -330,12 +336,12 @@ void VM::comparison_op() {
 	}
 }
 
-void VM::bind(bool strict) {
+void VM::bind(BindFlag bindType, bool unbind) {
 	size_t bind_count = *(++m_ip);
 	ByteCode *end = m_ip + bind_count;
 	size_t bind_idx = 0;
 
-	if (bind_count > stack_len()) {
+	if (!unbind && bind_count > stack_len()) {
 		error(false, Util::string_format(
 			"Trying to bind %d value(s), but the stack contains %d value(s)",
 			bind_count, stack_len()
@@ -345,22 +351,45 @@ void VM::bind(bool strict) {
 	while(m_ip < end) {
 		bind_idx = *(++m_ip);
 		auto binding_it = m_top_stack->bindings.find(m_env->idLiterals[bind_idx]);
+		bool at_end = binding_it == m_top_stack->bindings.end();
 		
-		// Check if binding exists
-		if (binding_it == m_top_stack->bindings.end()) {
-			m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
-		} else {
-			if (m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict) {
+		if (unbind) {
+			// Binding does not exist
+			if (at_end) {
 				error(false, Util::string_format(
-					"Trying to rebind a parameter/strict binding '%s'",
+					"Trying to unbind an unbound value '%s'",
 					m_env->idLiterals[bind_idx].c_str()
 				));
 			}
-		}
 
-		// Whether we can unbind or not
-		m_top_stack->bindings[m_env->idLiterals[bind_idx]]->strict = strict;
-		m_top_stack->bindings[m_env->idLiterals[bind_idx]]->value = pop_stack();
+			if (m_top_stack->bindings[m_env->idLiterals[bind_idx]]->flag == BindFlag::PARAM) {
+				error(false, Util::string_format(
+					"Trying to unbind a parameter '%s'",
+					m_env->idLiterals[bind_idx].c_str()
+				));
+			}
+
+			// Unbind the value
+			m_top_stack->bindings.erase(m_env->idLiterals[bind_idx]);
+		} else {
+			// Check if binding exists
+			if (at_end) {
+				m_top_stack->bindings[m_env->idLiterals[bind_idx]] = std::make_shared<Binding>();
+			} else {
+				BindFlag flag = m_top_stack->bindings[m_env->idLiterals[bind_idx]]->flag;
+
+				// Cannot override a parameter or strict
+				if (flag == BindFlag::STRICT || flag == BindFlag::PARAM) {
+					error(false, Util::string_format(
+						"Trying to rebind a parameter/strict binding '%s'",
+						m_env->idLiterals[bind_idx].c_str()
+					));
+				}
+			}
+
+			m_top_stack->bindings[m_env->idLiterals[bind_idx]]->flag = bindType;
+			m_top_stack->bindings[m_env->idLiterals[bind_idx]]->value = pop_stack();
+		}
 	}
 }
 
@@ -423,12 +452,22 @@ void VM::run() {
 			}
 
 			case ByteCode::BIND: {
-				bind(false);
+				bind(BindFlag::PLAIN, false);
 				break;
 			}
 
 			case ByteCode::BIND_STRICT: {
-				bind(true);
+				bind(BindFlag::STRICT, false);
+				break;
+			}
+
+			case ByteCode::BIND_PARAM: {
+				bind(BindFlag::PARAM, false);
+				break;
+			}
+
+			case ByteCode::UNBIND: {
+				bind(BindFlag::PLAIN, true);
 				break;
 			}
 

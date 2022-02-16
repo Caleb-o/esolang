@@ -15,8 +15,12 @@ namespace Runtime {
 }
 
 namespace Process {
+	enum BindFlag {
+		PLAIN, STRICT, PARAM,
+	};
+
 	struct Binding {
-		bool strict; // Whether we can unbind or not
+		BindFlag flag; // Whether we can unbind or not
 		std::shared_ptr<Value> value;	
 	};
 
@@ -169,6 +173,8 @@ namespace Process {
 				}
 
 				case ByteCode::BIND:
+				case ByteCode::UNBIND:
+				case ByteCode::BIND_PARAM:
 				case ByteCode::BIND_STRICT: {
 					int bindings = (int)env->code[++i];
 					int count = i + bindings;
