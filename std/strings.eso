@@ -56,7 +56,7 @@ proc std_to_upper(str : string) -> string {
 # Parameters	: STRING, STRING - src1, src2
 # Return		: BOOL - result
 proc std_str_cmp(str_a, str_b : string) -> bool {
-	str_a str_b @str_cmp
+	str_a str_b @str_cmp bind | ret | 2 @drop_n ret
 }
 
 # Wraps the native @stoi and provides an integer

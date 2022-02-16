@@ -5,6 +5,7 @@
 # https://edabit.com/challenge/s695FkhRd3J65tmdQ
 # Write a function to replace all instances of character c1 
 # with character c2 and vice versa.
+using 'std:strings'
 
 proc replace_all(b, a, str : string) -> string {
 	str @str_len 0 '' bind | result, idx, len |
@@ -13,15 +14,15 @@ proc replace_all(b, a, str : string) -> string {
 		idx @str_index bind | char |
 		false bind | has_value |
 		
-		char a @str_cmp if {
+		char a |!2| !std_str_cmp if {
 			true bind | has_value |
 			result b + bind | result |
-		} 2 @drop_n
+		}
 		
-		char b @str_cmp if {
+		char b |!2| !std_str_cmp if {
 			true bind | has_value |
 			result a + bind | result |
-		} 2 @drop_n
+		}
 		
 		has_value not if {
 			result char + bind | result |

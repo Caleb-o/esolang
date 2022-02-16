@@ -5,6 +5,7 @@
 # https://edabit.com/challenge/udrQ2ckXP9cXNXiSk
 # Create a function which validates whether a bridge is safe 
 # to walk on (i.e. has no gaps in it to fall through).
+using 'std:strings'
 
 proc main() -> void {
 	true loop {
@@ -15,19 +16,15 @@ proc main() -> void {
 		@str_len 0 true bind | safe, idx, len, input |
 
 		# Check for quit
-		'quit' input @str_cmp if {
-			2 @drop_n
+		'quit' input |!2| !std_str_cmp if {
 			'quitting' println drop
 			false
 		} else {
-			# Drop previous string values
-			2 @drop_n
-
 			# Loop through each string index
 			true loop {
-				input idx @str_index '#' @str_cmp false = if {
+				input idx @str_index '#' |!2| !std_str_cmp false = if {
 					false bind | safe |
-				} 3 @drop_n
+				} drop
 	
 				idx 1 + bind | idx |
 				idx len <

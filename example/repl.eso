@@ -6,6 +6,7 @@
 #			: Since we append into a main procedure, we cannot create our own procedures. Until
 #			: nested procedures are implemented, this simply will not work. So it is limited to
 #			: basic expressions and statements.
+using 'std:strings'
 
 proc main() -> void {
 	true loop {
@@ -14,16 +15,12 @@ proc main() -> void {
 		bind | source |
 
 		# Check if we want to quit
-		source 'quit' @str_cmp if {
+		source 'quit' |!2| !std_str_cmp if {
 			@drop_stack
 			'quitting' println drop
 			false
 		} else {
-			# Drop the quit
-			drop
-
-			source 'file' @str_cmp if {
-				2 @drop_n
+			source 'file' |!2| !std_str_cmp if {
 				'File path> ' @input
 				bind | fileName |
 
@@ -38,7 +35,6 @@ proc main() -> void {
 
 				true
 			} else {
-				2 @drop_n
 				# We must insert the code into a main block, since we don't currently support
 				# top-level code.
 				source '}' +
