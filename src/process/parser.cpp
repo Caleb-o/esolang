@@ -93,8 +93,8 @@ namespace Process {
 
 	void Parser::consume(TokenKind expected) {
 		if (m_current->kind == expected) {
-			m_current = m_lexer->get_token();
 			m_analyser.op(m_current);
+			m_current = m_lexer->get_token();
 		} else {
 			// TODO: Throw exception
 			error(Util::string_format("Expected token '%s' but got '%s' (%s) on line %d at pos %d\n", get_token_name(expected), get_token_name(m_current->kind), m_current->lexeme.c_str(), m_current->line, m_current->col));
@@ -154,6 +154,8 @@ namespace Process {
 				capture_count++;
 			}
 		}
+
+		m_analyser.capture(capture_count);
 
 		consume(TokenKind::CAPTURE);
 		push_bytes(ByteCode::CAPTURE, capture_count);
@@ -264,9 +266,43 @@ namespace Process {
 			));
 		}
 
+		// Find a procedure with N amount of values and check each type
+		size_t sub_idx = 0;
+		bool found = false;
+
+		for(auto& proc_def : m_env->defs.procedures[proc_idx].second) {
+			if (proc_def.parameters.size() != m_analyser.capture_size()) {
+				sub_idx++;
+				continue;
+			}
+
+			size_t param_idx = 0;
+			for(auto& param : proc_def.parameters) {
+				if (param.kind != flag_to_valuekind(m_analyser.peek(param_idx++))) {
+					break;
+				}
+			}
+
+			found = true;
+			break;
+		}
+		
+		if (found) {
+			// Add 1 so we can pop the capture
+			for(int i = 0; i < m_analyser.capture_size() + 1; ++i) {
+				m_analyser.pop();
+			}
+		} else {
+			error(Util::string_format(
+				"Could not find a procedure that matches the provided arguments for '%s'",
+				id.c_str()
+			));
+		}
+
 		// Get the current procedure idx and push it to the proc call
 		// Note: We infer which overload to call at run-time
 		push_bytes(ByteCode::PROCCALL, proc_idx);
+		push_byte(sub_idx);
 	}
 
 	void Parser::native_call_statement() {
@@ -295,6 +331,9 @@ namespace Process {
 		push_byte(ByteCode::LOAD_BINDING);
 
 		auto name_it = std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), binding);
+
+		// Check if binding exists and what type it is
+		m_analyser.load_binding(binding);
 
 		if (name_it == m_env->idLiterals.end()) {
 			m_env->idLiterals.push_back(binding);
@@ -337,11 +376,11 @@ namespace Process {
 
 		push_bytes(byte, 0);
 		size_t bind_len = (m_is_top_level) ? m_top_level.size() - 1 : m_env->code.size() - 1;
-		size_t bind_count = 0;
 		std::vector<size_t> bindidx;
 
 		consume(TokenKind::CAPTURE);
 
+		size_t idx;
 		while(m_current->kind != TokenKind::CAPTURE) {
 			std::string id = copy_lexeme_str(m_current);
 			consume(TokenKind::ID);
@@ -350,11 +389,11 @@ namespace Process {
 
 			if (name_it == m_env->idLiterals.end()) {
 				m_env->idLiterals.push_back(id);
-				size_t idx = m_env->idLiterals.size() - 1;
+				idx = m_env->idLiterals.size() - 1;
 				bindidx.push_back(idx);
 				push_byte(idx);
 			} else {
-				size_t idx = std::distance(m_env->idLiterals.begin(), name_it);
+				idx = std::distance(m_env->idLiterals.begin(), name_it);
 				bindidx.push_back(idx);
 				push_byte(idx);
 			}
@@ -366,8 +405,6 @@ namespace Process {
 				m_analyser.bind(id);
 			}
 
-			bind_count++;
-
 			// Multiple binds
 			if (m_current->kind == TokenKind::COMMA) {
 				consume(TokenKind::COMMA);
@@ -376,14 +413,16 @@ namespace Process {
 
 		consume(TokenKind::CAPTURE);
 
+		m_analyser.capture(bindidx.size());
+
 		// Get count of bindings
-		m_env->code[bind_len] = (ByteCode)bind_count;
+		m_env->code[bind_len] = (ByteCode)bindidx.size();
 
 		// "Scope" bound bindings
 		if (m_current->kind == TokenKind::LCURLY) {
 			code_block();
 
-			push_bytes(ByteCode::UNBIND, bind_count);
+			push_bytes(ByteCode::UNBIND, bindidx.size());
 			for(auto idx : bindidx) {
 				push_byte(idx);
 				m_analyser.unbind(*(m_env->idLiterals.begin() + idx));
@@ -559,6 +598,8 @@ namespace Process {
 				procDef.parameters.push_back({ id, kind });
 				params->parameters.push_back({ id, kind });
 
+				m_analyser.bind_param(id, valuekind_to_flag(kind));
+
 				if (std::find(m_env->idLiterals.begin(), m_env->idLiterals.end(), id) == m_env->idLiterals.end()) {
 					m_env->idLiterals.push_back(id);
 				}
@@ -646,7 +687,6 @@ namespace Process {
 			}
 		}
 
-
 		// Check each parameter and push a bind opcode with each param
 		if (m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size() > 0) {
 			push_bytes(ByteCode::BIND_PARAM, m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size());
@@ -665,6 +705,12 @@ namespace Process {
 
 		// Parse statements within code block
 		code_block();
+
+		if (m_env->defs.procedures[proc_idx].second[sub_idx].parameters.size() > 0) {
+			for(auto param : m_env->defs.procedures[proc_idx].second[sub_idx].parameters) {
+				m_analyser.unbind(param.id);
+			}
+		}
 
 		// Conditional bytes, since main cannot return
 		if (std::strcmp(id.c_str(), "main") != 0) {
@@ -729,7 +775,6 @@ namespace Process {
 	std::shared_ptr<Environment> Parser::parse(std::string source, std::vector<std::string> argv) {
 		m_lexer = std::make_unique<Lexer>(Lexer(source));
 		m_current = m_lexer->get_token();
-		m_analyser.op(m_current);
 
 		size_t hash = Util::hash(source.c_str(), source.size());
 		m_file_hashes.insert(hash);
@@ -740,6 +785,7 @@ namespace Process {
 		m_env->argv = argv;
 
 		program();
+
 		m_is_top_level = false;
 		m_completed = true;
 

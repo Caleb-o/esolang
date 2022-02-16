@@ -544,54 +544,9 @@ void VM::run() {
 
 			case ByteCode::PROCCALL: {
 				auto proc_it = std::next(m_env->defs.procedures.begin(), *(++m_ip));
-				int sub_idx = 0;
-
-				// TODO: Make it so void procs can go without a capture list
-				// Must be a capture list
-				if (m_stack.size() < m_top_stack->stack_start || peek_stack()->kind != ValueKind::CAPTURE) {
-					error(false, Util::string_format(
-						"Procedure call '%s' requires a capture list on the stack top",
-						proc_it->first.c_str()
-					));
-				}
+				int sub_idx = *(++m_ip);
 
 				std::shared_ptr<Value> capture_list = pop_stack();
-
-				// We must linearly check each overload + each parameter
-				// It is possible to immediately skip
-				for(auto it = proc_it->second.begin(); it != proc_it->second.end(); ++it) {
-					size_t param_idx = 0;
-					bool found = true;
-
-					// Skip if arguments aren't correct count
-					if (capture_list->capture_len != it->parameters.size()) {
-						sub_idx++;
-						continue;
-					}
-
-					// Check all parameters
-					for(int param_idx = 0; param_idx < it->parameters.size(); ++param_idx) {
-						// Types don't equal then it's correct
-						auto param = std::next(it->parameters.begin(), param_idx);
-
-						if (param->kind != peek_stack(param_idx)->kind) {
-							found = false;
-							continue;
-						}
-					}
-
-					// Correct type found
-					if (found) break;
-					sub_idx++;
-				}
-
-				// Failed to find a valid procedure that matches stack items
-				if (sub_idx >= proc_it->second.size()) {
-					error(false, Util::string_format(
-						"Could not find a procedure ('%s') that matches stack values",
-						proc_it->first.c_str()
-					));
-				}
 
 				// Setup a callframe
 				size_t return_idx = (m_ip - m_env->code.data());

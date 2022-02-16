@@ -42,7 +42,7 @@ namespace Process {
 	}
 
 	bool Analyser::is_allowed(TypeFlag flag_a, TypeFlag flag_b) {
-		return m_allowed_types[flag_a] & flag_b != 0;
+		return (m_allowed_types[flag_a] & flag_b) != 0;
 	}
 
 	void Analyser::op(std::shared_ptr<Token> current) {
@@ -130,6 +130,11 @@ namespace Process {
 		}
 	}
 
+	void Analyser::capture(size_t count) {
+		m_type_stack.push_back(TypeFlag::CAPTURED_VALUES);
+		m_capture_count = count;
+	}
+
 	void Analyser::bind(std::string id) {
 		if (m_type_stack.size() < m_stack_start + 1) {
 			error("Not enough items on the stack");
@@ -150,8 +155,25 @@ namespace Process {
 		m_type_bindings[id] = flag;
 	}
 
+	void Analyser::bind_param(std::string id, TypeFlag flag) {
+		m_type_bindings[id] = flag;
+	}
+
 	void Analyser::unbind(std::string id) {
 		m_type_bindings.erase(id);
+	}
+
+	void Analyser::load_binding(std::string id) {
+		auto bind_it = m_type_bindings.find(id);
+
+		if (bind_it == m_type_bindings.end()) {
+			error(Util::string_format(
+				"Trying to load a binding that isn't bound '%s'",
+				id.c_str()
+			));
+		}
+
+		m_type_stack.push_back(bind_it->second);
 	}
 
 	void Analyser::push(TypeFlag flag) {
