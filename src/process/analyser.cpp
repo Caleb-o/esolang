@@ -177,7 +177,6 @@ namespace Process {
 					kind_as_str(flag_to_valuekind(peek(0)))
 				));
 			}
-			add_proc_ret(env->defs.procedures[proc_idx].first, peek(0));
 			pop();
 
 			param_idx++;

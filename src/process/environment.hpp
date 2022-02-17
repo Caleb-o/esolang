@@ -53,6 +53,7 @@ namespace Process {
 	struct NativeDef {
 		std::shared_ptr<std::function<void(VM *)>> func;
 		std::vector<ValueKind> parameters;
+		std::vector<ValueKind> returns;
 	};
 
 	struct Definitions {

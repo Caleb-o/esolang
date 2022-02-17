@@ -24,7 +24,6 @@ namespace Process {
 		std::vector<TypeFlag> m_type_stack;
 		std::map<TypeFlag, int> m_allowed_types;
 		std::map<std::string, TypeFlag> m_type_bindings;
-		std::map<std::string, std::vector<TypeFlag>> m_proc_rets;
 		std::shared_ptr<Token> m_current;
 
 	public:
@@ -43,8 +42,6 @@ namespace Process {
 		void capture(size_t);
 		size_t eval_return(std::shared_ptr<Environment>, size_t, std::vector<Runtime::ValueKind>&);
 		size_t capture_size() { return m_capture_count; }
-		void add_proc_ret(std::string id, TypeFlag flag) { m_proc_rets[id].push_back(flag); }
-		std::vector<TypeFlag>& get_proc_ret(std::string id) { return m_proc_rets[id]; }
 		void bind(std::string);
 		void bind_param(std::string, TypeFlag);
 		void unbind(std::string);

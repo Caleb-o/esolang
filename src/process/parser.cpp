@@ -306,8 +306,8 @@ namespace Process {
 		push_bytes(ByteCode::PROCCALL, proc_idx);
 		push_byte(sub_idx);
 
-		for(auto flag : m_analyser.get_proc_ret(id)) {
-			m_analyser.push(flag);
+		for(auto& param : m_env->defs.procedures[proc_idx].second[sub_idx].parameters) {
+			m_analyser.push(valuekind_to_flag(param.kind));
 		}
 	}
 
@@ -328,6 +328,24 @@ namespace Process {
 		}
 
 		// TODO: Add analysis for native calls, we may need to add return types for native procs
+		size_t idx = 0;
+		for(auto param : native_it->second->parameters) {
+			if (param != flag_to_valuekind(m_analyser.peek(0))) {
+				error(Util::string_format(
+					"'%s' expected type '%s' at pos %d, but got '%s'",
+					native_it->first.c_str(),
+					kind_as_str(param),
+					idx,
+					get_type_name(m_analyser.peek(0))
+				));
+			}
+			m_analyser.pop();
+			idx++;
+		}
+
+		for(auto param : native_it->second->returns) {
+			m_analyser.push(valuekind_to_flag(param));
+		}
 
 		push_bytes(ByteCode::NATIVECALL, native_idx);
 	}
