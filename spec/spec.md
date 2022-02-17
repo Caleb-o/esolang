@@ -11,6 +11,9 @@ Both flavours offer different syntaxes and features, at different speeds. Saturn
 ## What's different from the last flavour?
 "Pluto" is the new flavour in the collection of Eso. Like the last, it will include many changes to features, syntax and all-round look and feel. To begin, here is a broad overview of what differs:
 
+* Written in Odin instead of C++
+	* C++ is great! But it can easily become annoying to manage and write
+	* Odin offers high-level features and syntax for a better workflow
 * Arrays. It is difficult to program without some sort of data storage, so arrays are required.
 ```
 # Create an array of size 4 (Take)
@@ -28,6 +31,7 @@ arr[1] println drop
 Note: *To create an array, an index and type annotation is required. Arrays will be bounds checked and will throw an error if indexing out of bounds. This can be done at compile-time since we know the size.*
 
 * Type properties/procedures over native procedures
+	* Reasoning: It is a much nicer and cleaner syntax. The old native calls just would not work with the new style/flow.
 ```
 # Old
 str ' ' @str_split
@@ -55,6 +59,14 @@ PI :: 3.14
 
 # New
 add_two(1, 2) println drop
+```
+* Loop break and continue
+```
+# Old
+true loop { false }
+
+# New
+loop { break }
 ```
 
 ## Considerations
