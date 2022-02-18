@@ -78,6 +78,9 @@ skip_whitespace :: proc(lexer : ^Lexer) {
 
 make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 	start_idx := lexer._ip
+	
+	// Skip initial item
+	advance(lexer)
 
 	for lexer._ip < len(lexer.source) && is_alpha_num(lexer.source[lexer._ip]) do advance(lexer)
 
@@ -90,6 +93,7 @@ make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 		lower_lexeme := strings.to_lower(lexeme)
 
 		// To lower version matches a keyword
+		// TODO: Use flag that disables this check (On by default)
 		if lower_lexeme in RESERVED {
 			formatted := fmt.aprintf("'%s' matches a keyword. Did you mean '%s'?", lexeme, lower_lexeme)
 			info.log(info.Log_Level_Flag.Warning, formatted, lexer._line, lexer._col)
@@ -99,6 +103,31 @@ make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 
 		return make_token(lexer, .Id, lexeme)
 	}
+}
+
+make_numeric :: proc(lexer : ^Lexer) -> ^Token {
+	start_idx := lexer._ip
+	kind := .Int_Lit
+	has_floating_point := false
+
+	for lexer._ip < len(lexer.source) && is_alpha_num(lexer.source[lexer._ip]) {
+		advance(lexer)
+
+		// Decimal place found, we can assume floating point
+		if lexer.source[lexer._ip] == '.' {
+			if has_floating_point {
+				// We already have a floating point and we found another
+				info.log(info.Log_Level_Flag.Error, "Floating point number found a second decimal place", lexer._line, lexer._col)
+				return nil
+			}
+
+			// Set the numeric type to floating point
+			has_floating_point = true
+			kind = .Float_Lit
+		}
+	}
+
+	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip]))
 }
 
 get_token :: proc(lexer : ^Lexer) -> ^Token {
@@ -114,12 +143,15 @@ get_token :: proc(lexer : ^Lexer) -> ^Token {
 			return make_token(lexer, .Eof, "EOF")
 		}
 
-		// TODO: Identifier
+		// Create an Identifier
 		if is_alpha(lexer.source[lexer._ip]) {
 			return make_identifier(lexer)
 		}
 
-		// TODO: Numeric
+		// Create a Numeric value
+		if is_digit(lexer.source[lexer._ip]) {
+			return make_number(lexer)
+		}
 
 		// TODO: Single token
 		switch single := lexer.source[lexer._ip]; single {
