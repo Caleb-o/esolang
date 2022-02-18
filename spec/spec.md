@@ -18,19 +18,19 @@ New:
 	* C++ is great! But it can easily become annoying to manage and write
 	* Odin offers high-level features and syntax for a better workflow
 * Arrays. It is difficult to program without some sort of data storage, so arrays are required.
-```
-# Create an array of size 4 using type int
-$arr[4 : int]
+	```
+	# Create an array of size 4 using type int
+	$arr[4 : int]
 
-# We could also tell the array to capture N amount of values while binding
-1 2 $arr[2 : int](2)
+	# We could also tell the array to capture N amount of values while binding
+	1 2 $arr[2 : int](2)
 
-# Index an array
-arr[1] println drop
+	# Index an array
+	arr[1] println drop
 
-# Assign a value
-3 $arr[0]
-```
+	# Assign a value
+	3 $arr[0]
+	```
 ***Note: To create an array, an index and type annotation is required. Arrays will be bounds checked and will throw an error if indexing out of bounds. This can be done at compile-time since we know the size.**
 
 * Type properties/procedures over native procedures
@@ -154,13 +154,12 @@ The "Bytecode" may need to use u16/u32 instead of a typical u8. Primarily for th
 * `ROTATE`					- Rotates the top 3 items on the stack `a b c => c b a`
 * `BIND [FLAG] [ID_IDX]`	- Binds a value using a certain flag, with an identifier
 * `UNBIND [COUNT] [ID_IDX] <SEMI ID_IDX>` - Unbinds COUNT amount of bindings with ID
-* `LOAD_BINDING [ID_IDX]`		- Pushes a value onto the stack, using the value from a binding
+* `LOAD_BINDING [ID_IDX]`	- Pushes a value onto the stack, using the value from a binding
 * `PROC_CALL [DEF_IDX]`		- Calls the procedure at index of its definition
 * `BUILTIN_CALL [DEF_IDX]`	- Calls a builtin procedure at index of its definition
 * `GOTO [POS]`				- Moves the instruction pointer to the position specified
 * `CONDITION [FALSE_POS]` 	- If the current value is false, jump to position after body
 * `RETURN`					- Flag for the VM to pop the current frame (A goto will handle the jump back, which follows the return)
-* `ADD, SUB, MUL, DIV, MOD`	- ADD|SUB|MUL|DIV maths operations
-* `GREATER, LESS, EQUAL` 	- GREATER|LESS|EQUAL|GREATER_EQ|LESS_EQ comparison operations
-* `GREATER_EQ, LESS_EQ`		
-* `OR, AND, NOT`			- Boolean operations
+* `ARITHMETIC [FLAG]`		- ADD|SUB|MUL|DIV maths operations
+* `COMPARISON [FLAG]`		- GREATER|GREATER_EQ|LESS|LESS_EQ|EQUAL comparison operations
+* `BOOLEAN [FLAG]`			- OR|AND|NOT boolean operations
