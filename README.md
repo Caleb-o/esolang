@@ -10,5 +10,8 @@ This is a bytecode interpreted, stack-based language. I have been reading about 
 - BrainFuck
 - Odin
 
+## Building
+`odin build src/main.odin -vet [-debug|-opt:3] -out:bin/eso.exe`
+
 ## Note
 Eso is in development and is **very** likely to change at any moment. It is on its third iteration right now, which again, will differ from the last. There is a spec folder with ideas and a goal sample. Since I want to keep previous iterations around, for educational purposes and as milestones, I've added branches where these "flavours" ended support. They should still run in their state, but will not be compatible with other flavours of Eso or be supported.
