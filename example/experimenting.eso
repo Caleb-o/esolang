@@ -1,6 +1,0 @@
-# Author    : Caleb
-# Date      : 10th Feb 2022
-# Modified  : 16th Feb 2022
-proc main() -> void {
-	'str' @str_len drop
-}

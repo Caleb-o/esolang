@@ -1,8 +1,0 @@
-# Author    : Caleb
-# Date      : 10th Feb 2022
-# Modified  : 10th Feb 2022
-
-# Print Hello World!
-proc main() -> void {
-	'Hello, World!' println drop
-}

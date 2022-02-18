@@ -77,11 +77,6 @@ this will require some adjustments to proc_call/procedure_def() because we expec
 to be added as a definition immediately. We can make proc_id_literal a temporary buffer,
 just so we can resolve definitions.
 
-
-## List of Native Procedures:
-* [ ] `write_file` : Writes to a file, using the previous string as a file path and the string prior as the buffer
-
-
 ## Top-level code
 If we simply ran the VM top to bottom, we would run into procedures and run their code, which is not desired. One solution is, we capture all top-level code and insert it all at the bottom and set the ip to the start of the top-level code.
 
@@ -99,10 +94,6 @@ Maths functions - eg. cos, sin, tan,
 * Namespacing / Packages instead of imports
 	* This would require a "project" file of sorts or automatically compiling files in a directory, recursively.
 	* Name resolution for procedures
-* % / mod
-* continue / break within loops
-	* Requires re-evaluation of a block, to determine where the continue/break goes to
-	* A continue/break can simply be a goto - continue to top, break to bottom
 * More CLI arguments/flags:
 	* -c : lexes + parses files only, checks for errors
 	* -t : runs all tests within a file (Requires Runner system)

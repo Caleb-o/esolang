@@ -58,6 +58,9 @@ New:
 	log(Log.INFO, "Finished parsing")
 	log(Log.DEBUG, "Skipping using on existing file", file_info)
 	```
+* [**Internal**] Runners (Refer to notes)
+* Tests (Refer to notes)
+* Bit operations - Bit shifts, or, and
 * Quality of life changes
 	* Better binding syntax, which allows simpler usage with plain and strict bindings. Allows the bindings to be more explicit with a single syntax.
 	```
