@@ -16,14 +16,15 @@ using {
 PI :: 3.14
 
 
-# This is a procedure that takes two integers and returns 1
+# This is a procedure that takes two integers and returns one int
 # x and y are bound with a const flag, so they cannot be overwritten
-proc add_two(x, y : int) :: int {
+proc add_twoi(x, y : int) :: int {
 	x y +
 }
 
-# Just like the original Eso, we can overload a procedure
-proc add_two(x, y : float) :: float {
+# Unlike the Jupiter flavour of Eso, we cannot overload a procedure
+# This makes parsing and the bytecode a little simpler
+proc add_twof(x, y : float) :: float {
 	x y +
 }
 
@@ -44,30 +45,32 @@ proc string_split(str : string) :: string[] {
 
 # Main procedure - the entry point
 proc main() :: void {
-	# We can parse it this and also see that value and 1 are of type int
 	# Here x = value, y = 2
 	add_two(value, 2) println
 
 	# We will bind value to the top value with the strict modifier
-	# so we cannot overwrite value. We can be explicity with the type,
+	# so we cannot overwrite value. We can be explicit with the type annotation,
 	# but can can also infer the type
 	$value : strict
 
 	'string' $str
 
-	# Push 1, 2 and 3 then bind them to a, b, c (a=3, b= 2, a =1)
+	# Push 1, 2 and 3 then bind them to a, b, c (a=3, b=2, a=1)
 	1 2 3
 	$a, b, c
 
 	# Creating an array (with 3 integer elements) and capturing all 3 immediately
 	4 5 6
-	$d[3 : int](3)
+	$arr[3 : int](3)
 
 	# Access the third element
-	d[2] println drop
+	arr[2] println drop
 
 	# Overwrite a value at index 1
-	3 $d[1]
+	3 $arr[1]
+
+	# This would cause an error, since we go out of bounds
+	# $arr[5]
 
 	# Using other properties
 	# Type - Will push the values type to the stack
@@ -77,6 +80,8 @@ proc main() :: void {
 	a.sizeof println drop
 
 	# Len - Return the length of an array/string
-	d.len println drop
+	arr.len println drop
 	str.len println drop
+
+	drop drop
 }

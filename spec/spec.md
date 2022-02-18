@@ -11,6 +11,7 @@ Both flavours offer different syntaxes and features, at different speeds. Saturn
 ## What's different from the last flavour?
 "Pluto" is the new flavour in the collection of Eso. Like the last, it will include many changes to features, syntax and all-round look and feel. To begin, here is a broad overview of what differs:
 
+New:
 * Written in Odin instead of C++
 	* C++ is great! But it can easily become annoying to manage and write
 	* Odin offers high-level features and syntax for a better workflow
@@ -51,7 +52,9 @@ str.split(' ')
 # Types will be inferred since it is constant, we only allow an expression after
 PI :: 3.14
 ```
-* Compile-time type checking
+* Compile-time checks
+	* Type checking
+	* Bound accesses in arrays
 * Explicit procedure calls
 ```
 # Old
@@ -61,6 +64,7 @@ PI :: 3.14
 add_two(1, 2) println drop
 ```
 * Loop break and continue
+	* Note: Breaks and continues are just a GOTO op which points to either the end or start of the loop
 ```
 # Old
 true loop { false }
@@ -68,6 +72,26 @@ true loop { false }
 # New
 loop { break }
 ```
+
+Removed:
+* Procedure overloading
+	* Made it easy to have the same functionality with multiple signatures, but you would not know which it would call.
+	* In a language like this, it's difficult to really know whether a type is correct.
+	* I would like more explicit behaviours in Eso
+* No native procedures
+	* Native procedures are being replaced with type procedures, properties and builtin procedures.
+	* Builtin procedures are basically the same, however, there is no special syntax to invoke them.
+	```
+	# Old
+	'hello.eso' @read_file
+	str ' ' @str_split
+
+	# New
+	read_file('hello.eso')
+	str.split(' ')
+	```
+* Captures
+	* Captures served the purpose of passing data into a procedure. Since we're now passing them directly, we don't need this feature.
 
 ## Considerations
 * Type as an expr/statement
