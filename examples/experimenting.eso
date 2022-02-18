@@ -1,4 +1,9 @@
 # Hello again!
 proc main() :: void {
 	'Hello, World!' println drop
+
+	1 2.3 4
+
+	$a, b : float, c : strict int
+	!a, b, c
 }

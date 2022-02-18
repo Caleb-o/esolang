@@ -11,11 +11,6 @@ Lexer :: struct {
 	source : string,
 }
 
-// char peek(size_t);
-
-// std::shared_ptr<Token> make_string();
-// std::shared_ptr<Token> make_single(TokenKind);
-
 @(private)
 is_alpha :: proc(ch : u8) -> bool {
 	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_'
@@ -63,7 +58,6 @@ skip_whitespace :: proc(lexer : ^Lexer) {
 			
 			case '\t'..'\r', ' ':
 				advance(lexer)
-				info.log(info.Log_Level_Flag.Debug, "whitespace")
 			
 			case: // None of the above
 				break outer
@@ -71,6 +65,7 @@ skip_whitespace :: proc(lexer : ^Lexer) {
 	}
 }
 
+@(private)
 make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 	start_idx := lexer._ip
 	
@@ -100,6 +95,28 @@ make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 	}
 }
 
+@(private)
+make_string :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
+	// Skip initial quote
+	advance(lexer)
+
+	start_idx := lexer._ip
+
+	for lexer._ip < len(lexer.source) && lexer.source[lexer._ip] != '\'' do advance(lexer)
+
+	// Consume other quote
+	advance(lexer)
+
+	// Unterminated string
+	if lexer._ip >= len(lexer.source) && lexer.source[lexer._ip-1] != '\'' {
+		info.log(info.Log_Level_Flag.Error, "Unterminated string", lexer._line, lexer._col)
+		return make_token(lexer, .Eof, "Error"), .LexerErr
+	}
+
+	return make_token(lexer, .String_Lit, string(lexer.source[start_idx:lexer._ip-1])), .Ok
+}
+
+@(private)
 make_numeric :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 	start_idx := lexer._ip
 	kind := Token_Type.Int_Lit
@@ -119,11 +136,47 @@ make_numeric :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 			// Set the numeric type to floating point
 			has_floating_point = true
 			kind = .Float_Lit
+			
+			advance(lexer)
 		}
 	}
 
 	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip])), .Ok
 }
+
+@(private)
+make_single :: proc(lexer : ^Lexer, kind : Token_Type) -> (^Token, misc.Eso_Status) {
+	// Check for end of file
+	if lexer._ip + 1 > len(lexer.source) {
+		info.log(info.Log_Level_Flag.Error, "Unexpected end of file", lexer._line, lexer._col)
+		return make_token(lexer, .Eof, "Error"), .LexerErr
+	}
+
+	start_idx := lexer._ip
+	advance(lexer)
+	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip])), .Ok
+}
+
+@(private)
+make_double :: proc(lexer : ^Lexer, kind : Token_Type) -> (^Token, misc.Eso_Status) {
+	// Check for end of file
+	if lexer._ip + 2 > len(lexer.source) {
+		info.log(info.Log_Level_Flag.Error, "Unexpected end of file", lexer._line, lexer._col)
+		return make_token(lexer, .Eof, "Error"), .LexerErr
+	}
+
+	start_idx := lexer._ip
+	advance(lexer)
+	advance(lexer)
+	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip])), .Ok
+}
+
+@(private)
+peek :: proc(lexer : ^Lexer) -> u8 {
+	if lexer._ip + 1 >= len(lexer.source) do return '\e'
+	return lexer.source[lexer._ip + 1]
+}
+
 
 get_token :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 	if lexer._ip < len(lexer.source) {
@@ -148,6 +201,50 @@ get_token :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 
 		// TODO: Single token
 		switch single := lexer.source[lexer._ip]; single {
+			case '+':	return make_single(lexer, .Plus)
+			case '-':	return make_single(lexer, .Minus)
+			case '*':	return make_single(lexer, .Star)
+			case '/':	return make_single(lexer, .Slash)
+			case '%':	return make_single(lexer, .Modulus)
+
+			case '(':	return make_single(lexer, .L_Paren)
+			case ')':	return make_single(lexer, .R_Paren)
+			case '[':	return make_single(lexer, .L_Square)
+			case ']':	return make_single(lexer, .R_Square)
+			case '{':	return make_single(lexer, .L_Curly)
+			case '}':	return make_single(lexer, .R_Curly)
+
+			case '$':	return make_single(lexer, .Bind)
+			case '!':	return make_single(lexer, .Unbind)
+
+			case '.':	return make_single(lexer, .Dot)
+			case ',':	return make_single(lexer, .Comma)
+
+			case ':':
+				if peek(lexer) == ':' {
+					return make_double(lexer, .Colon_Colon)
+				} else {
+					return make_single(lexer, .Colon)
+				}
+
+			case '>':
+				if peek(lexer) == '=' {
+					return make_double(lexer, .Greater_Eq)
+				} else {
+					return make_single(lexer, .Greater)
+				}
+			case '<':
+				if peek(lexer) == '=' {
+					return make_double(lexer, .Less_Eq)
+				} else {
+					return make_single(lexer, .Less)
+				}
+			case '=':
+				return make_single(lexer, .Equal)
+			
+			case '\'':
+				return make_string(lexer)
+
 			case: // Does not match
 				info.log(info.Log_Level_Flag.Error, "Unknown token found", single, lexer._line, lexer._col)
 				return make_token(lexer, .Eof, "Error"), .LexerErr

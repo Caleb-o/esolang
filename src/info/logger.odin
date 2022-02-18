@@ -18,7 +18,7 @@ Log_Flags :: enum {
 @(private)
 Timer := time.Stopwatch{}
 @(private)
-Logger_Flags := Log_Flags.None
+Logger_Flags : Log_Flags
 
 
 @(private)
@@ -54,13 +54,23 @@ disable :: proc() {
 // Prints the coloured log level and timing (if flag is enabled)
 print_header :: proc(flag : Log_Level_Flag) {
 	// Print initial flag with its colour
-	fmt.printf("\u001b[37;1m[%s%s\u001b[37;1m] ", COLOUR_MAP[flag], flag)
+	fmt.printf("\u001b[37;1m[%s%s\u001b[37;1m]", COLOUR_MAP[flag], flag)
 
 	if Logger_Flags == Log_Flags.Show_Timings {
 		_, mm, ss := time.clock_from_stopwatch(Timer)
-		ms := cast(int)time.duration_milliseconds(time.stopwatch_duration(Timer))
-		fmt.printf("[%d:%d:%d] ", mm, ss, ms)
+		ms := time.duration_milliseconds(time.stopwatch_duration(Timer))
+
+		fmt.printf("\u001b[38;5;23m ")
+
+		if mm > 0 {
+			fmt.printf("%dm-%ds-%fms", mm, ss, ms)
+		} else if ss > 0 {
+			fmt.printf("%ds-%fms", ss, ms)
+		} else {
+			fmt.printf("%fms", ms)
+		}
 	}
+	fmt.printf("\u001b[37;1m ")
 }
 
 
