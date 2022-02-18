@@ -1,0 +1,5 @@
+# Hello again!
+^
+proc main() :: void {
+	'Hello, World!' println drop
+}

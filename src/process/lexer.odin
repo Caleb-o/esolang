@@ -13,9 +13,7 @@ Lexer :: struct {
 
 // char peek(size_t);
 
-// std::shared_ptr<Token> make_identifier();
 // std::shared_ptr<Token> make_string();
-// std::shared_ptr<Token> make_number();
 // std::shared_ptr<Token> make_single(TokenKind);
 
 @(private)
@@ -102,7 +100,7 @@ make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 	}
 }
 
-make_numeric :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Error) {
+make_numeric :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 	start_idx := lexer._ip
 	kind := Token_Type.Int_Lit
 	has_floating_point := false
@@ -115,7 +113,7 @@ make_numeric :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Error) {
 			if has_floating_point {
 				// We already have a floating point and we found another
 				info.log(info.Log_Level_Flag.Error, "Floating point number found a second decimal place", lexer._line, lexer._col)
-				return make_token(lexer, .Eof, "Error"), .Lexer
+				return make_token(lexer, .Eof, "Error"), .LexerErr
 			}
 
 			// Set the numeric type to floating point
@@ -127,7 +125,7 @@ make_numeric :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Error) {
 	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip])), .Ok
 }
 
-get_token :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Error) {
+get_token :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 	if lexer._ip < len(lexer.source) {
 		// Skip whitespace first
 		skip_whitespace(lexer)
@@ -152,7 +150,7 @@ get_token :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Error) {
 		switch single := lexer.source[lexer._ip]; single {
 			case: // Does not match
 				info.log(info.Log_Level_Flag.Error, "Unknown token found", single, lexer._line, lexer._col)
-				return make_token(lexer, .Eof, "Error"), .Lexer
+				return make_token(lexer, .Eof, "Error"), .LexerErr
 		}
 	}
 

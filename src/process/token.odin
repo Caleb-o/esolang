@@ -1,6 +1,6 @@
 package process
 
-Token_Type :: enum {
+Token_Type :: enum u8 {
 	// Operators
 	Plus, Minus, Slash, Star, Modulus, Colon, Colon_Colon,
 	Greater, Greater_Eq, Less, Less_Eq, Equal, Or, And, Not,

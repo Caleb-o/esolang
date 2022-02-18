@@ -1,5 +1,6 @@
 package main
 
+import "core:os"
 import "info"
 import "process"
 import "misc"
@@ -7,15 +8,21 @@ import "misc"
 main :: proc() {
 	info.enable()
 
-	lexer := process.Lexer { 1, 1, 0, "100.0" }
-	info.log(info.Log_Level_Flag.Info, "Parsing")
+	if data, status := os.read_entire_file_from_filename("examples/hello.eso"); status {
+		lexer := process.Lexer { 1, 1, 0, string(data) }
+		info.log(info.Log_Level_Flag.Info, "Parsing")
 
-	if token, status := process.get_token(&lexer); status != misc.Eso_Error.Ok {
-		info.log(info.Log_Level_Flag.Error, "Parser encountered an error")
-		free(token)
+		if token, status := process.get_token(&lexer); status != misc.Eso_Status.Ok {
+			info.log(status, "Parser encountered an error")
+			free(token)
+		} else {
+			info.log(info.Log_Level_Flag.Debug, token.lexeme)
+			free(token)
+		}
+
+		delete(data)
 	} else {
-		info.log(info.Log_Level_Flag.Debug, token.lexeme)
-		free(token)
+		info.log(info.Log_Level_Flag.Error, "Could not read file")
 	}
 	
 	process.cleanup_reserved()

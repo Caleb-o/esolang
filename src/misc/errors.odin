@@ -1,5 +1,5 @@
 package misc
 
-Eso_Error :: enum {
-	Ok, Lexer, Parser, Runtime,
+Eso_Status :: enum u8 {
+	Ok, LexerErr, ParserErr, RuntimeErr,
 }

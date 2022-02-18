@@ -2,6 +2,8 @@ package Info
 
 import "core:fmt"
 import "core:time"
+import "../misc"
+
 
 // The level of the log 
 Log_Level_Flag :: enum {
@@ -78,4 +80,9 @@ log_lexer_char :: proc(flag : Log_Level_Flag, message : string, unknown : u8, li
 	fmt.printf("%s '%c' on line %d at pos %d\n", message, unknown, line, col)
 }
 
-log :: proc{log_message, log_lexer, log_lexer_char}
+log_eso_status :: proc(status : misc.Eso_Status, message : string) {
+	print_header(.Error)
+	fmt.printf("%s with status '%s'\n", message, status)
+}
+
+log :: proc{log_message, log_lexer, log_lexer_char, log_eso_status}
