@@ -71,6 +71,9 @@ New:
 	# New
 	# Using modifiers, type annotations and inference
 	1 2 3 4 $a : strict, b : int, c : strict int, d
+
+	# Unbinding values
+	!a, b, d
 	```
 * Top-level constants
 	```

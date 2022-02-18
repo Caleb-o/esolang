@@ -67,3 +67,15 @@ log_message :: proc(flag : Log_Level_Flag, message : string) {
 	print_header(flag)
 	fmt.printf("%s\n", message)
 }
+
+log_lexer :: proc(flag : Log_Level_Flag, message : string, line, col : int) {
+	print_header(flag)
+	fmt.printf("%s on line %d at pos %d\n", message, line, col)
+}
+
+log_lexer_char :: proc(flag : Log_Level_Flag, message : string, unknown : u8, line, col : int) {
+	print_header(flag)
+	fmt.printf("%s '%c' on line %d at pos %d\n", message, unknown, line, col)
+}
+
+log :: proc{log_message, log_lexer, log_lexer_char}

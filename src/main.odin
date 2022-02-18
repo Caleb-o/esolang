@@ -1,16 +1,19 @@
 package main
 
 import "info"
+import "process"
 
 main :: proc() {
 	info.enable()
 
 	using info.Log_Level_Flag
 
-	info.log_message(Debug, "Debugging stuff")
-	info.log_message(Info, "Hello!")
-	info.log_message(Warning, "Something isn't right")
-	info.log_message(Error, "ABORT!")
+	lexer := process.Lexer { 1, 1, 0, "Swap" }
 
+	token := process.get_token(&lexer)
+	info.log(Debug, token.lexeme)
+	free(token)
+	
+	process.cleanup()
 	info.disable()
 }
