@@ -22,7 +22,7 @@ Logger_Flags := Log_Flags.None
 @(private)
 COLOUR_MAP := map[Log_Level_Flag]string {
 	.Debug = "\u001b[32;1m",
-	.Info = "\u001b[37m",
+	.Info = "\u001b[37;1m",
 	.Warning = "\u001b[33;1m",
 	.Error = "\u001b[31;1m",
 }
@@ -52,7 +52,7 @@ disable :: proc() {
 // Prints the coloured log level and timing (if flag is enabled)
 print_header :: proc(flag : Log_Level_Flag) {
 	// Print initial flag with its colour
-	fmt.printf("[%s%s\u001b[37m] ", COLOUR_MAP[flag], flag)
+	fmt.printf("\u001b[37;1m[%s%s\u001b[37;1m] ", COLOUR_MAP[flag], flag)
 
 	if Logger_Flags == Log_Flags.Show_Timings {
 		_, mm, ss := time.clock_from_stopwatch(Timer)

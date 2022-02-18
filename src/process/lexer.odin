@@ -2,16 +2,13 @@ package process
 
 import "core:fmt"
 import "core:strings"
+import "../misc"
 import "../info"
 
 
 Lexer :: struct {
 	_line, _col, _ip : int,
 	source : string,
-}
-
-cleanup :: proc() {
-	cleanup_reserved()
 }
 
 // char peek(size_t);
@@ -105,12 +102,12 @@ make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 	}
 }
 
-make_numeric :: proc(lexer : ^Lexer) -> ^Token {
+make_numeric :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Error) {
 	start_idx := lexer._ip
-	kind := .Int_Lit
+	kind := Token_Type.Int_Lit
 	has_floating_point := false
 
-	for lexer._ip < len(lexer.source) && is_alpha_num(lexer.source[lexer._ip]) {
+	for lexer._ip < len(lexer.source) && is_digit(lexer.source[lexer._ip]) {
 		advance(lexer)
 
 		// Decimal place found, we can assume floating point
@@ -118,7 +115,7 @@ make_numeric :: proc(lexer : ^Lexer) -> ^Token {
 			if has_floating_point {
 				// We already have a floating point and we found another
 				info.log(info.Log_Level_Flag.Error, "Floating point number found a second decimal place", lexer._line, lexer._col)
-				return nil
+				return make_token(lexer, .Eof, "Error"), .Lexer
 			}
 
 			// Set the numeric type to floating point
@@ -127,39 +124,38 @@ make_numeric :: proc(lexer : ^Lexer) -> ^Token {
 		}
 	}
 
-	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip]))
+	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip])), .Ok
 }
 
-get_token :: proc(lexer : ^Lexer) -> ^Token {
+get_token :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Error) {
 	if lexer._ip < len(lexer.source) {
 		// Skip whitespace first
 		skip_whitespace(lexer)
 
-		info.log(info.Log_Level_Flag.Debug, "Kek")
-
 		// Sanity check
 		if lexer._ip >= len(lexer.source) {
 			// Return an EOF token
-			return make_token(lexer, .Eof, "EOF")
+			return make_token(lexer, .Eof, "EOF"), .Ok
 		}
 
 		// Create an Identifier
 		if is_alpha(lexer.source[lexer._ip]) {
-			return make_identifier(lexer)
+			return make_identifier(lexer), .Ok
 		}
 
 		// Create a Numeric value
 		if is_digit(lexer.source[lexer._ip]) {
-			return make_number(lexer)
+			return make_numeric(lexer)
 		}
 
 		// TODO: Single token
 		switch single := lexer.source[lexer._ip]; single {
 			case: // Does not match
 				info.log(info.Log_Level_Flag.Error, "Unknown token found", single, lexer._line, lexer._col)
+				return make_token(lexer, .Eof, "Error"), .Lexer
 		}
 	}
 
 	// Return an EOF token
-	return make_token(lexer, .Eof, "EOF")
+	return make_token(lexer, .Eof, "EOF"), .Ok
 }

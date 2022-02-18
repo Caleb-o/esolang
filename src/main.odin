@@ -2,18 +2,22 @@ package main
 
 import "info"
 import "process"
+import "misc"
 
 main :: proc() {
 	info.enable()
 
-	using info.Log_Level_Flag
+	lexer := process.Lexer { 1, 1, 0, "100.0" }
+	info.log(info.Log_Level_Flag.Info, "Parsing")
 
-	lexer := process.Lexer { 1, 1, 0, "Swap" }
-
-	token := process.get_token(&lexer)
-	info.log(Debug, token.lexeme)
-	free(token)
+	if token, status := process.get_token(&lexer); status != misc.Eso_Error.Ok {
+		info.log(info.Log_Level_Flag.Error, "Parser encountered an error")
+		free(token)
+	} else {
+		info.log(info.Log_Level_Flag.Debug, token.lexeme)
+		free(token)
+	}
 	
-	process.cleanup()
+	process.cleanup_reserved()
 	info.disable()
 }
