@@ -48,7 +48,6 @@ main :: proc() {
 				}
 				cfg |= misc.Cfg_Flags.No_Logs
 
-			case "--debug":			cfg |= misc.Cfg_Flags.Debug
 			case "--bytecode":		cfg |= misc.Cfg_Flags.Show_Defs_Bytecode
 			case "--warn-id-key":	cfg |= misc.Cfg_Flags.Warn_Id_Keywords
 			case "--warn-id-proc":	cfg |= misc.Cfg_Flags.Warn_Id_Proc_Id
@@ -82,8 +81,6 @@ main :: proc() {
 					free(token)
 					break
 				}
-
-				info.log(info.Log_Level_Flag.Debug, token.lexeme)
 				free(token)
 			} else {
 				info.log(status, "Parser encountered an error")

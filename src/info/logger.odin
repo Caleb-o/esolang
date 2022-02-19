@@ -15,6 +15,7 @@ Log_Flags :: enum {
 	None = 0x01,
 	Show_Timings = 0x02,
 	No_Logs = 0x04,
+	Debug = 0x08,
 }
 
 @(private)
