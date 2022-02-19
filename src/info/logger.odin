@@ -12,7 +12,9 @@ Log_Level_Flag :: enum {
 
 // Flags to change the behaviour of the logger
 Log_Flags :: enum {
-	None, Show_Timings,
+	None = 0x01,
+	Show_Timings = 0x02,
+	No_Logs = 0x04,
 }
 
 @(private)
@@ -41,12 +43,20 @@ enable :: proc(flags := Log_Flags.None) {
 
 // Cleanup and stop the timer of the logger
 disable :: proc() {
-	if Logger_Flags == Log_Flags.Show_Timings {
-		time.stopwatch_stop(&Timer)
+	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
+		if Logger_Flags & Log_Flags.Show_Timings == Log_Flags.Show_Timings {
+			time.stopwatch_stop(&Timer)
+		}
+		log_message(Log_Level_Flag.Info, "Finished")
 	}
-	log_message(Log_Level_Flag.Info, "Finished")
 
 	delete(COLOUR_MAP)
+}
+
+check_run_flags :: proc(flags : misc.Cfg_Flags) {
+	if (flags & misc.Cfg_Flags.No_Logs == misc.Cfg_Flags.No_Logs) {
+		Logger_Flags |= Log_Flags.No_Logs
+	}
 }
 
 
@@ -76,23 +86,31 @@ print_header :: proc(flag : Log_Level_Flag) {
 
 // General log procedure
 log_message :: proc(flag : Log_Level_Flag, message : string) {
-	print_header(flag)
-	fmt.printf("%s\n", message)
+	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
+		print_header(flag)
+		fmt.printf("%s\n", message)
+	}
 }
 
 log_lexer :: proc(flag : Log_Level_Flag, message : string, line, col : int) {
-	print_header(flag)
-	fmt.printf("%s on line %d at pos %d\n", message, line, col)
+	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
+		print_header(flag)
+		fmt.printf("%s on line %d at pos %d\n", message, line, col)
+	}
 }
 
 log_lexer_char :: proc(flag : Log_Level_Flag, message : string, unknown : u8, line, col : int) {
-	print_header(flag)
-	fmt.printf("%s '%c' on line %d at pos %d\n", message, unknown, line, col)
+	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
+		print_header(flag)
+		fmt.printf("%s '%c' on line %d at pos %d\n", message, unknown, line, col)
+	}
 }
 
 log_eso_status :: proc(status : misc.Eso_Status, message : string) {
-	print_header(.Error)
-	fmt.printf("%s with status '%s'\n", message, status)
+	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
+		print_header(.Error)
+		fmt.printf("%s with status '%s'\n", message, status)
+	}
 }
 
 log :: proc{log_message, log_lexer, log_lexer_char, log_eso_status}
