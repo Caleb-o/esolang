@@ -158,7 +158,7 @@ The "Bytecode" may need to use u16/u32 instead of a typical u8. Primarily for th
 * `DUPLICATE`				- Duplicates the top item on the stack
 * `SWAP`					- Swaps the top two items on the stack
 * `ROTATE`					- Rotates the top 3 items on the stack `a b c => c b a`
-* `BIND [FLAG] [ID_IDX]`	- Binds a value using a certain flag, with an identifier
+* `BIND [FLAG] [ID_IDX] [PARAM_IDX]`	- Binds a value using a certain flag (0 - plain, 1 - strict, 2 - param), with an identifier
 * `UNBIND [COUNT] [ID_IDX] <SEMI ID_IDX>` - Unbinds COUNT amount of bindings with ID
 * `LOAD_BINDING [ID_IDX]`	- Pushes a value onto the stack, using the value from a binding
 * `PROC_CALL [DEF_IDX]`		- Calls the procedure at index of its definition

@@ -16,10 +16,10 @@ Parser :: struct {
 	_flags : misc.Cfg_Flags,
 
 	_lexers : [dynamic]Lexer,
-	_hashes : [dynamic]u32,
+	_hashes : [dynamic]u16,
 
 	// Temporary tracking to make life a little easier
-	_ids : map[string]u32,
+	_ids : map[string]u16,
 
 	// -- Procedure bound
 	_params : map[string]shared.ValueFlag,
@@ -66,13 +66,13 @@ parser_cleanup :: proc() {
 }
 
 @(private="file")
-push_byte_u32 :: proc(op : u32) {
+push_byte_u32 :: proc(op : u16) {
 	append(&PARSER._env.code, op)
 }
 
 @(private="file")
 push_byte_op :: proc(op : shared.Byte_Code) {
-	append(&PARSER._env.code, u32(op))
+	append(&PARSER._env.code, u16(op))
 }
 
 // Overload
@@ -107,16 +107,16 @@ invalid_token :: proc() -> misc.Eso_Status {
 }
 
 @(private="file")
-add_identifier :: proc(id : string) -> u32 {
+add_identifier :: proc(id : string) -> u16 {
 	if idx, ok := PARSER._ids[id]; ok {
 		// Return existing index
-		return idx
+		return u16(idx)
 	} else {
 		// Add a new identifier and cache its index for later
 		append(&PARSER._env.identifiers, id)
-		idx = u32(len(PARSER._env.identifiers)-1)
-		PARSER._ids[id] = idx
-		return idx
+		iidx := u16(len(PARSER._env.identifiers)-1)
+		PARSER._ids[id] = iidx
+		return iidx
 	}
 }
 
@@ -153,7 +153,7 @@ push_value :: proc() -> misc.Eso_Status {
 			append(&PARSER._env.values, Value{ PARSER._current_token.lexeme, shared.ValueFlag.String })
 	}
 
-	push_byte(u32(len(PARSER._env.values)-1))
+	push_byte(u16(len(PARSER._env.values)-1))
 	return .Ok
 }
 
@@ -226,16 +226,32 @@ code_block :: proc() -> misc.Eso_Status {
 
 @(private="file")
 type_list :: proc() -> misc.Eso_Status {
+	using shared
+	
 	for PARSER._current_token.kind != Token_Type.R_Paren {
 		ids : [dynamic]string
-		defer delete(ids)
+		identifier_idxs : [dynamic]u16
+		defer {
+			delete(ids)
+			delete(identifier_idxs)
+		}
 
 		// Get all IDs
 		for PARSER._current_token.kind != Token_Type.Colon {
 			append(&ids, PARSER._current_token.lexeme)
-			_ = add_identifier(PARSER._current_token.lexeme)	
+			append(&identifier_idxs, add_identifier(PARSER._current_token.lexeme))
 
 			consume(Token_Type.Id) or_return
+
+			// Parse a comma
+			if PARSER._current_token.kind == Token_Type.Comma {
+				consume(Token_Type.Comma) or_return
+
+				if PARSER._current_token.kind == Token_Type.L_Curly {
+					info.log(info.Log_Level_Flag.Error, "Trailing comma after parameter ID not allowed")
+					return .ParserErr
+				}
+			}
 		}
 
 		// Consume colon
@@ -250,9 +266,14 @@ type_list :: proc() -> misc.Eso_Status {
 		// Apply flag to all current IDs
 		proc_def := top_procedure()
 
-		for idx := 0; idx < len(ids); idx += 1 {
+		for param_idx := 0; param_idx < len(ids); param_idx += 1 {
+			push_byte(Byte_Code.Bind)
+			push_byte(2) // Param
+			push_byte(identifier_idxs[param_idx])
+			push_byte(u16(param_idx))
+
 			append(&proc_def.params, type_flag)
-			PARSER._params[ids[idx]] = type_flag
+			PARSER._params[ids[param_idx]] = type_flag
 		}
 	}
 	return .Ok
@@ -274,12 +295,16 @@ procedure_def :: proc() -> misc.Eso_Status {
 	consume(Token_Type.Id) or_return
 
 	// Push call op and identifier
-	push_identifier(proc_id)
+	add_identifier(proc_id)
 	append(&PARSER._env.defs.procedures, shared.Procedure_Def { 
 		code_idx(),
 		make([dynamic]shared.ValueFlag, 0),
 		make([dynamic]shared.ValueFlag, 0),
 	})
+
+	// Setup for temporary data
+	PARSER._params = make(map[string]shared.ValueFlag)
+	PARSER._returns = make([dynamic]shared.ValueFlag)
 
 	defer {
 		// Cleanup temporary data
@@ -316,11 +341,15 @@ procedure_def :: proc() -> misc.Eso_Status {
 
 @(private="file")
 program :: proc() -> misc.Eso_Status {
-	#partial switch PARSER._current_token.kind {
-		case Token_Type.Proc:		return procedure_def()
-		case: // Default
-			return invalid_token()
+	for PARSER._current_token.kind != Token_Type.Eof {
+		#partial switch PARSER._current_token.kind {
+			case Token_Type.Proc:		procedure_def() or_return
+			case: // Default
+				return invalid_token()
+		}
 	}
+
+	return .Ok
 }
 
 parse :: proc() -> ^shared.Environment {

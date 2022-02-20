@@ -1,4 +1,6 @@
 # Hello again!
-proc main() :: Void {
+proc woah(a, b, c : int) :: void {}
+
+proc main() :: void {
 	'Hello, World!' println drop
 }

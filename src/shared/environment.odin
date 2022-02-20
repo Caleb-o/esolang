@@ -2,7 +2,7 @@ package shared
 
 Environment :: struct {
 	defs : Definitions,
-	code : [dynamic]u32,
+	code : [dynamic]u16,
 	identifiers : [dynamic]string,
 	values : [dynamic]Value,
 }

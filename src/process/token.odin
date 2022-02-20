@@ -53,11 +53,11 @@ RESERVED := map[string]Token_Type {
 	"not" = .Not,
 
 	"strict" = .Strict,
-	"Void" = .Type_Id,
-	"Integer" = .Type_Id,
-	"Float" = .Type_Id,
-	"Bool" = .Type_Id,
-	"String" = .Type_Id,
+	"void" = .Type_Id,
+	"int" = .Type_Id,
+	"float" = .Type_Id,
+	"bool" = .Type_Id,
+	"string" = .Type_Id,
 }
 
 // Frees the memory held by reserved map

@@ -8,6 +8,37 @@ import "process"
 import "misc"
 import "shared"
 
+
+// TODO: Move out of main"
+print_env :: proc(env : ^shared.Environment) {
+	using shared
+
+	Bind_Type :: enum {
+		Plain, Strict, Param,
+	}
+
+	for idx := 0; idx < len(env.code); idx += 1 {
+		code := env.code[idx]
+		fmt.printf("%4d %s", idx, cast(shared.Byte_Code)code)
+
+		#partial switch cast(Byte_Code)env.code[idx] {
+			case Byte_Code.Push:
+				value := env.values[env.code[idx+1]]
+				fmt.printf("<'%v' %s>", value.data, value.flags)
+				idx += 1
+
+			case Byte_Code.Bind:
+				type := env.code[idx+1]
+				id := env.identifiers[env.code[idx+2]]
+				pos := env.code[idx+3]
+				fmt.printf("<'%s' %s %d>", id, cast(Bind_Type)type, pos)
+				idx += 3
+		}
+
+		fmt.println()
+	}
+}
+
 main :: proc() {
 	info.enable()
 
@@ -50,7 +81,7 @@ main :: proc() {
 				}
 				cfg |= misc.Cfg_Flags.No_Logs
 
-			case "--bytecode":		cfg |= misc.Cfg_Flags.Show_Defs_Bytecode
+			case "--debug":			cfg |= misc.Cfg_Flags.Debug
 			case "--warn-id-key":	cfg |= misc.Cfg_Flags.Warn_Id_Keywords
 			case "--warn-id-proc":	cfg |= misc.Cfg_Flags.Warn_Id_Proc_Id
 			case "--pedantic":
@@ -77,6 +108,9 @@ main :: proc() {
 		return
 	}
 
-	// Env will be cleared in defer, since parser has a handle on it
-	shared.env_free(process.parse())
+	env := process.parse()
+	if cfg & misc.Cfg_Flags.Debug == misc.Cfg_Flags.Debug {
+		print_env(env)
+	}
+	shared.env_free(env)
 }
