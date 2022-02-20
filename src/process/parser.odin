@@ -20,6 +20,7 @@ Parser :: struct {
 
 	// Temporary tracking to make life a little easier
 	_ids : map[string]u16,
+	_proc_ids : map[string]u16,
 
 	// -- Procedure bound
 	_params : map[string]shared.ValueFlag,
@@ -43,6 +44,7 @@ parser_init :: proc(file_path : string, flags : misc.Cfg_Flags) -> misc.Eso_Stat
 	PARSER._env = new(shared.Environment)
 	PARSER._flags = flags
 	PARSER._skip_main = false
+	PARSER._proc_ids = make(map[string]u16)
 	
 	// Append to lexers and hashes
 	source := string(data)
@@ -63,6 +65,7 @@ parser_cleanup :: proc() {
 	delete(PARSER._lexers)
 	delete(PARSER._hashes)
 	delete(PARSER._ids)
+	delete(PARSER._proc_ids)
 }
 
 @(private="file")
@@ -289,10 +292,22 @@ parameter_list :: proc() -> misc.Eso_Status {
 
 @(private="file")
 procedure_def :: proc() -> misc.Eso_Status {
+	using shared
 	consume(Token_Type.Proc) or_return
 	
 	proc_id := PARSER._current_token.lexeme
 	consume(Token_Type.Id) or_return
+
+	if _, ok := PARSER._proc_ids[proc_id]; ok {
+		// Check for duplicate main
+		if proc_id == "main" {
+			info.log(info.Log_Level_Flag.Error, "Cannot redefine the main procedure")
+			return .ParserErr
+		}
+	} else {
+		// Dummy
+		PARSER._proc_ids[proc_id] = 0
+	}
 
 	// Push call op and identifier
 	add_identifier(proc_id)
@@ -335,6 +350,13 @@ procedure_def :: proc() -> misc.Eso_Status {
 
 	// Parse the body
 	code_block() or_return
+
+	if proc_id == "main" {
+		push_byte(Byte_Code.Halt)
+	} else {
+		push_byte(Byte_Code.Return)
+		push_byte(u16(len(PARSER._env.defs.procedures)))
+	}
 
 	return .Ok
 }

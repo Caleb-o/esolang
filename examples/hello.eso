@@ -1,5 +1,6 @@
 # Hello again!
 proc woah(a, b, c : int) :: void {}
+proc wow(a, b, c : int) :: void {}
 
 proc main() :: void {
 	'Hello, World!' println drop
