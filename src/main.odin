@@ -69,27 +69,11 @@ main :: proc() {
 	// Give logger flags
 	info.check_run_flags(cfg)
 
+	parser : process.Parser
+	defer process.parser_cleanup(&parser)
 
-	if data, status := os.read_entire_file_from_filename(file_name); status {
-		defer delete(data)
-		lexer := process.Lexer { 1, 1, 0, string(data) }
-		info.log(info.Log_Level_Flag.Info, "Lexing")
-
-		for {
-			if token, status := process.get_token(&lexer); status == misc.Eso_Status.Ok {
-				if token.kind == process.Token_Type.Eof {
-					free(token)
-					break
-				}
-				free(token)
-			} else {
-				info.log(status, "Parser encountered an error")
-				free(token)
-				break
-			}
-		}
-	} else {
-		info.log(info.Log_Level_Flag.Error, "Could not read file")
-		delete(data)
+	// Failed
+	if status := process.parser_init(&parser, file_name, cfg); status != misc.Eso_Status.Ok {
+		return
 	}
 }

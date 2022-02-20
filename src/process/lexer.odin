@@ -11,28 +11,32 @@ Lexer :: struct {
 	source : string,
 }
 
-@(private)
+lexer_cleanup :: proc(lexer : ^Lexer) {
+	// delete(lexer.source)
+}
+
+@(private="file")
 is_alpha :: proc(ch : u8) -> bool {
 	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_'
 }
 
-@(private)
+@(private="file")
 is_digit :: proc(ch : u8) -> bool {
 	return ch >= '0' && ch <= '9'
 }
 
-@(private)
+@(private="file")
 is_alpha_num :: proc(ch : u8) -> bool {
 	return is_alpha(ch) || is_digit(ch)
 }
 
-@(private)
+@(private="file")
 advance :: proc(lexer : ^Lexer) {
 	lexer._ip += 1
 	lexer._col += 1
 }
 
-@(private)
+@(private="file")
 make_token :: proc(lexer : ^Lexer, kind : Token_Type, lexeme : string) -> ^Token {
 	token := new(Token)
 	token^ = Token { kind, lexer._line, lexer._col, lexeme }
@@ -40,7 +44,7 @@ make_token :: proc(lexer : ^Lexer, kind : Token_Type, lexeme : string) -> ^Token
 }
 
 // Skips all whitespace characters including comments
-@(private)
+@(private="file")
 skip_whitespace :: proc(lexer : ^Lexer) {
 	src_len := len(lexer.source)
 
@@ -65,7 +69,7 @@ skip_whitespace :: proc(lexer : ^Lexer) {
 	}
 }
 
-@(private)
+@(private="file")
 make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 	start_idx := lexer._ip
 	
@@ -95,7 +99,7 @@ make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 	}
 }
 
-@(private)
+@(private="file")
 make_string :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 	// Skip initial quote
 	advance(lexer)
@@ -116,7 +120,7 @@ make_string :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 	return make_token(lexer, .String_Lit, string(lexer.source[start_idx:lexer._ip-1])), .Ok
 }
 
-@(private)
+@(private="file")
 make_numeric :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 	start_idx := lexer._ip
 	kind := Token_Type.Int_Lit
@@ -144,7 +148,7 @@ make_numeric :: proc(lexer : ^Lexer) -> (^Token, misc.Eso_Status) {
 	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip])), .Ok
 }
 
-@(private)
+@(private="file")
 make_single :: proc(lexer : ^Lexer, kind : Token_Type) -> (^Token, misc.Eso_Status) {
 	// Check for end of file
 	if lexer._ip + 1 > len(lexer.source) {
@@ -157,7 +161,7 @@ make_single :: proc(lexer : ^Lexer, kind : Token_Type) -> (^Token, misc.Eso_Stat
 	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip])), .Ok
 }
 
-@(private)
+@(private="file")
 make_double :: proc(lexer : ^Lexer, kind : Token_Type) -> (^Token, misc.Eso_Status) {
 	// Check for end of file
 	if lexer._ip + 2 > len(lexer.source) {
@@ -171,7 +175,7 @@ make_double :: proc(lexer : ^Lexer, kind : Token_Type) -> (^Token, misc.Eso_Stat
 	return make_token(lexer, kind, string(lexer.source[start_idx:lexer._ip])), .Ok
 }
 
-@(private)
+@(private="file")
 peek :: proc(lexer : ^Lexer) -> u8 {
 	if lexer._ip + 1 >= len(lexer.source) do return '\e'
 	return lexer.source[lexer._ip + 1]
