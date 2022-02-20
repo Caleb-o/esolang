@@ -6,16 +6,17 @@ package shared
 ValueFlag :: enum {
 	Array = 0x01,
 	Strict = 0x02,
-	Integer = 0x04,
-	Float = 0x08,
-	Boolean = 0x16,
-	String = 0x32,
+	Void = 0x04,
+	Integer = 0x08,
+	Float = 0x16,
+	Boolean = 0x32,
+	String = 0x64,
 }
 
 // Internal data of a value
 ValueData :: union {
 	bool,
-	i32,
+	int,
 	f32,
 	string,
 }
@@ -24,4 +25,16 @@ ValueData :: union {
 Value :: struct {
 	data : ValueData,
 	flags : ValueFlag,
+}
+
+
+str_to_vflag :: proc(str : string) -> ValueFlag {
+	switch str {
+		case "Void":		return ValueFlag.Void
+		case "Integer":		return ValueFlag.Integer
+		case "Float":		return ValueFlag.Float
+		case "Bool":		return ValueFlag.Boolean
+		case "String":		return ValueFlag.String
+		case:				return ValueFlag.Void
+	}
 }

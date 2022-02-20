@@ -17,6 +17,7 @@ main :: proc() {
 		delete(os.args)
 	}
 
+	// Incorrect usage
 	if len(os.args) < 2 {
 		info.log(info.Log_Level_Flag.Error, "Usage: eso [script] <flags>")
 		return
@@ -69,18 +70,13 @@ main :: proc() {
 
 	// Give logger flags
 	info.check_run_flags(cfg)
-
-	parser : process.Parser
-	defer {
-		process.parser_cleanup(&parser)
-		shared.env_free(parser._env)
-	}
+	defer process.parser_cleanup()
 
 	// Failed
-	if status := process.parser_init(&parser, file_name, cfg); status != misc.Eso_Status.Ok {
+	if status := process.parser_init(file_name, cfg); status != misc.Eso_Status.Ok {
 		return
 	}
 
 	// Env will be cleared in defer, since parser has a handle on it
-	_ = process.parse(&parser)
+	shared.env_free(process.parse())
 }

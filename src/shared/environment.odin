@@ -1,17 +1,16 @@
 package shared
 
 Environment :: struct {
-	code : [dynamic]u32,
 	defs : Definitions,
-
-	id_loc : map[string]u32,
+	code : [dynamic]u32,
 	identifiers : [dynamic]string,
+	values : [dynamic]Value,
 }
 
 env_free :: proc(env : ^Environment) {
 	delete(env.code)
-	delete(env.id_loc)
 	delete(env.identifiers)
+	delete(env.values)
 
 	defs_cleanup(&env.defs)
 	
