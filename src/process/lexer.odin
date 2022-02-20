@@ -12,7 +12,7 @@ Lexer :: struct {
 }
 
 lexer_cleanup :: proc(lexer : ^Lexer) {
-	// delete(lexer.source)
+	delete(lexer.source)
 }
 
 @(private="file")

@@ -8,4 +8,5 @@ Environment :: struct {
 env_free :: proc(env : ^Environment) {
 	delete(env.code)
 	defs_cleanup(&env.defs)
+	free(env)
 }

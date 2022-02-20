@@ -6,6 +6,7 @@ import "core:fmt"
 import "info"
 import "process"
 import "misc"
+import "shared"
 
 main :: proc() {
 	info.enable()
@@ -70,10 +71,16 @@ main :: proc() {
 	info.check_run_flags(cfg)
 
 	parser : process.Parser
-	defer process.parser_cleanup(&parser)
+	defer {
+		process.parser_cleanup(&parser)
+		shared.env_free(parser._env)
+	}
 
 	// Failed
 	if status := process.parser_init(&parser, file_name, cfg); status != misc.Eso_Status.Ok {
 		return
 	}
+
+	// Env will be cleared in defer, since parser has a handle on it
+	_ = process.parse(&parser)
 }
