@@ -44,6 +44,11 @@ print_env :: proc(env : ^Environment) {
 				fmt.printf("<'%v' %s>", value.data, value.flags)
 				idx += 1
 
+			case Byte_Code.Return:
+				proc_idx := env.code[idx+1]
+				fmt.printf("<%d>", proc_idx)
+				idx += 1
+
 			case Byte_Code.Bind:
 				type := env.code[idx+1]
 				id := env.identifiers[env.code[idx+2]]

@@ -1,6 +1,5 @@
 package process
 
-import "core:fmt"
 import "core:strings"
 import "../misc"
 import "../info"
@@ -89,9 +88,11 @@ make_identifier :: proc(lexer : ^Lexer) -> ^Token {
 		// To lower version matches a keyword
 		// TODO: Use flag that disables this check (On by default)
 		if lower_lexeme in RESERVED {
-			formatted := fmt.aprintf("'%s' matches a keyword. Did you mean '%s'?", lexeme, lower_lexeme)
-			info.log(info.Log_Level_Flag.Warning, formatted, lexer._line, lexer._col)
-			delete(formatted)
+			info.log(
+				info.Log_Level_Flag.Warning,
+				"'%s' matches a keyword. Did you mean '%s'?",
+				lexer._line, lexer._col, lexeme, lower_lexeme,
+			)
 		}
 		delete(lower_lexeme)
 

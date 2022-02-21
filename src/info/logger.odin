@@ -48,7 +48,7 @@ disable :: proc() {
 		if Logger_Flags & Log_Flags.Show_Timings == Log_Flags.Show_Timings {
 			time.stopwatch_stop(&Timer)
 		}
-		log_message(Log_Level_Flag.Info, "Finished")
+		log(Log_Level_Flag.Info, "Finished")
 	}
 
 	delete(COLOUR_MAP)
@@ -86,24 +86,36 @@ print_header :: proc(flag : Log_Level_Flag) {
 
 
 // General log procedure
-log_message :: proc(flag : Log_Level_Flag, message : string) {
-	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
-		print_header(flag)
-		fmt.printf("%s\n", message)
-	}
-}
-
-log_lexer :: proc(flag : Log_Level_Flag, message : string, line, col : int) {
-	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
-		print_header(flag)
-		fmt.printf("%s on line %d at pos %d\n", message, line, col)
-	}
-}
-
-log_lexer_char :: proc(flag : Log_Level_Flag, message : string, unknown : u8, line, col : int) {
+log_detail_char :: proc(flag : Log_Level_Flag, message : string, unknown : u8, line, col : int) {
 	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
 		print_header(flag)
 		fmt.printf("%s '%c' on line %d at pos %d\n", message, unknown, line, col)
+	}
+}
+
+log_fmt :: proc(flag : Log_Level_Flag, format : string, args : ..any) {
+	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
+		print_header(flag)
+
+		if len(args) > 0 {
+			fmt.println(format, args)
+		} else {
+			fmt.println(format)
+		}
+	}
+}
+
+log_detail_fmt :: proc(flag : Log_Level_Flag, format : string, line, col : int, args : ..any) {
+	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
+		print_header(flag)
+
+		if len(args) > 0 { 
+			formatted := fmt.aprintf(format, args)
+			fmt.printf("%s on line %d at pos %d\n", formatted, line, col)
+			delete(formatted)
+		} else {
+			fmt.printf("%s on line %d at pos %d\n", format, line, col)
+		}
 	}
 }
 
@@ -114,4 +126,4 @@ log_eso_status :: proc(status : misc.Eso_Status, message : string) {
 	}
 }
 
-log :: proc{log_message, log_lexer, log_lexer_char, log_eso_status}
+log :: proc{log_detail_char, log_detail_fmt, log_fmt, log_eso_status}

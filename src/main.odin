@@ -1,7 +1,6 @@
 package main
 
 import "core:os"
-import "core:fmt"
 
 import "info"
 import "process"
@@ -34,26 +33,12 @@ main :: proc() {
 		case "check":	mode = misc.Run_Mode.Check
 
 		case: // Default
-			formatted := fmt.aprintf("Unknown mode found '%s'", os.args[1])
-			info.log(info.Log_Level_Flag.Warning, formatted)
-			delete(formatted)
+			info.log(info.Log_Level_Flag.Warning, "Unknown mode found '%s'", os.args[1])
 			return
 	}
 
 	// Parse cmd flags
-	arg_idx := 3
-	for arg_idx < len(os.args) {
-		defer arg_idx += 1
-
-		/*
-			No_Log = 0x02, 					// Disables all logging
-			Debug = 0x04,					// Enables/overrides some flags for debugging purposes
-			Show_Defs_Bytecode = 0x08,		// Shows bytecode, IDs and procedure definitions | Debug will enable this
-			Warn_Id_Keywords = 0x16,		// Checks identifiers against keywords and warns for potential typo
-			Warn_Id_Proc_Id = 0x32,			// Similar to ID Keywords, it will warn if a binding is similar to a procedure name
-			Warn_Pedantic = 0x64,			// Enables all warnings
-		*/
-
+	for arg_idx := 3; arg_idx < len(os.args); arg_idx += 1 {
 		switch os.args[arg_idx] {
 			case "--no-logs":
 				// Error if Pedantic is set
@@ -75,9 +60,7 @@ main :: proc() {
 				cfg |= misc.Cfg_Flags.Warn_Id_Proc_Id | misc.Cfg_Flags.Warn_Id_Keywords
 
 			case: // Unknown
-				formatted := fmt.aprintf("Unknown flag found '%s'", os.args[arg_idx])
-				info.log(info.Log_Level_Flag.Warning, formatted)
-				delete(formatted)
+				info.log(info.Log_Level_Flag.Warning, "Unknown flag found '%s'", os.args[arg_idx])
 		}
 	}
 
@@ -91,8 +74,9 @@ main :: proc() {
 	}
 
 	env := process.parse()
+	defer shared.env_free(env)
+	
 	if cfg & misc.Cfg_Flags.Debug == misc.Cfg_Flags.Debug {
 		shared.print_env(env)
 	}
-	shared.env_free(env)
 }

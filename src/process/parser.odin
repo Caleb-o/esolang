@@ -1,7 +1,6 @@
 package process
 
 import "core:os"
-import "core:fmt"
 import "core:strconv"
 
 import "../shared"
@@ -100,12 +99,14 @@ top_procedure :: proc() -> ^shared.Procedure_Def {
 
 @(private="file")
 invalid_token :: proc() -> misc.Eso_Status {
-	formatted := fmt.aprintf("Unknown token found in top-level '%s' of type %s", PARSER._current_token.lexeme, PARSER._current_token.kind)
-			
 	lexer := top_lexer()
-	info.log(info.Log_Level_Flag.Error, formatted, lexer._line, lexer._col)
+	info.log(
+		info.Log_Level_Flag.Error,
+		"Unknown token found in top-level '%s' of type %s",
+		lexer._line, lexer._col,
+		PARSER._current_token.lexeme, PARSER._current_token.kind,
+	)
 	
-	delete(formatted)
 	return misc.Eso_Status.ParserErr
 }
 
