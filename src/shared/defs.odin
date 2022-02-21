@@ -1,6 +1,7 @@
 package shared
 
 Procedure_Def :: struct {
+	identifier : string, // For debugging purposes
 	op_start : u16, // Where the procedure starts
 	params : [dynamic]ValueFlag,
 	returns : [dynamic]ValueFlag,

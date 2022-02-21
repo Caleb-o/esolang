@@ -31,7 +31,7 @@ Value :: struct {
 str_to_vflag :: proc(str : string) -> ValueFlag {
 	switch str {
 		case "void":		return ValueFlag.Void
-		case "integer":		return ValueFlag.Integer
+		case "int":			return ValueFlag.Integer
 		case "float":		return ValueFlag.Float
 		case "bool":		return ValueFlag.Boolean
 		case "string":		return ValueFlag.String

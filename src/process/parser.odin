@@ -312,8 +312,9 @@ procedure_def :: proc() -> misc.Eso_Status {
 
 	// Push call op and identifier
 	add_identifier(proc_id)
-	append(&PARSER._env.defs.procedures, shared.Procedure_Def { 
-		code_idx(),
+	append(&PARSER._env.defs.procedures, shared.Procedure_Def {
+		proc_id,
+		code_idx()+1,
 		make([dynamic]shared.ValueFlag, 0),
 		make([dynamic]shared.ValueFlag, 0),
 	})

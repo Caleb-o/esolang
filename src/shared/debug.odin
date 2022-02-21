@@ -4,6 +4,22 @@ import "core:fmt"
 
 
 @(private="file")
+print_defs :: proc(env : ^Environment) {
+	fmt.println("=== Procedure Definitions ===")
+
+	for proc_def, idx in env.defs.procedures {
+		fmt.printf("%3d '%s' %v :: %v | starts at %d\n", 
+			idx,
+			proc_def.identifier,
+			proc_def.params,
+			proc_def.returns,
+			proc_def.op_start,
+		)
+	}
+	fmt.println()
+}
+
+@(private="file")
 print_ids :: proc(env : ^Environment) {
 	fmt.println("=== Identifiers ===")
 
@@ -29,6 +45,7 @@ print_env :: proc(env : ^Environment) {
 		Plain, Strict, Param,
 	}
 
+	print_defs(env)
 	print_ids(env)
 	print_values(env)
 
