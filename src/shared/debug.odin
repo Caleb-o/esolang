@@ -8,13 +8,34 @@ print_defs :: proc(env : ^Environment) {
 	fmt.println("=== Procedure Definitions ===")
 
 	for proc_def, idx in env.defs.procedures {
-		fmt.printf("%3d '%s' %v :: %v | starts at %d\n", 
+		fmt.printf("%3d '%s' [", 
 			idx,
 			proc_def.identifier,
-			proc_def.params,
-			proc_def.returns,
-			proc_def.op_start,
 		)
+
+		for flag, fidx in proc_def.params {
+			flag_str := vflag_as_str(flag)
+			fmt.printf("(%s)", flag_str)
+			delete(flag_str)
+
+			if fidx < len(proc_def.params)-1 {
+				fmt.print(" ")
+			}
+		}
+
+		fmt.print("] :: ")
+
+		for flag, fidx in proc_def.returns {
+			flag_str := vflag_as_str(flag)
+			fmt.printf("(%s)", flag_str)
+			delete(flag_str)
+
+			if fidx < len(proc_def.returns)-1 {
+				fmt.print(" ")
+			}
+		}
+
+		fmt.printf(" | starts at %d\n", proc_def.op_start)
 	}
 	fmt.println()
 }
@@ -34,7 +55,9 @@ print_values :: proc(env : ^Environment) {
 	fmt.println("=== Values ===")
 
 	for value, idx in env.values {
-		fmt.printf("%3d '%v' %s\n", idx, value.data, value.flags)
+		flag_str := vflag_as_str(value.flags)
+		fmt.printf("%3d '%v' %s\n", idx, value.data, flag_str)
+		delete(flag_str)
 	}
 	fmt.println()
 }
@@ -63,7 +86,7 @@ print_env :: proc(env : ^Environment) {
 
 			case Byte_Code.Return:
 				proc_idx := env.code[idx+1]
-				fmt.printf("<%d>", proc_idx)
+				fmt.printf("<%d>\n", proc_idx)
 				idx += 1
 
 			case Byte_Code.Bind:

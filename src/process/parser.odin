@@ -21,6 +21,9 @@ Parser :: struct {
 	_ids : map[string]u16,
 	_proc_ids : map[string]u16,
 
+	// -- Globals
+	_global_ids : map[string]u16,
+
 	// -- Procedure bound
 	_params : map[string]shared.ValueFlag,
 	_returns : [dynamic]shared.ValueFlag,
@@ -65,6 +68,7 @@ parser_cleanup :: proc() {
 	delete(PARSER._hashes)
 	delete(PARSER._ids)
 	delete(PARSER._proc_ids)
+	delete(PARSER._global_ids)
 }
 
 @(private="file")
@@ -131,10 +135,10 @@ push_identifier :: proc(id : string) {
 }
 
 @(private="file")
-push_value :: proc() -> misc.Eso_Status {
+push_value :: proc(global := false) -> misc.Eso_Status {
 	using shared
 
-	push_byte(Byte_Code.Push)
+	if !global do push_byte(Byte_Code.Push)
 
 	#partial switch PARSER._current_token.kind {
 		case Token_Type.Int_Lit:
@@ -157,7 +161,7 @@ push_value :: proc() -> misc.Eso_Status {
 			append(&PARSER._env.values, Value{ PARSER._current_token.lexeme, shared.ValueFlag.String })
 	}
 
-	push_byte(u16(len(PARSER._env.values)-1))
+	if !global do push_byte(u16(len(PARSER._env.values)-1))
 	return .Ok
 }
 
@@ -175,18 +179,18 @@ consume :: proc(expected : Token_Type) -> misc.Eso_Status {
 }
 
 @(private="file")
-expr :: proc() -> misc.Eso_Status {
+expr :: proc(global := false) -> misc.Eso_Status {
 	#partial switch PARSER._current_token.kind {
 		case Token_Type.Int_Lit: fallthrough
 		case Token_Type.Float_Lit: fallthrough
 		case Token_Type.Bool_Lit: fallthrough
 		case Token_Type.String_Lit:
-			status := push_value()
+			status := push_value(global)
 			consume(PARSER._current_token.kind)
 			return status
 
 		case: // Default
-			info.log(info.Log_Level_Flag.Error, "Unknown token found")
+			info.log(info.Log_Level_Flag.Error, "Unknown token found '%s'", PARSER._current_token.line, PARSER._current_token.col, PARSER._current_token.kind,)
 			return .ParserErr
 	}
 
@@ -267,6 +271,21 @@ type_list :: proc() -> misc.Eso_Status {
 
 		type_flag := shared.str_to_vflag(type_str)
 
+		// Array type
+		if PARSER._current_token.kind == Token_Type.L_Square {
+			if type_flag == shared.ValueFlag.Void {
+				info.log(info.Log_Level_Flag.Error, "Type void cannot be an array", PARSER._current_token.line, PARSER._current_token.col)
+				return .ParserErr
+			}
+
+			consume(Token_Type.L_Square) or_return
+			consume(Token_Type.R_Square) or_return
+
+			// Type is an array
+			type_flag |= shared.ValueFlag.Array
+		}
+
+
 		// Apply flag to all current IDs
 		proc_def := top_procedure()
 
@@ -302,11 +321,11 @@ procedure_def :: proc() -> misc.Eso_Status {
 	if _, ok := PARSER._proc_ids[proc_id]; ok {
 		// Check for duplicate main
 		if proc_id == "main" {
-			info.log(info.Log_Level_Flag.Error, "Cannot redefine the main procedure")
+			info.log(info.Log_Level_Flag.Error, "Cannot redefine the main procedure", PARSER._current_token.line, PARSER._current_token.col)
 			return .ParserErr
 		}
 	} else {
-		// Dummy
+		// Dummy, we only care for the name but want O(1) access
 		PARSER._proc_ids[proc_id] = 0
 	}
 
@@ -336,15 +355,30 @@ procedure_def :: proc() -> misc.Eso_Status {
 	proc_def := top_procedure()
 	// Parse return types
 	for PARSER._current_token.kind != Token_Type.L_Curly {
-		append(&proc_def.returns, shared.str_to_vflag(PARSER._current_token.lexeme))
+		type_flag := shared.str_to_vflag(PARSER._current_token.lexeme)
 		consume(Token_Type.Type_Id) or_return
+
+		// Array type
+		if PARSER._current_token.kind == Token_Type.L_Square {
+			if type_flag == shared.ValueFlag.Void {
+				info.log(info.Log_Level_Flag.Error, "Type void cannot be an array", PARSER._current_token.line, PARSER._current_token.col)
+				return .ParserErr
+			}
+
+			consume(Token_Type.L_Square) or_return
+			consume(Token_Type.R_Square) or_return
+
+			// Type is an array
+			type_flag |= shared.ValueFlag.Array
+		}
+		append(&proc_def.returns, type_flag)
 
 		// Parse a comma
 		if PARSER._current_token.kind == Token_Type.Comma {
 			consume(Token_Type.Comma) or_return
 
 			if PARSER._current_token.kind == Token_Type.L_Curly {
-				info.log(info.Log_Level_Flag.Error, "Trailing comma after return type not allowed")
+				info.log(info.Log_Level_Flag.Error, "Trailing comma after return type not allowed", PARSER._current_token.line, PARSER._current_token.col)
 				return .ParserErr
 			}
 		}
@@ -364,9 +398,28 @@ procedure_def :: proc() -> misc.Eso_Status {
 }
 
 @(private="file")
+global_def :: proc() -> misc.Eso_Status {
+	identifier := PARSER._current_token.lexeme
+	consume(Token_Type.Id) or_return
+
+	// Constant type
+	consume(Token_Type.Colon_Colon) or_return
+
+	// Capture the value
+	expr(true) or_return
+
+	PARSER._env.values[len(PARSER._env.values)-1].flags |= shared.ValueFlag.Strict
+	PARSER._global_ids[identifier] = u16(len(PARSER._env.values)-1)
+
+	append(&PARSER._env.globals, u16(len(PARSER._env.values)-1))
+	return .Ok
+}
+
+@(private="file")
 program :: proc() -> misc.Eso_Status {
 	for PARSER._current_token.kind != Token_Type.Eof {
 		#partial switch PARSER._current_token.kind {
+			case Token_Type.Id:			global_def() or_return
 			case Token_Type.Proc:		procedure_def() or_return
 			case: // Default
 				return invalid_token()

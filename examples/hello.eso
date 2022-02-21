@@ -1,6 +1,9 @@
 # Hello again!
+global :: 'Hello'
+
 proc woah(a, b, c : int) :: void {}
-proc wow(a, b, c : int) :: void {}
+proc wow(a, b, c : int[]) :: void {}
+proc wow(a : int[]) :: int[] {}
 
 proc main() :: void {
 	'Hello, World!' println drop

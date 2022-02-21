@@ -98,7 +98,9 @@ log_fmt :: proc(flag : Log_Level_Flag, format : string, args : ..any) {
 		print_header(flag)
 
 		if len(args) > 0 {
-			fmt.println(format, args)
+			formatted := fmt.aprintf(format, args)
+			fmt.println(formatted)
+			delete(formatted)
 		} else {
 			fmt.println(format)
 		}
@@ -109,7 +111,7 @@ log_detail_fmt :: proc(flag : Log_Level_Flag, format : string, line, col : int, 
 	if Logger_Flags & Log_Flags.No_Logs != Log_Flags.No_Logs {
 		print_header(flag)
 
-		if len(args) > 0 { 
+		if len(args) > 0 {
 			formatted := fmt.aprintf(format, args)
 			fmt.printf("%s on line %d at pos %d\n", formatted, line, col)
 			delete(formatted)
