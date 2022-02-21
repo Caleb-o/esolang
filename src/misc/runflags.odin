@@ -8,3 +8,9 @@ Cfg_Flags :: enum u32 {
 	Warn_Pedantic = 0x16,			// Enables all warnings
 	No_Logs = 0x32, 				// Disables all logging
 }
+
+Run_Mode :: enum {
+	Run,		// Default mode - Runs code as normal
+	Check,		// Check - Completes all stages before interpretation, to check the validity of code.
+	Test,		// Test - Runs test cases within a file
+}

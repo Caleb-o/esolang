@@ -14,6 +14,7 @@ Byte_Code :: enum u16 {
 	Load_Binding,
 	Proc_Call,
 	Builtin_Call,
+	Return,
 	Goto,
 	Condition,
 	Arithmetic,

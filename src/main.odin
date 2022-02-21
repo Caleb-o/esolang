@@ -18,17 +18,30 @@ main :: proc() {
 	}
 
 	// Incorrect usage
-	if len(os.args) < 2 {
-		info.log(info.Log_Level_Flag.Error, "Usage: eso [script] <flags>")
+	if len(os.args) < 3 {
+		info.log(info.Log_Level_Flag.Error, "Usage: eso [run|test|check] [script] <flags>")
 		return
 	}
 
 	// Get the filename
-	file_name := os.args[1]
+	file_name := os.args[2]
 	cfg := misc.Cfg_Flags.Default
+	mode := misc.Run_Mode.Run
+
+	switch os.args[1] {
+		case "run":		mode = misc.Run_Mode.Run
+		case "test":	mode = misc.Run_Mode.Test
+		case "check":	mode = misc.Run_Mode.Check
+
+		case: // Default
+			formatted := fmt.aprintf("Unknown mode found '%s'", os.args[1])
+			info.log(info.Log_Level_Flag.Warning, formatted)
+			delete(formatted)
+			return
+	}
 
 	// Parse cmd flags
-	arg_idx := 2
+	arg_idx := 3
 	for arg_idx < len(os.args) {
 		defer arg_idx += 1
 
